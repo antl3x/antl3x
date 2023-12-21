@@ -1,5 +1,7 @@
 ### Hi there 👋
 
+Follow me on 𝕏 [@antl3x](https://x.com/antl3x)
+
 <!--
 **antl3x/antl3x** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
 
