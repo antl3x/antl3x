@@ -1,0 +1,9 @@
+creation_rules:
+  - filename_regex: '*\@production\.*'
+    pgp: '00BF3259E59E7708631132B0017C53DA3AFE113A'
+
+  - filename_regex: '*\@localhost\.*'
+    pgp: '00BF3259E59E7708631132B0017C53DA3AFE113A'
+
+  # Fallback rule for all other files
+  - pgp: '00BF3259E59E7708631132B0017C53DA3AFE113A'

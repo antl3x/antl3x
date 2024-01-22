@@ -1,0 +1,23 @@
+{
+  "name": "antl3x",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "compile": "zx _scripts/compile.mjs",
+    "@production:cicd.deploy": "zx _scripts/@production:cicd.deploy.mjs",
+    "@localhost:app.dev": "zx _scripts/@localhost:app.dev.mjs",
+    "@localhost:app.preview": "zx _scripts/@localhost:app.preview.mjs"
+  },
+  "dependencies": {
+    "react": "latest",
+    "react-dom": "latest",
+    "vocs": "latest",
+    "yargs": "^17.7.2",
+    "zx": "^7.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.5",
+    "@types/react": "18.2.48",
+    "typescript": "5.3.3"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "loadbalancer",
+  "version": "0.0.0",
+  "scripts": {
+    "@production:cicd.deploy": "zx _scripts/@production:cicd.deploy.mjs"
+  },
+  "devDependencies": {
+    "yargs": "^17.7.2",
+    "zx": "^7.2.3"
+  }
+}

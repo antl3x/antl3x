@@ -1,0 +1,14 @@
+{
+  "name": "antl3x",
+  "description": "monorepo",
+  "scripts": {
+    "install.binaries": "zx _scripts/install.binaries.mjs",
+    "sops": "zx _scripts/sops.mjs"
+  },
+  "keywords": [],
+  "author": "Antonio Moura (antl3x)",
+  "dependencies": {
+    "yargs": "^17.7.2",
+    "zx": "^7.2.3"
+  }
+}
