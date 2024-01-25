@@ -28,7 +28,10 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "paths": {
+      "@components/*": ["./docs/components/*"],
+    }
   },
   "include": [
     "**/*.ts",

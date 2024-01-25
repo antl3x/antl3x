@@ -1,0 +1,42 @@
+{
+  "name": "cv-antl3x-co",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "@localhost:app.dev": "zx _scripts/@localhost:app.dev.mjs",
+    "@localhost:app.preview": "zx _scripts/@localhost:app.preview.mjs",
+    "@production:cicd.deploy": "zx _scripts/@production:cicd.deploy.mjs",
+    "compile": "zx _scripts/compile.mjs",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@radix-ui/react-avatar": "^1.0.4",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@vercel/analytics": "^1.1.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "cmdk": "^0.2.0",
+    "lucide-react": "^0.300.0",
+    "next": "14.0.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "tailwind-merge": "^2.2.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^0.8.0",
+    "zx": "^7.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.4",
+    "postcss": "^8",
+    "prettier": "^3.1.1",
+    "prettier-plugin-tailwindcss": "^0.5.9",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5"
+  }
+}

@@ -1,3 +1,7 @@
+@layer vocs_preflight { @tailwind base; }
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
     font-family: 'iAWriterMonoS';
     src: url('/fonts/iAWriterMonoS-Bold.eot'); /* IE9 Compat Modes */
@@ -125,11 +129,16 @@
   }
   
   .vocs_Anchor {
-      text-decoration-style: dashed;
+      text-decoration-style: dashed !important;
   }
 
   a {
     cursor: default;
+  }
+
+  .vocs_Sidebar_item:hover  {
+    text-decoration: underline;
+    text-decoration-style: dashed;
   }
 
   .vocs_ListItem:not(:last-child) {

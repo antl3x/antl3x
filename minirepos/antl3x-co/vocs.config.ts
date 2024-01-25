@@ -1,6 +1,18 @@
 import { defineConfig } from 'vocs';
+import tsconfigPaths from 'vite-tsconfig-paths' 
 
 export default defineConfig({
+  vite: {
+    plugins: [tsconfigPaths({
+      root: __dirname,
+    })] 
+  },
+  ogImageUrl: {
+    '/': '/og-image.png'
+  },
+  font: {
+    google: 'DM Mono'
+  },
   title: '@antl3x / webhome',
 
 iconUrl: {
@@ -20,20 +32,13 @@ logoUrl: {
           link: '/', 
         }, 
         { 
-          text: 'My Resume', 
-          link: 'https://resume.antl3x.co', 
+          text: 'Posts', 
+          link: '/posts', 
         }, 
         { 
-          text: 'Posts', 
-          collapsed: false, 
-          items: [ 
-            { 
-              text: '2024', 
-              link: 'posts/2024', 
-            }, 
- 
-          ], 
-        },
+          text: 'Resume / CV', 
+          link: 'https://cv.antl3x.co', 
+        }, 
         { 
           text: 'Let\'s Connect', 
           collapsed: false, 
@@ -86,10 +91,10 @@ logoUrl: {
         }
       },
       fontFamily: {
-        default: 'iAWriterDuoS'
+        default: 'DM Mono'
       },
       fontSize: {
-      root: '15px',
+      root: '14px',
     },
     fontWeight: {
       semibold: '600',

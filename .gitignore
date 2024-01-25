@@ -2,7 +2,9 @@
 **/*.dec.*
 **/tmp
 
-
+linte
+markdown.db
+*.timestamp-*
 # Node modules
 node_modules/
 **/node_modules/
