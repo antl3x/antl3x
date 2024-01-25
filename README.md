@@ -22,7 +22,6 @@ Welcome to my GitHub!
 
 - **Living:** in **Salt Lake City, US 🇺🇸**
  
-
 - **Who:** I'm a seasoned **Software Engineer** with strong technical skills  and a **hands-on CTO** with over 10 years in the tech industry. My journey includes being an **founder** where I've accumulated a wealth of experience in building and scaling B2B and B2C products.
 
 - **What:** I'm deeply passionate about **coding**, **data in general (from dataviz to ml models)**, and **quantitative trading**.
@@ -33,7 +32,8 @@ Welcome to my GitHub!
 
 ---
 
-#### How I Work
+
+### How I Work
 - I'm obsessed with building software that works well and isn't overcomplicated.
 
 - I don't just lead; I also code. Contributing to the codebase and working as a software engineer alongside my team is essential.
@@ -46,7 +46,7 @@ Welcome to my GitHub!
 
 ---
 
-#### Collaborations and Contributions
+### Collaborations and Contributions
 - **Open Source:** I'm a strong advocate for open-source software and actively contribute to various projects. I believe in the power of community-driven development.
 
 - **Consulting:** Leveraging my extensive experience, I'm open to collaborating on **special closed-source projects** and providing consultancy in my areas of expertise.
@@ -55,15 +55,17 @@ Welcome to my GitHub!
 
 ---
 
-#### My Projects
+### My Projects
+
+- [codePlot](https://github.com/codePlot-co/codePlot) is an innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.
 
 - [super-ts](https://github.com/antl3x/super-ts) is a Typescript functional programming library inspired by [Haskell](https://www.haskell.org/) and [PureScript](http://www.purescript.org/) providing both runtime type checking and functional algebraic data types.
 
 ---
 
-#### Let's Connect!
+### Let's Connect!
 - **[Email](mailto:antonio@antl3x.co):** Feel free to reach out to me. I'm always open to interesting conversations and opportunities.
-- **[Blog](blog.antl3x.co):** Check out my writings where I share my thoughts on technology, data, and financial markets.
+- **[Blog](https://antl3x.co/posts):** Check out my writings where I share my thoughts on technology, data, and financial markets.
 - **[LinkedIn](https://linkedin.com/in/antl3x):** Connect with me professionally.
 - [𝕏](https://x.com/antl3x): Follow me.
 
