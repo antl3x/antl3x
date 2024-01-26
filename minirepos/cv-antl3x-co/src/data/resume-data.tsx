@@ -104,7 +104,7 @@ export const RESUME_DATA = {
   ],
   projects: [
     {
-      title: "codePlot",
+      title: "codeplot",
       techStack: [
         "Spatial Interfaces",
         "Python",
@@ -115,8 +115,8 @@ export const RESUME_DATA = {
       ],
       description: "An innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.",
       link: {
-        label: "codePlot",
-        href: "https://github.com/codePlot-co/codePlot",
+        label: "codeplot",
+        href: "https://github.com/codeplot-co/codeplot",
       },
     },
     {

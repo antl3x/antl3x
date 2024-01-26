@@ -29,9 +29,9 @@
     "links": [
       {
         "from": "pages/index.mdx",
-        "to": "https://github.com/codePlot-co/codePlot",
-        "toRaw": "https://github.com/codePlot-co/codePlot",
-        "text": "codePlot",
+        "to": "https://github.com/codeplot-co/codeplot",
+        "toRaw": "https://github.com/codeplot-co/codeplot",
+        "text": "codeplot",
         "embed": false,
         "internal": false
       },
@@ -69,9 +69,9 @@
       },
       {
         "from": "pages/index.mdx",
-        "to": "https://github.com/codePlot-co/codePlot",
-        "toRaw": "https://github.com/codePlot-co/codePlot",
-        "text": "codePlot",
+        "to": "https://github.com/codeplot-co/codeplot",
+        "toRaw": "https://github.com/codeplot-co/codeplot",
+        "text": "codeplot",
         "embed": false,
         "internal": false
       },
@@ -109,14 +109,6 @@
       },
       {
         "from": "pages/index.mdx",
-        "to": "pages/blog.antl3x.co",
-        "toRaw": "blog.antl3x.co",
-        "text": "Blog",
-        "embed": false,
-        "internal": true
-      },
-      {
-        "from": "pages/index.mdx",
         "to": "https://linkedin.com/in/antl3x",
         "toRaw": "https://linkedin.com/in/antl3x",
         "text": "LinkedIn",
@@ -130,14 +122,30 @@
         "text": "𝕏",
         "embed": false,
         "internal": false
+      },
+      {
+        "from": "pages/index.mdx",
+        "to": "https://github.com/antl3x",
+        "toRaw": "https://github.com/antl3x",
+        "text": "https://github.com/antl3x",
+        "embed": false,
+        "internal": false
+      },
+      {
+        "from": "pages/index.mdx",
+        "to": "https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyCca5akhZ492pP08QBchz5Q4QA6kFYsBrc&q=weather",
+        "toRaw": "https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyCca5akhZ492pP08QBchz5Q4QA6kFYsBrc&q=weather",
+        "text": "https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyCca5akhZ492pP08QBchz5Q4QA6kFYsBrc&q=weather",
+        "embed": false,
+        "internal": false
       }
     ]
   },
   {
-    "_id": "5188e9528ad0bbde70161b4248f8757353de6d9f",
-    "file_path": "docs/pages/posts/2023-01-24-hello-world.mdx",
+    "_id": "00bc18dedee3fda57d1c5fd5858091eb6e522c9b",
+    "file_path": "docs/pages/posts/2024-01-24-hello-world.mdx",
     "extension": "mdx",
-    "url_path": "pages/posts/2023-01-24-hello-world",
+    "url_path": "pages/posts/2024-01-24-hello-world",
     "filetype": "post",
     "metadata": {
       "title": "Hello World!",
@@ -151,7 +159,7 @@
     "tags": [],
     "links": [
       {
-        "from": "pages/posts/2023-01-24-hello-world.mdx",
+        "from": "pages/posts/2024-01-24-hello-world.mdx",
         "to": "https://obsidian.md",
         "toRaw": "https://obsidian.md",
         "text": "Obsidian",
@@ -168,7 +176,7 @@
     "filetype": "post",
     "metadata": {
       "title": "Today I Decided to Create a Tool That I Always Wanted",
-      "description": "In this post, I talk about my wish of creating codePlot, a tool that I always wanted but never found in any existing tool.",
+      "description": "In this post, I talk about my wish of creating codeplot, a tool that I always wanted but never found in any existing tool.",
       "date": "2024-01-25T00:00:00.000Z",
       "views": 1.203,
       "type": "post",
@@ -179,11 +187,11 @@
     "links": [
       {
         "from": "pages/posts/2024-01-25-today-i-decided-to-create-a-tool-that-i-always-wanted.mdx",
-        "to": "pages/posts/#",
-        "toRaw": "#",
+        "to": "https://discord.gg/fYTsNp5Wvt",
+        "toRaw": "https://discord.gg/fYTsNp5Wvt",
         "text": "Discord",
         "embed": false,
-        "internal": true
+        "internal": false
       }
     ]
   },

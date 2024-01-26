@@ -57,7 +57,7 @@ Welcome to my GitHub!
 
 ### My Projects
 
-- [codePlot](https://github.com/codePlot-co/codePlot) is an innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.
+- [codeplot](https://github.com/codeplot-co/codeplot) is an innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.
 
 - [super-ts](https://github.com/antl3x/super-ts) is a Typescript functional programming library inspired by [Haskell](https://www.haskell.org/) and [PureScript](http://www.purescript.org/) providing both runtime type checking and functional algebraic data types.
 
