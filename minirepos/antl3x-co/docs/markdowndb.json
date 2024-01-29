@@ -1,18 +1,5 @@
 [
   {
-    "_id": "25ed6c2e85da65b2dfaf279ecc2a5453feb21c43",
-    "file_path": "docs/pages/example.mdx",
-    "extension": "mdx",
-    "url_path": "pages/example",
-    "filetype": null,
-    "metadata": {
-      "tags": [],
-      "tasks": []
-    },
-    "tags": [],
-    "links": []
-  },
-  {
     "_id": "a9bfad7c7a2e553eaa9077be643a1023042f047a",
     "file_path": "docs/pages/index.mdx",
     "extension": "mdx",
@@ -127,15 +114,7 @@
         "from": "pages/index.mdx",
         "to": "https://github.com/antl3x",
         "toRaw": "https://github.com/antl3x",
-        "text": "https://github.com/antl3x",
-        "embed": false,
-        "internal": false
-      },
-      {
-        "from": "pages/index.mdx",
-        "to": "https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyCca5akhZ492pP08QBchz5Q4QA6kFYsBrc&q=weather",
-        "toRaw": "https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyCca5akhZ492pP08QBchz5Q4QA6kFYsBrc&q=weather",
-        "text": "https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyCca5akhZ492pP08QBchz5Q4QA6kFYsBrc&q=weather",
+        "text": "GitHub",
         "embed": false,
         "internal": false
       }

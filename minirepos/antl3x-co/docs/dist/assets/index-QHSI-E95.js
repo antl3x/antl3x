@@ -1,4 +1,4 @@
-import{u as t,j as n}from"./index-YXWiSWx0.js";import{P as r}from"./posts-list-9bJ81TUP.js";import"./post-info-Jag5zGcO.js";const l={layout:"content",title:"Antonio Moura (@antl3x) / Home",description:"Antonio Moura (@antl3x) is a seasoned Software Engineer and hands-on CTO with over 10 years in the tech industry. His journey includes being an founder where he's accumulated a wealth of experience in building and scaling B2B and B2C products."};function s(i){const e={a:"a",div:"div",h2:"h2",h3:"h3",hr:"hr",li:"li",p:"p",strong:"strong",ul:"ul",...t(),...i.components};return n.jsxs(n.Fragment,{children:[n.jsxs(e.h2,{id:"hi-there-im-antonio-",children:["Hi there, I'm Antonio 👋",n.jsx(e.a,{"aria-hidden":"true",tabIndex:"-1",href:"#hi-there-im-antonio-",children:n.jsx(e.div,{"data-autolink-icon":!0})})]}),`
+import{u as t,j as n}from"./index-EM4OTDqk.js";import{P as r}from"./posts-list-Mqp1g5z4.js";import"./post-info-x_c5V6Te.js";const l={layout:"content",title:"Antonio Moura (@antl3x) / Home",description:"Antonio Moura (@antl3x) is a seasoned Software Engineer and hands-on CTO with over 10 years in the tech industry. His journey includes being an founder where he's accumulated a wealth of experience in building and scaling B2B and B2C products."};function s(i){const e={a:"a",div:"div",h2:"h2",h3:"h3",hr:"hr",li:"li",p:"p",strong:"strong",ul:"ul",...t(),...i.components};return n.jsxs(n.Fragment,{children:[n.jsxs(e.h2,{id:"hi-there-im-antonio-",children:["Hi there, I'm Antonio 👋",n.jsx(e.a,{"aria-hidden":"true",tabIndex:"-1",href:"#hi-there-im-antonio-",children:n.jsx(e.div,{"data-autolink-icon":!0})})]}),`
 `,n.jsx(e.p,{children:"Welcome to my webhome!"}),`
 `,n.jsxs(e.h3,{id:"about-me",children:["About Me",n.jsx(e.a,{"aria-hidden":"true",tabIndex:"-1",href:"#about-me",children:n.jsx(e.div,{"data-autolink-icon":!0})})]}),`
 `,n.jsxs(e.ul,{children:[`
@@ -60,13 +60,12 @@ import{u as t,j as n}from"./index-YXWiSWx0.js";import{P as r}from"./posts-list-9
 `,n.jsx(e.hr,{}),`
 `,n.jsxs(e.h3,{id:"lets-connect",children:["Let's Connect!",n.jsx(e.a,{"aria-hidden":"true",tabIndex:"-1",href:"#lets-connect",children:n.jsx(e.div,{"data-autolink-icon":!0})})]}),`
 `,n.jsxs(e.ul,{children:[`
-`,n.jsxs(e.li,{children:[n.jsxs(e.strong,{children:[n.jsx(e.a,{href:"mailto:antonio@antl3x.co",children:"Email"}),":"]})," Feel free to reach out to me. I'm always open to interesting conversations and opportunities."]}),`
-`,n.jsxs(e.li,{children:[n.jsxs(e.strong,{children:[n.jsx(e.a,{href:"https://linkedin.com/in/antl3x",children:"LinkedIn"}),":"]})," Connect with me professionally."]}),`
+`,n.jsxs(e.li,{children:[n.jsx(e.strong,{children:n.jsx(e.a,{href:"mailto:antonio@antl3x.co",children:"Email"})}),": Feel free to reach out to me. I'm always open to interesting conversations and opportunities."]}),`
+`,n.jsxs(e.li,{children:[n.jsx(e.strong,{children:n.jsx(e.a,{href:"https://linkedin.com/in/antl3x",children:"LinkedIn"})}),": Connect with me professionally."]}),`
 `,n.jsxs(e.li,{children:[n.jsx(e.a,{href:"https://x.com/antl3x",children:"𝕏"}),": Follow me."]}),`
-`,n.jsxs(e.li,{children:[n.jsx(e.strong,{children:"[GitHub]"}),"(",n.jsx(e.a,{href:"https://github.com/antl3x",children:"https://github.com/antl3x"}),"): Follow me."]}),`
+`,n.jsxs(e.li,{children:[n.jsx(e.strong,{children:n.jsx(e.a,{href:"https://github.com/antl3x",children:"GitHub"})}),": Follow me."]}),`
 `]}),`
 `,n.jsx(e.hr,{}),`
 `,n.jsxs(e.h3,{id:"last-posts",children:["Last Posts",n.jsx(e.a,{"aria-hidden":"true",tabIndex:"-1",href:"#last-posts",children:n.jsx(e.div,{"data-autolink-icon":!0})})]}),`
 `,`
-`,n.jsx(r,{}),`
-`,n.jsxs(e.p,{children:[n.jsx(e.a,{href:"https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyCca5akhZ492pP08QBchz5Q4QA6kFYsBrc&q=weather",children:"https://customsearch.googleapis.com/customsearch/v1?key=AIzaSyCca5akhZ492pP08QBchz5Q4QA6kFYsBrc&q=weather"})," in clearfield&num=10&cx=923a7bcc712ee431d&"]})]})}function c(i={}){const{wrapper:e}={...t(),...i.components};return e?n.jsx(e,{...i,children:n.jsx(s,{...i})}):s(i)}export{c as default,l as frontmatter};
+`,n.jsx(r,{})]})}function c(i={}){const{wrapper:e}={...t(),...i.components};return e?n.jsx(e,{...i,children:n.jsx(s,{...i})}):s(i)}export{c as default,l as frontmatter};
