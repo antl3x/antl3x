@@ -1,7 +1,7 @@
 **/_tmp
 **/*.dec.*
 **/tmp
-dist
+**/dist/
 
 linte
 markdown.db
