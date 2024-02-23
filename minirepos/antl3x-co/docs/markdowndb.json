@@ -175,6 +175,41 @@
     ]
   },
   {
+    "_id": "2c21d54321fdafae6ca0fe6dd6037495e984dc24",
+    "file_path": "docs/pages/posts/2024-02-23-speed-tiers.mdx",
+    "extension": "mdx",
+    "url_path": "pages/posts/2024-02-23-speed-tiers",
+    "filetype": "post",
+    "metadata": {
+      "title": "Speed Tiers: Freemium with the Currency of Time",
+      "description": "This post explores a novel twist on the freemium model by emphasizing time as a valuable currency. It discusses how in the digital era, optimizing time usage can redefine user experiences and proposes a \"Speed Tier\" system to efficiently manage time.",
+      "date": "2024-02-23T00:00:00.000Z",
+      "views": 1234,
+      "type": "post",
+      "tags": [],
+      "tasks": []
+    },
+    "tags": [],
+    "links": [
+      {
+        "from": "pages/posts/2024-02-23-speed-tiers.mdx",
+        "to": "https://taylor.town/frugly",
+        "toRaw": "https://taylor.town/frugly",
+        "text": "",
+        "embed": false,
+        "internal": false
+      },
+      {
+        "from": "pages/posts/2024-02-23-speed-tiers.mdx",
+        "to": "https://taylor.town",
+        "toRaw": "https://taylor.town",
+        "text": "",
+        "embed": false,
+        "internal": false
+      }
+    ]
+  },
+  {
     "_id": "f464818a4a6171d4a5203e61c2119635aeefc58d",
     "file_path": "docs/pages/posts/index.mdx",
     "extension": "mdx",
