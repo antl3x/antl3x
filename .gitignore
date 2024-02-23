@@ -1,6 +1,7 @@
 **/_tmp
 **/*.dec.*
 **/tmp
+dist
 
 linte
 markdown.db
