@@ -38,6 +38,18 @@ async function isNonEmptyFile(filePath) {
 
 // Function to encrypt or decrypt a file
 async function processFile(filePath, mode) {
+  if (!filePath.includes('.enc') && !filePath.includes('.dec')) {
+    return;
+  }
+
+  if (filePath.includes('.dec') && mode === 'decrypt') {
+    return;
+  }
+
+  if (filePath.includes('.enc') && mode === 'encrypt') {
+    return;
+  }
+
   let tempFilePath;
   try {
     const extension = path.extname(filePath);
@@ -54,7 +66,7 @@ async function processFile(filePath, mode) {
 
 
     const newFilePath = path.join(dirname, newFilename);
-    tempFilePath = path.join(os.tmpdir(), path.basename(newFilePath));
+    tempFilePath = newFilePath + '.tmp';
 
     if (mode === 'encrypt') {
       await $`sops --config sops.yaml --encrypt ${filePath} > ${tempFilePath}`;

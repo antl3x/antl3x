@@ -10,5 +10,6 @@ cue export _cue/* --expression dockerComposeProduction --out yaml > _tmp/docker-
 export $(cat _tmp/.env | xargs)
 
 docker context use $DOCKER_CONTEXT
-docker compose --file ./_tmp/docker-compose.yaml up traefik -d
+docker rm -f traefik
+docker compose --file ./_tmp/docker-compose.yaml up traefik -d --remove-orphans
 `

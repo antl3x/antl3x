@@ -10,8 +10,8 @@ module.exports = {
   prefix: "",
   theme: {
     fontFamily: {
-      sans: ["DM Mono"],
-      mono: ["DM Mono"],
+      sans: ["iaWriterQuattroS"],
+      mono: ["iaWriterQuattroS"],
     
     },
     container: {

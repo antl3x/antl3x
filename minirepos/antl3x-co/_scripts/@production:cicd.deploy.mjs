@@ -13,5 +13,6 @@ pnpm compile
 
 docker context use $DOCKER_CONTEXT
 docker build -t $DOCKER_IMAGE .
+docker rm -f antl3x-co || true
 docker compose --file ./_tmp/docker-compose.yaml up -d
 `

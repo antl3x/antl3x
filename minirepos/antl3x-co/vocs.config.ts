@@ -10,9 +10,6 @@ export default defineConfig({
   ogImageUrl: {
     '/': '/og-image.png'
   },
-  font: {
-    google: 'DM Mono'
-  },
   title: '@antl3x / webhome',
 
 iconUrl: {
@@ -89,9 +86,6 @@ logoUrl: {
           light: '#f2dfce',
           dark: '#1e1d1f'
         }
-      },
-      fontFamily: {
-        default: 'DM Mono'
       },
       fontSize: {
       root: '14px',
