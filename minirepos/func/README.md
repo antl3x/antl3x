@@ -1,10 +1,27 @@
 # 🕺 `func`
 
-`func` is a lightweight JavaScript/TypeScript micro-library created by [@antl3x](https://antl3x.co) that simplifies function creation with run-time argument validation and parsing using the powerful `zod` library.
+`func` let you declare functions with stricted type checking arguments that are validated in run-time using `zod`.
 
-It provides a concise and expressive way to define functions with strict type checking and error handling.
+```typescript
+const sum = func({
+  args: { a: z.number(), b: z.number() },
+  handler: ({ a, b }) => a + b,
+});
 
-I call it "func style!"
+const mul = func({
+  args: [z.number(), z.number()],
+  handler: (a, b) => a * b,
+});
+
+// Success 
+sum({ a: 5, b: 3 }); // Output: 8
+mul(4, 6); // Output: 24
+
+// Fail
+sum({ a: '5', b: 3 }); // Throws an error: "Expected number, received string"
+```
+
+Created by [@antl3x](https://antl3x.co) 
 
 ## Features
 
@@ -21,7 +38,7 @@ pnpm install @antl3x/func
 
 ## Usage
 
-Import the `func` and `z` from the `@totuna/func` package:
+Import the `func` and `z` from the `@antl3x/func` package:
 
 ```typescript
 import { func, z } from '@antl3x/func';
@@ -29,30 +46,13 @@ import { func, z } from '@antl3x/func';
 
 Define functions using the `func` function and specify the argument schema and handler:
 
-```typescript
-const sum = func({
-  args: { a: z.number(), b: z.number() },
-  handler: ({ a, b }) => a + b,
-});
 
-const mul = func({
-  args: [z.number(), z.number()],
-  handler: (a, b) => a * b,
-});
-```
 
 The `args` property can be either an object or an array, allowing you to define named or positional arguments respectively. The argument types are defined using the `zod` schema validation library.
 
 The `handler` function receives the parsed and validated arguments based on the defined schema. If the arguments fail validation, an error is automatically thrown with a detailed error message.
 
 Invoke the defined functions with the appropriate arguments:
-
-```typescript
-console.log(sum({ a: 5, b: 3 })); // Output: 8
-console.log(mul(4, 6)); // Output: 24
-
-console.log(sum({ a: '5', b: 3 })); // Throws an error: "Expected number, received string"
-```
 
 ## Examples
 
