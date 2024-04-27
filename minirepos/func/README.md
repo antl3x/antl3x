@@ -3,23 +3,49 @@
 `func` allows you to declare functions with strict type-checked arguments that are validated at runtime using `zod`.
 
 ```typescript
-const sum = func(
-  { a: z.number(), b: z.number() },
-  ({ a, b }) => a + b
-);
 
-const mul = func(
+/* ------------------------------ Short Flavor ------------------------------ */
+
+const add = func(
   [z.number(), z.number()],
-  (a, b) => a * b
+  (a, b) => a + b
 );
 
-// Success
-sum({ a: 5, b: 3 }); // Output: 8
-mul(4, 6); // Output: 24
+const fullName = func(
+  { first: z.string(), last: z.string() },
+  ({ first, last }) => `${first} ${last}`
+);
 
-// Fail
-sum({ a: '5', b: 3 }); // Throws an error: "Expected number, received string"
+add(4, 6); // Output: 24
+add('4', 6); // Throws an error
+
+fullName({ first: 'Mike', last: 'Lee' }) // Output: Mike Lee
+fullName({ first: 'Mike' }) // Throws an error
+
+
+/* ----------------------------- Verbose Flavor ----------------------------- */
+
+const sum = funcDef({
+  args: [z.number(), z.number()],
+  handler: (a, b) => a + b
+});
+
+const fullName = funcDef({
+  args: { first: z.string(), last: z.string() },
+  handler: ({ first, last }) => `${first} ${last}`
+});
+
+
+sum(5, 3); // Output: 8
+sum('5', 3); // Throws an error
+
+fullName({ first: 'Mike', last: 'Lee' }) // Output: Mike Lee
+fullName({ first: 'Mike' }) // Throws an error
+
+
+
 ```
+
 
 Created by [@antl3x](https://antl3x.co)
 
@@ -36,9 +62,39 @@ Created by [@antl3x](https://antl3x.co)
 pnpm install @antl3x/func
 ```
 
-## Usage
+# Usage
 
-### Using `func`
+
+## 1. Func Usage
+
+Here's the fixed Description function signature and Parameters section:
+
+
+## 1.1 Description
+
+`func` is the less verbose flavor used to define your type-checked function.
+
+```typescript
+
+func(args, handler): (...args: T[]) => T
+
+```
+
+## 1.2 Parameters
+
+> - **args**
+>     - A `ZodSchema` object or array that defines the argument schema for the function.
+>     - If an object is provided, the function expects named arguments matching the schema.
+>     - If an array is provided, the function expects positional arguments matching the schema.
+
+> - **handler**
+>     - The function that will be executed with the parsed and validated arguments.
+>     - The handler function should accept the arguments based on the defined schema.
+>     - If an object schema is used, the handler should expect an object with the corresponding properties.
+>     - If an array schema is used, the handler should expect individual arguments in the same order as the schema.
+
+
+## 1.3 Examples 
 
 Define functions using the `func` helper to specify the function argument schema and handler:
 
@@ -67,7 +123,30 @@ const calculateArea = func(
 calculateArea(5, 7); // Output: 35
 ```
 
-### Using `funcDef`
+## 2. FuncDef Usage
+
+## 2.1 Description
+
+`funcDef` is the more verbose flavor used to define your type-checked function. It allows you to separate the argument schema and handler in a more explicit way.
+
+```typescript
+funcDef({ args, handler }): (...args: T[]) => T
+```
+
+## 2.2 Parameters
+
+> - **args**
+>     - A `ZodSchema` object or array that defines the argument schema for the function.
+>     - If an object is provided, the function expects named arguments matching the schema.
+>     - If an array is provided, the function expects positional arguments matching the schema.
+
+> - **handler**
+>     - The function that will be executed with the parsed and validated arguments.
+>     - The handler function should accept the arguments based on the defined schema.
+>     - If an object schema is used, the handler should expect an object with the corresponding properties.
+>     - If an array schema is used, the handler should expect individual arguments in the same order as the schema.
+
+## 2.3 Examples
 
 Define functions using the `funcDef` helper to separate the argument schema and handler in a more explicit/verbose way:
 
