@@ -1,6 +1,6 @@
 {
   "name": "@antl3x/func",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "func allows you to declare functions with strict type-checked arguments that are validated at runtime using zod",
   "homepage": "https://github.com/antl3x/antl3x/tree/master/minirepos/func",
   "main": "./dist/cjs/index.js",
