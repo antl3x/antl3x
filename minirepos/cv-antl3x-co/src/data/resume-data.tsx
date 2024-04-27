@@ -1,5 +1,5 @@
 import { GitHubIcon, LinkedInIcon, XIcon } from "@/components/icons";
-
+import { title } from "process";
 
 export const RESUME_DATA = {
   name: "Antonio Moura",
@@ -8,7 +8,8 @@ export const RESUME_DATA = {
   locationLink: "https://www.google.com/maps/place/Salt+Lake+City,+UT",
   about:
     "Seasoned Software Engineer, Hands-on CTO, and Quant Trading Enthusiast with over 10 years in the tech industry.",
-  summary: "As a Software Engineer with experience as a founder and Head of Engineering, I specialize in developing and improving SaaS products for B2B and B2C markets. Passionate about open source software, I advocate for collaborative development to drive innovation and effective solutions.",
+  summary:
+    "As a Software Engineer with experience as a founder and Head of Engineering, I specialize in developing and improving SaaS products for B2B and B2C markets. Passionate about open source software, I advocate for collaborative development to drive innovation and effective solutions.",
   avatarUrl: "/me-light.png",
   personalWebsiteUrl: "https://antl3x.co",
   contact: {
@@ -40,15 +41,15 @@ export const RESUME_DATA = {
       start: "2020",
       end: "2022",
     },
-    
+
     {
-      school: "Sao Paulo University of Computer Science and Administration (FIAP)",
+      school:
+        "Sao Paulo University of Computer Science and Administration (FIAP)",
       link: "https://www.fiap.com.br/",
       degree: "Bachelor's Degree in Software Engineering & IT Management",
       start: "2018",
       end: "2020",
     },
-
   ],
   work: [
     {
@@ -58,11 +59,11 @@ export const RESUME_DATA = {
       title: "Head of Engineering",
       start: "2018",
       end: "Current",
-      description:[
+      description: [
         "Led engineering for a top legaltech in LatAm, servicing clients like Accenture, Renault, Siemens.",
         "Orchestrated AWS to Google Cloud transition, adopting Kubernetes + monorepo for improved efficiency.",
-        "Developed a monorepo workflow and enhanced hiring practices for SOC-2 compliance readiness."
-      ]
+        "Developed a monorepo workflow and enhanced hiring practices for SOC-2 compliance readiness.",
+      ],
     },
     {
       company: "Drafteam",
@@ -74,8 +75,8 @@ export const RESUME_DATA = {
       description: [
         "Co-founded a successful multi-sport fantasy game startup incubated by Google Campus Residency, ranking third in the US and second in Brazil.",
         "Managed engineering team to design and implement robust cloud infrastructure on Google Cloud Platform.",
-        "Achieved 3.8 million daily entries, leveraging TypeScript, React, NodeJS, and BigQuery."
-      ]
+        "Achieved 3.8 million daily entries, leveraging TypeScript, React, NodeJS, and BigQuery.",
+      ],
     },
     {
       company: "Blu365",
@@ -84,11 +85,11 @@ export const RESUME_DATA = {
       title: "Technical Lead @ Analytics",
       start: "2015",
       end: "2016",
-      description:[
-          "Led the Growth & Analytics, designing real-time services integrating AWS RedShift, DynamoDB, Aurora.",
-          "Spearheaded API integration with Banco Itáu, boosting debt collection deals by 20%, significantly increasing revenue."
-        ]
-    }
+      description: [
+        "Led the Growth & Analytics, designing real-time services integrating AWS RedShift, DynamoDB, Aurora.",
+        "Spearheaded API integration with Banco Itáu, boosting debt collection deals by 20%, significantly increasing revenue.",
+      ],
+    },
   ],
   skills: [
     "TypeScript",
@@ -100,7 +101,7 @@ export const RESUME_DATA = {
     "Svelte",
     "GraphQL",
     "WebRTC",
-    "Functional Programming"
+    "Functional Programming",
   ],
   projects: [
     {
@@ -113,10 +114,21 @@ export const RESUME_DATA = {
         "Vite",
         "Websockets",
       ],
-      description: "An innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.",
+      description:
+        "An innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.",
       link: {
         label: "codeplot",
         href: "https://github.com/codeplot-co/codeplot",
+      },
+    },
+    {
+      title: "learnpolars.co",
+      techStack: ["TypeScript", "NextJS", "Vite", "Tailwind CSS", "MDX"],
+      description:
+        "A platform for learning data science with Polars, a blazingly fast Python DataFrame library, providing interactive code examples and tutorials.",
+      link: {
+        label: "learnpolars.co",
+        href: "https://learnpolars.co",
       },
     },
     {
@@ -128,10 +140,21 @@ export const RESUME_DATA = {
         "Algebraic Data Types",
         "Runtime Type Checking",
       ],
-      description: "super-ts is a Typescript functional programming library inspired by Haskell and PureScript providing both runtime type checking and functional algebraic data types.",
+      description:
+        "super-ts is a Typescript functional programming library inspired by Haskell and PureScript providing both runtime type checking and functional algebraic data types.",
       link: {
         label: "super-ts",
         href: "https://github.com/antl3x/super-ts",
+      },
+    },
+    {
+      title: "func",
+      techStack: ["NPM Package", "TypeScript", "Runtime Type Checking"],
+      description:
+        "func is a lightweight JavaScript/TypeScript micro-library that simplifies function creation with run-time argument validation and parsing using the powerful `zod` library.",
+      link: {
+        label: "func",
+        href: "https://github.com/antl3x/antl3x/tree/master/minirepos/func",
       },
     },
   ],
