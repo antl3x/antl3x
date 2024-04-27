@@ -1,7 +1,12 @@
 # 🕺 `func`
 
+<div align="center">
 [![Open in Visual Studio Code](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Open%20in%20Visual%20Studio%20Code&labelColor=2c2c32&color=007acc&logoColor=007acc)](https://open.vscode.dev/antl3x/antl3x/blob/master/minirepos/func/LICENSE)
-[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/antl3x/antl3x/blob/master/minirepos/func/LICENSE)
+<span> · </span>
+</div>
+
+[![MIT License](https://img.shields.io/npm/l/@antl3x/func.svg?)](https://github.com/antl3x/antl3x/blob/master/minirepos/func/LICENSE)
+[![NPM Version](https://img.shields.io/npm/v/@antl3x/func.svg?style=flat)](npmjs.com/package/@antl3x/func)
 
 ## Overview 
 `func` allows you to declare functions with strict type-checked arguments that are validated at runtime using `zod`.
