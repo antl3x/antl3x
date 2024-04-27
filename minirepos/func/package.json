@@ -1,6 +1,6 @@
 {
   "name": "@antl3x/func",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "func helps define functions with strict type checking and error handling at run-time.",
   "homepage": "https://github.com/antl3x/antl3x/tree/master/minirepos/func",
   "main": "./dist/cjs/index.js",
