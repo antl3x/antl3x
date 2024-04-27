@@ -1,6 +1,6 @@
 # 🕺 `func`
 
-`func` is a lightweight JavaScript/TypeScript micro-library created by [@antl3x](https://antl3x.co) that simplifies function creation with run-time argument validation and parsing using the powerful `zod` library. 
+`func` is a lightweight JavaScript/TypeScript micro-library created by [@antl3x](https://antl3x.co) that simplifies function creation with run-time argument validation and parsing using the powerful `zod` library.
 
 It provides a concise and expressive way to define functions with strict type checking and error handling.
 
@@ -16,7 +16,7 @@ I call it "func style!"
 ## Installation
 
 ```bash
-npm install @antl3x/func
+pnpm install @antl3x/func
 ```
 
 ## Usage
@@ -24,7 +24,7 @@ npm install @antl3x/func
 Import the `func` and `z` from the `@totuna/func` package:
 
 ```typescript
-import { func, z } from "@antl3x/func";
+import { func, z } from '@antl3x/func';
 ```
 
 Define functions using the `func` function and specify the argument schema and handler:
@@ -51,7 +51,7 @@ Invoke the defined functions with the appropriate arguments:
 console.log(sum({ a: 5, b: 3 })); // Output: 8
 console.log(mul(4, 6)); // Output: 24
 
-console.log(sum({ a: "5", b: 3 })); // Throws an error: "Expected number, received string"
+console.log(sum({ a: '5', b: 3 })); // Throws an error: "Expected number, received string"
 ```
 
 ## Examples
@@ -62,20 +62,21 @@ Here are a few more examples showcasing the flexibility of `func`:
 const greet = func({
   args: { name: z.string(), age: z.number().optional() },
   handler: ({ name, age }) => {
-    const ageStr = age ? ` You are ${age} years old.` : "";
+    const ageStr = age ? ` You are ${age} years old.` : '';
     return `Hello, ${name}!${ageStr}`;
   },
 });
 
-console.log(greet({ name: "Alice", age: 25 })); // Output: "Hello, Alice! You are 25 years old."
-console.log(greet({ name: "Bob" })); // Output: "Hello, Bob!"
+console.log(greet({ name: 'Alice', age: 25 })); // Output: "Hello, Alice! You are 25 years old."
+console.log(greet({ name: 'Bob' })); // Output: "Hello, Bob!"
+```
 
-
+```typescript
 const calculateArea = func({
-args: { width: z.number(), height: z.number() },
-handler: ({ width, height }) => width * height,
+  args: { width: z.number(), height: z.number() },
+  handler: ({ width, height }) => width * height,
 });
-  
+
 console.log(calculateArea({ width: 5, height: 7 })); // Output: 35
 ```
 
@@ -84,5 +85,3 @@ console.log(calculateArea({ width: 5, height: 7 })); // Output: 35
 This project is licensed under the MIT License.
 
 ---
-
-Feel free to customize and expand upon this README based on your specific `func` micro-library implementation and additional features.
