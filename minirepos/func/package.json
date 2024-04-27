@@ -1,7 +1,8 @@
 {
   "name": "@antl3x/func",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "func helps define functions with strict type checking and error handling at run-time.",
+  "homepage": "https://github.com/antl3x/antl3x/tree/master/minirepos/func",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
@@ -46,7 +47,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/antl3x/antl3x",
-    "directory": "minirepos/func",
+    "directory": "/minirepos/func",
     "branch": "master"
   },
   "peerDependencies": {
