@@ -1,6 +1,6 @@
 # 🕺 `func`
 
-`func` let you declare functions with stricted type checking arguments that are validated in run-time using `zod`.
+`func` allows you to declare functions with strict type-checked arguments that are validated at runtime using `zod`.
 
 ```typescript
 const sum = func({
@@ -38,27 +38,13 @@ pnpm install @antl3x/func
 
 ## Usage
 
-Import the `func` and `z` from the `@antl3x/func` package:
+Define functions using the `func` and `z` helpers to specify the function argument schema and handler:
 
 ```typescript
 import { func, z } from '@antl3x/func';
-```
 
-Define functions using the `func` function and specify the argument schema and handler:
+/** - - - - - Example 1 - - - - - **/
 
-
-
-The `args` property can be either an object or an array, allowing you to define named or positional arguments respectively. The argument types are defined using the `zod` schema validation library.
-
-The `handler` function receives the parsed and validated arguments based on the defined schema. If the arguments fail validation, an error is automatically thrown with a detailed error message.
-
-Invoke the defined functions with the appropriate arguments:
-
-## Examples
-
-Here are a few more examples showcasing the flexibility of `func`:
-
-```typescript
 const greet = func({
   args: { name: z.string(), age: z.number().optional() },
   handler: ({ name, age }) => {
@@ -67,18 +53,24 @@ const greet = func({
   },
 });
 
-console.log(greet({ name: 'Alice', age: 25 })); // Output: "Hello, Alice! You are 25 years old."
-console.log(greet({ name: 'Bob' })); // Output: "Hello, Bob!"
-```
+greet({ name: 'Alice', age: 25 }); // Output: "Hello, Alice! You are 25 years old."
 
-```typescript
+greet({ name: 'Bob' }); // Output: "Hello, Bob!"
+
+/** - - - - - Example 2 - - - - - **/
+
 const calculateArea = func({
   args: { width: z.number(), height: z.number() },
   handler: ({ width, height }) => width * height,
 });
 
-console.log(calculateArea({ width: 5, height: 7 })); // Output: 35
+calculateArea({ width: 5, height: 7 }); // Output: 35
 ```
+
+The `args` property can be either an object or an array, allowing you to define named or positional arguments respectively. The argument types are defined using the `zod` schema validation library.
+
+The `handler` function receives the parsed and validated arguments based on the defined schema. If the arguments fail validation, an error is automatically thrown with a detailed error message.
+
 
 ## License
 
