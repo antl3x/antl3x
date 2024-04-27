@@ -9,8 +9,9 @@
 
 </div>
 
-## Overview 
 `func` allows you to declare functions with strict type-checked arguments that are validated at runtime using `zod`.
+
+## Demo 
 
 ```typescript
 
