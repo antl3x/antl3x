@@ -11,6 +11,9 @@
 
 `func` allows you to declare functions with strict type-checked arguments that are validated at runtime using `zod`.
 
+Created by [@antl3x](https://antl3x.co)
+
+
 ## Demo 
 
 ```typescript
@@ -27,10 +30,10 @@ const fullName = func(
   ({ first, last }) => `${first} ${last}`
 );
 
-add(4, 6); // Output: 24
+add(4, 6); // 24
 add('4', 6); // Throws an error
 
-fullName({ first: 'Mike', last: 'Lee' }) // Output: Mike Lee
+fullName({ first: 'Mike', last: 'Lee' }) // Mike Lee
 fullName({ first: 'Mike' }) // Throws an error
 
 
@@ -47,18 +50,15 @@ const fullName = funcDef({
 });
 
 
-sum(5, 3); // Output: 8
+sum(5, 3); // 8
 sum('5', 3); // Throws an error
 
-fullName({ first: 'Mike', last: 'Lee' }) // Output: Mike Lee
+fullName({ first: 'Mike', last: 'Lee' }) // Mike Lee
 fullName({ first: 'Mike' }) // Throws an error
 
 
 
 ```
-
-
-Created by [@antl3x](https://antl3x.co)
 
 ## Features
 
@@ -117,8 +117,8 @@ const greet = func(
     return `Hello, ${name}!${ageStr}`;
 });
 
-greet({ name: 'Alice', age: 25 }); // Output: "Hello, Alice! You are 25 years old."
-greet({ name: 'Bob' }); // Output: "Hello, Bob!"
+greet({ name: 'Alice', age: 25 }); // "Hello, Alice! You are 25 years old."
+greet({ name: 'Bob' }); // "Hello, Bob!"
 
 /** - - - - - Example 2 - - - - - */
 
@@ -127,7 +127,7 @@ const calculateArea = func(
   (width, height) => width * height
 );
 
-calculateArea(5, 7); // Output: 35
+calculateArea(5, 7); // 35
 ```
 
 ### 2. FuncDef
@@ -170,8 +170,8 @@ const greetDef = funcDef({
   },
 });
 
-greetDef({ name: 'Alice', age: 25 }); // Output: "Hello, Alice! You are 25 years old."
-greetDef({ name: 'Bob' }); // Output: "Hello, Bob!"
+greetDef({ name: 'Alice', age: 25 }); // "Hello, Alice! You are 25 years old."
+greetDef({ name: 'Bob' }); // "Hello, Bob!"
 
 /** - - - - - Example 2 - - - - - */
 
@@ -180,7 +180,7 @@ const calculateAreaDef = funcDef({
   handler: (width, height) => width * height,
 });
 
-calculateAreaDef(5, 7); // Output: 35
+calculateAreaDef(5, 7); // 35
 ```
 
 The `args` property can be either an object or an array, allowing you to define named or positional arguments respectively.
