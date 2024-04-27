@@ -1,5 +1,9 @@
 # 🕺 `func`
 
+[![Open in Visual Studio Code](https://img.shields.io/static/v1?logo=visualstudiocode&label=&message=Open%20in%20Visual%20Studio%20Code&labelColor=2c2c32&color=007acc&logoColor=007acc)](https://open.vscode.dev/antl3x/antl3x/blob/master/minirepos/func/LICENSE)
+[![MIT License](https://img.shields.io/apm/l/atomic-design-ui.svg?)](https://github.com/antl3x/antl3x/blob/master/minirepos/func/LICENSE)
+
+## Overview 
 `func` allows you to declare functions with strict type-checked arguments that are validated at runtime using `zod`.
 
 ```typescript
@@ -62,15 +66,11 @@ Created by [@antl3x](https://antl3x.co)
 pnpm install @antl3x/func
 ```
 
-# Usage
+## Usage
 
+### 1. Func
 
-## 1. Func Usage
-
-Here's the fixed Description function signature and Parameters section:
-
-
-## 1.1 Description
+### 1.1 Description
 
 `func` is the less verbose flavor used to define your type-checked function.
 
@@ -80,7 +80,7 @@ func(args, handler): (...args: T[]) => T
 
 ```
 
-## 1.2 Parameters
+### 1.2 Parameters
 
 > - **args**
 >     - A `ZodSchema` object or array that defines the argument schema for the function.
@@ -94,7 +94,7 @@ func(args, handler): (...args: T[]) => T
 >     - If an array schema is used, the handler should expect individual arguments in the same order as the schema.
 
 
-## 1.3 Examples 
+### 1.3 Examples 
 
 Define functions using the `func` helper to specify the function argument schema and handler:
 
@@ -123,9 +123,9 @@ const calculateArea = func(
 calculateArea(5, 7); // Output: 35
 ```
 
-## 2. FuncDef Usage
+### 2. FuncDef
 
-## 2.1 Description
+### 2.1 Description
 
 `funcDef` is the more verbose flavor used to define your type-checked function. It allows you to separate the argument schema and handler in a more explicit way.
 
@@ -133,7 +133,7 @@ calculateArea(5, 7); // Output: 35
 funcDef({ args, handler }): (...args: T[]) => T
 ```
 
-## 2.2 Parameters
+### 2.2 Parameters
 
 > - **args**
 >     - A `ZodSchema` object or array that defines the argument schema for the function.
@@ -146,7 +146,7 @@ funcDef({ args, handler }): (...args: T[]) => T
 >     - If an object schema is used, the handler should expect an object with the corresponding properties.
 >     - If an array schema is used, the handler should expect individual arguments in the same order as the schema.
 
-## 2.3 Examples
+### 2.3 Examples
 
 Define functions using the `funcDef` helper to separate the argument schema and handler in a more explicit/verbose way:
 
