@@ -3,17 +3,17 @@
 `func` allows you to declare functions with strict type-checked arguments that are validated at runtime using `zod`.
 
 ```typescript
-const sum = func({
-  args: { a: z.number(), b: z.number() },
-  handler: ({ a, b }) => a + b,
-});
+const sum = func(
+  { a: z.number(), b: z.number() },
+  ({ a, b }) => a + b
+);
 
-const mul = func({
-  args: [z.number(), z.number()],
-  handler: (a, b) => a * b,
-});
+const mul = func(
+  [z.number(), z.number()],
+  (a, b) => a * b
+);
 
-// Success 
+// Success
 sum({ a: 5, b: 3 }); // Output: 8
 mul(4, 6); // Output: 24
 
@@ -21,7 +21,7 @@ mul(4, 6); // Output: 24
 sum({ a: '5', b: 3 }); // Throws an error: "Expected number, received string"
 ```
 
-Created by [@antl3x](https://antl3x.co) 
+Created by [@antl3x](https://antl3x.co)
 
 ## Features
 
@@ -38,14 +38,45 @@ pnpm install @antl3x/func
 
 ## Usage
 
-Define functions using the `func` and `z` helpers to specify the function argument schema and handler:
+### Using `func`
+
+Define functions using the `func` helper to specify the function argument schema and handler:
 
 ```typescript
 import { func, z } from '@antl3x/func';
 
-/** - - - - - Example 1 - - - - - **/
+/** - - - - - Example 1 - - - - - */
 
-const greet = func({
+const greet = func(
+  { name: z.string(), age: z.number().optional() },
+  ({ name, age }) => {
+    const ageStr = age ? ` You are ${age} years old.` : '';
+    return `Hello, ${name}!${ageStr}`;
+});
+
+greet({ name: 'Alice', age: 25 }); // Output: "Hello, Alice! You are 25 years old."
+greet({ name: 'Bob' }); // Output: "Hello, Bob!"
+
+/** - - - - - Example 2 - - - - - */
+
+const calculateArea = func(
+  [z.number(), z.number()],
+  (width, height) => width * height
+);
+
+calculateArea(5, 7); // Output: 35
+```
+
+### Using `funcDef`
+
+Define functions using the `funcDef` helper to separate the argument schema and handler in a more explicit/verbose way:
+
+```typescript
+import { funcDef, z } from '@antl3x/func';
+
+/** - - - - - Example 1 - - - - - */
+
+const greetDef = funcDef({
   args: { name: z.string(), age: z.number().optional() },
   handler: ({ name, age }) => {
     const ageStr = age ? ` You are ${age} years old.` : '';
@@ -53,24 +84,26 @@ const greet = func({
   },
 });
 
-greet({ name: 'Alice', age: 25 }); // Output: "Hello, Alice! You are 25 years old."
+greetDef({ name: 'Alice', age: 25 }); // Output: "Hello, Alice! You are 25 years old."
+greetDef({ name: 'Bob' }); // Output: "Hello, Bob!"
 
-greet({ name: 'Bob' }); // Output: "Hello, Bob!"
+/** - - - - - Example 2 - - - - - */
 
-/** - - - - - Example 2 - - - - - **/
-
-const calculateArea = func({
-  args: { width: z.number(), height: z.number() },
-  handler: ({ width, height }) => width * height,
+const calculateAreaDef = funcDef({
+  args: [z.number(), z.number()],
+  handler: (width, height) => width * height,
 });
 
-calculateArea({ width: 5, height: 7 }); // Output: 35
+calculateAreaDef(5, 7); // Output: 35
 ```
 
-The `args` property can be either an object or an array, allowing you to define named or positional arguments respectively. The argument types are defined using the `zod` schema validation library.
+The `args` property can be either an object or an array, allowing you to define named or positional arguments respectively.
 
-The `handler` function receives the parsed and validated arguments based on the defined schema. If the arguments fail validation, an error is automatically thrown with a detailed error message.
+The argument types are defined using the `zod` schema validation library.
 
+The `handler` function receives the parsed and validated arguments based on the defined schema.
+
+If the arguments fail validation, an error is automatically thrown with a detailed error message.
 
 ## License
 

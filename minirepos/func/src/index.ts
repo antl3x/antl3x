@@ -1,1 +1,2 @@
-export { func, z } from './func';
+export * as z from 'zod';
+export { func, funcDef, ZodErrors } from './func';
