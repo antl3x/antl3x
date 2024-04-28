@@ -1,12 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ESNext",
     "useDefineForClassFields": true,
-    "lib": [
-      "ES2020",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "experimentalDecorators": true,
     "module": "ESNext",
     "skipLibCheck": true,
     /* Bundler mode */
@@ -30,15 +27,9 @@
       }
     ],
     "paths": {
-      "@components/*": ["./docs/components/*"],
+      "@components/*": ["./docs/components/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }
