@@ -1,0 +1,11 @@
+import { createContext } from "mobx-keystone";
+import { Client, Pool } from "pg";
+import { Config } from "./TotunaConfig";
+import { SystemVariables } from "./SystemVariables";
+
+export const rootCtx = createContext<{
+  pgClient: Client;
+  pgPool: Pool;
+  config: Config;
+  SystemVariables: SystemVariables;
+}>();

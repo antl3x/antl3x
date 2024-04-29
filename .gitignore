@@ -4,6 +4,8 @@
 **/dist/
 dist
 
+._totuna_
+
 linte
 markdown.db
 *.timestamp-*
