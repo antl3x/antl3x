@@ -15,10 +15,10 @@ const _getEnvOr = <A>(keys: string[], defaultValue: A): A => {
 
 @model("@totuna/Config/v1/FolderNames")
 export class ConfigFolderNames extends Model({
-  types: prop<string>(_getEnvOr(["TOTUNA_TYPES_FOLDER"], "_@types")),
+  types: prop<string>(_getEnvOr(["TOTUNA_TYPES_FOLDER"], "types")),
   executions: prop<string>(_getEnvOr(["TOTUNA_EXECUTIONS_FOLDER"], "executions")),
   privileges: prop<string>(_getEnvOr(["TOTUNA_PRIVILEGES_FOLDER"], "privileges")),
-  main: prop<string>(_getEnvOr(["TOTUNA_MAIN_FOLDER"], "totuna")),
+  main: prop<string>(_getEnvOr(["TOTUNA_MAIN_FOLDER"], "@totuna")),
 }) {
   get DatabasePath() {
     return this.main + "/" + rootCtx.get(this)?.config.pgConfig.database;
@@ -26,11 +26,23 @@ export class ConfigFolderNames extends Model({
   get privilegesPath() {
     return this.DatabasePath + "/" + this.privileges;
   }
+  get privilegesOnSequencePath() {
+    return this.privilegesPath + "/sequences";
+  }
+  get privilegesOnFunctionPath() {
+    return this.privilegesPath + "/functions";
+  }
+  get privilegesOnDatabasePath() {
+    return this.privilegesPath + "/databases";
+  }
   get privilegesOnSchemaPath() {
     return this.privilegesPath + "/schemas";
   }
   get privilegesOnTablePath() {
     return this.privilegesPath + "/tables";
+  }
+  get privilegesOnViewPath() {
+    return this.privilegesPath + "/views";
   }
   get privilegesOnColumnPath() {
     return this.privilegesPath + "/columns";

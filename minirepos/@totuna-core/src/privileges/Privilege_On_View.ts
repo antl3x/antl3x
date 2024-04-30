@@ -24,6 +24,7 @@ export const Privilege_On_View = z.object({
   "<type>": z.literal("Privilege_On_View").default("Privilege_On_View"),
   database: z.string(),
   schema: z.string(),
+  view: z.string(),
   grantee: z.string(),
   privilege: PGSQL_Privileges_On_View_Dict,
 });

@@ -1,10 +1,10 @@
-import { Privilege_On_Table } from "@/privileges/Privilege_On_Table";
+import { Privilege_On_View } from "@/privileges/Privilege_On_View";
 import { AggregateFile, AggregatorModule } from "./@types";
 import { satisfies } from "@/utils/satisfies";
 
 import parse from "parse-es-import";
 
-satisfies<AggregatorModule<Privilege_On_Table, Aggregates>, typeof import("./Agreggator__Tables")>();
+satisfies<AggregatorModule<Privilege_On_View, Aggregates>, typeof import("@/aggregators/Aggregator__View")>();
 
 /* -------------------------------------------------------------------------- */
 /*                                 Interfaces                                 */
@@ -12,12 +12,12 @@ satisfies<AggregatorModule<Privilege_On_Table, Aggregates>, typeof import("./Agr
 
 export interface Aggregate {
   privileges: {
-    [grantee: string]: Privilege_On_Table["privilege_type"][];
+    [grantee: string]: Privilege_On_View["privilege"][];
   };
   meta: {
-    table_schema: Privilege_On_Table["table_schema"];
-    table_name: Privilege_On_Table["table_name"];
-    database: Privilege_On_Table["database"];
+    schema: Privilege_On_View["schema"];
+    view: Privilege_On_View["view"];
+    database: Privilege_On_View["database"];
   };
 }
 
@@ -36,7 +36,7 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
   for (const key in aggregates) {
     const { meta, privileges } = aggregates[key];
 
-    const fileName = `${meta.table_schema}.${meta.table_name}.ts`;
+    const fileName = `${meta.schema}.${meta.view}.ts`;
 
     let content = `export const privileges = ${JSON.stringify(privileges, null, 2)};\n\n`;
     content += `export const meta = ${JSON.stringify(meta, null, 2)};`;
@@ -50,8 +50,8 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
 /* ------------------------- aggregatesToPrivileges ------------------------- */
 
 /** Converts an aggregate object back to a state array */
-export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_Table[] => {
-  const privileges = [] as Privilege_On_Table[];
+export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_View[] => {
+  const privileges = [] as Privilege_On_View[];
 
   for (const key in aggregates) {
     const { meta, privileges: privs } = aggregates[key];
@@ -59,10 +59,10 @@ export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_Tab
     for (const grantee in privs) {
       for (const privilege of privs[grantee]) {
         privileges.push({
-          "<type>": "Privilege_On_Table",
+          "<type>": "Privilege_On_View",
           ...meta,
           grantee,
-          privilege_type: privilege,
+          privilege: privilege,
         });
       }
     }
@@ -83,7 +83,7 @@ export const filesToAggregates = (files: string[]): Aggregates => {
     const privileges = JSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "privileges")!.value);
     const meta = JSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "meta")!.value);
 
-    const key = `${meta.table_schema}.${meta.table_name}`;
+    const key = `${meta.schema}.${meta.view}`;
 
     aggregates[key] = { privileges, meta };
   }
@@ -93,23 +93,23 @@ export const filesToAggregates = (files: string[]): Aggregates => {
 
 /* ---------------------------- filesToPrivileges --------------------------- */
 
-export const filesToPrivileges = (files: string[]): Privilege_On_Table[] => {
+export const filesToPrivileges = (files: string[]): Privilege_On_View[] => {
   return aggregatesToPrivileges(filesToAggregates(files));
 };
 
 /* ------------------------- privilegesToAggregates ------------------------- */
 
-export const privilegesToAggregates = (privileges: Privilege_On_Table[]): Aggregates => {
+export const privilegesToAggregates = (privileges: Privilege_On_View[]): Aggregates => {
   return privileges.reduce(
     (acc, privilege) => {
-      const key = `${privilege.table_schema}.${privilege.table_name}`;
+      const key = `${privilege.schema}.${privilege.view}`;
 
       if (!acc[key]) {
         acc[key] = {
           privileges: {},
           meta: {
-            table_schema: privilege.table_schema,
-            table_name: privilege.table_name,
+            schema: privilege.schema,
+            view: privilege.view,
             database: privilege.database,
           },
         };
@@ -119,7 +119,7 @@ export const privilegesToAggregates = (privileges: Privilege_On_Table[]): Aggreg
         acc[key].privileges[privilege.grantee] = [];
       }
 
-      acc[key].privileges[privilege.grantee].push(privilege.privilege_type);
+      acc[key].privileges[privilege.grantee].push(privilege.privilege);
 
       return acc;
     },
@@ -129,6 +129,6 @@ export const privilegesToAggregates = (privileges: Privilege_On_Table[]): Aggreg
 
 /* ---------------------------- privilegesToFiles --------------------------- */
 
-export const privilegesToFiles = (privileges: Privilege_On_Table[]): AggregateFile[] => {
+export const privilegesToFiles = (privileges: Privilege_On_View[]): AggregateFile[] => {
   return aggregatesToFiles(privilegesToAggregates(privileges));
 };

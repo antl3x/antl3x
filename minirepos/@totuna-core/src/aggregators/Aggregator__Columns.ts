@@ -19,7 +19,7 @@ export interface Aggregate {
   meta: {
     table_schema: Privilege_On_Column["table_schema"];
     table_name: Privilege_On_Column["table_name"];
-    table_catalog: Privilege_On_Column["table_catalog"];
+    database: Privilege_On_Column["database"];
   };
 }
 
@@ -115,7 +115,7 @@ export const privilegesToAggregates = (privileges: Privilege_On_Column[]): Aggre
           meta: {
             table_schema: privilege.table_schema,
             table_name: privilege.table_name,
-            table_catalog: privilege.table_catalog,
+            database: privilege.database,
           },
         };
       }

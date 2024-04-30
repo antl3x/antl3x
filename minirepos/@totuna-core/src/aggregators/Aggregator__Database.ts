@@ -1,10 +1,10 @@
-import { Privilege_On_Table } from "@/privileges/Privilege_On_Table";
+import { Privilege_On_Database } from "@/privileges/Privilege_On_Database";
 import { AggregateFile, AggregatorModule } from "./@types";
 import { satisfies } from "@/utils/satisfies";
 
 import parse from "parse-es-import";
 
-satisfies<AggregatorModule<Privilege_On_Table, Aggregates>, typeof import("./Agreggator__Tables")>();
+satisfies<AggregatorModule<Privilege_On_Database, Aggregates>, typeof import("@/aggregators/Aggregator__Database")>();
 
 /* -------------------------------------------------------------------------- */
 /*                                 Interfaces                                 */
@@ -12,12 +12,10 @@ satisfies<AggregatorModule<Privilege_On_Table, Aggregates>, typeof import("./Agr
 
 export interface Aggregate {
   privileges: {
-    [grantee: string]: Privilege_On_Table["privilege_type"][];
+    [grantee: string]: Privilege_On_Database["privilege_type"][];
   };
   meta: {
-    table_schema: Privilege_On_Table["table_schema"];
-    table_name: Privilege_On_Table["table_name"];
-    database: Privilege_On_Table["database"];
+    database: Privilege_On_Database["database"];
   };
 }
 
@@ -36,7 +34,7 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
   for (const key in aggregates) {
     const { meta, privileges } = aggregates[key];
 
-    const fileName = `${meta.table_schema}.${meta.table_name}.ts`;
+    const fileName = `${meta.database}.ts`;
 
     let content = `export const privileges = ${JSON.stringify(privileges, null, 2)};\n\n`;
     content += `export const meta = ${JSON.stringify(meta, null, 2)};`;
@@ -50,8 +48,8 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
 /* ------------------------- aggregatesToPrivileges ------------------------- */
 
 /** Converts an aggregate object back to a state array */
-export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_Table[] => {
-  const privileges = [] as Privilege_On_Table[];
+export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_Database[] => {
+  const privileges = [] as Privilege_On_Database[];
 
   for (const key in aggregates) {
     const { meta, privileges: privs } = aggregates[key];
@@ -59,7 +57,7 @@ export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_Tab
     for (const grantee in privs) {
       for (const privilege of privs[grantee]) {
         privileges.push({
-          "<type>": "Privilege_On_Table",
+          "<type>": "Privilege_On_Database",
           ...meta,
           grantee,
           privilege_type: privilege,
@@ -93,23 +91,21 @@ export const filesToAggregates = (files: string[]): Aggregates => {
 
 /* ---------------------------- filesToPrivileges --------------------------- */
 
-export const filesToPrivileges = (files: string[]): Privilege_On_Table[] => {
+export const filesToPrivileges = (files: string[]): Privilege_On_Database[] => {
   return aggregatesToPrivileges(filesToAggregates(files));
 };
 
 /* ------------------------- privilegesToAggregates ------------------------- */
 
-export const privilegesToAggregates = (privileges: Privilege_On_Table[]): Aggregates => {
+export const privilegesToAggregates = (privileges: Privilege_On_Database[]): Aggregates => {
   return privileges.reduce(
     (acc, privilege) => {
-      const key = `${privilege.table_schema}.${privilege.table_name}`;
+      const key = `${privilege.database}`;
 
       if (!acc[key]) {
         acc[key] = {
           privileges: {},
           meta: {
-            table_schema: privilege.table_schema,
-            table_name: privilege.table_name,
             database: privilege.database,
           },
         };
@@ -129,6 +125,6 @@ export const privilegesToAggregates = (privileges: Privilege_On_Table[]): Aggreg
 
 /* ---------------------------- privilegesToFiles --------------------------- */
 
-export const privilegesToFiles = (privileges: Privilege_On_Table[]): AggregateFile[] => {
+export const privilegesToFiles = (privileges: Privilege_On_Database[]): AggregateFile[] => {
   return aggregatesToFiles(privilegesToAggregates(privileges));
 };

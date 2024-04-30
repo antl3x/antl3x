@@ -2,7 +2,15 @@ import fs from "fs";
 import { Model, _async, _await, model, modelAction, modelFlow } from "mobx-keystone";
 import { TypeOf } from "zod";
 import { rootCtx } from "./RootCtx";
-import { Agreggator__Tables, Aggregator__Columns, Aggregator__Schema } from "./aggregators";
+import {
+  Agreggator__Tables,
+  Aggregator__Columns,
+  Aggregator__Schema,
+  Aggregator__Database,
+  Aggregator__View,
+  Aggregator__Function,
+  Aggregator__Sequence,
+} from "./aggregators";
 import { getZodTypeIdentifier } from "./utils";
 import { PRIVILEGE, PRIVILEGES_MAP } from "./privileges/PRIVILEGES_MAP";
 
@@ -45,6 +53,10 @@ export class PrivilegesManager extends Model({}) {
       PRIVILEGE_ON_TABLE: [Agreggator__Tables, ctx!.config.folderNames.privilegesOnTablePath],
       PRIVILEGE_ON_COLUMN: [Aggregator__Columns, ctx!.config.folderNames.privilegesOnColumnPath],
       PRIVILEGE_ON_SCHEMA: [Aggregator__Schema, ctx!.config.folderNames.privilegesOnSchemaPath],
+      PRIVILEGE_ON_DATABASE: [Aggregator__Database, ctx!.config.folderNames.privilegesOnDatabasePath],
+      PRIVILEGE_ON_VIEW: [Aggregator__View, ctx!.config.folderNames.privilegesOnViewPath],
+      PRIVILEGE_ON_FUNCTION: [Aggregator__Function, ctx!.config.folderNames.privilegesOnFunctionPath],
+      PRIVILEGE_ON_SEQUENCE: [Aggregator__Sequence, ctx!.config.folderNames.privilegesOnSequencePath],
     } as const;
 
     const [aggregator, folderPath] = Aggregators[typeID];
@@ -53,10 +65,15 @@ export class PrivilegesManager extends Model({}) {
     // @ts-expect-error Validated by Aggregators
     const files = aggregator.aggregatesToFiles(aggregated);
 
-    files.forEach((file) => {
-      fs.mkdirSync(folderPath, { recursive: true });
-      fs.writeFileSync(folderPath + "/" + file.fileName, file.content);
-    });
+    if (files.length > 0) {
+      files.forEach((file) => {
+        fs.mkdirSync(folderPath, { recursive: true });
+        fs.writeFileSync(folderPath + "/" + file.fileName, file.content);
+      });
+    } else {
+      // Delete all files in the folder
+      fs.rmdirSync(folderPath, { recursive: true });
+    }
   }
 
   @modelFlow

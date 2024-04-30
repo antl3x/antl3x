@@ -25,7 +25,7 @@ export type Privilege_On_Table = z.TypeOf<typeof Privilege_On_Table>;
 export const Privilege_On_Table = z.object({
   "<type>": z.literal("Privilege_On_Table").default("Privilege_On_Table"),
   table_name: z.string(),
-  table_catalog: z.string(),
+  database: z.string(),
   table_schema: z.string(),
   grantee: z.string(),
   privilege_type: PGSQL_Privileges_On_Table_Dict,
