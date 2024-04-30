@@ -13,7 +13,7 @@ satisfies<AggregatorModule<Privilege_On_Column, Aggregates>, typeof import("@/ag
 export interface Aggregate {
   privileges: {
     [grantee: string]: {
-      [columnName: string]: Privilege_On_Column["privilege_type"][];
+      [privilege: Privilege_On_Column["privilege_type"]]: string[];
     };
   };
   meta: {
@@ -59,14 +59,14 @@ export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_Col
     const { meta, privileges: privs } = aggregates[key];
 
     for (const grantee in privs) {
-      for (const columnName in privs[grantee]) {
-        for (const privilege of privs[grantee][columnName]) {
+      for (const privilege_type in privs[grantee]) {
+        for (const column_name of privs[grantee][privilege_type]) {
           privileges.push({
             "<type>": "Privilege_On_Column",
             ...meta,
             grantee,
-            column_name: columnName,
-            privilege_type: privilege,
+            column_name,
+            privilege_type,
           });
         }
       }
@@ -120,17 +120,17 @@ export const privilegesToAggregates = (privileges: Privilege_On_Column[]): Aggre
         };
       }
 
-      const { grantee, privilege_type, ...meta } = privilege;
+      const { grantee, privilege_type, column_name } = privilege;
 
       if (!acc[key].privileges[grantee]) {
         acc[key].privileges[grantee] = {};
       }
 
-      if (!acc[key].privileges[grantee][meta.column_name]) {
-        acc[key].privileges[grantee][meta.column_name] = [];
+      if (!acc[key].privileges[grantee][privilege_type]) {
+        acc[key].privileges[grantee][privilege_type] = [];
       }
 
-      acc[key].privileges[grantee][meta.column_name].push(privilege_type);
+      acc[key].privileges[grantee][privilege_type].push(column_name);
 
       return acc;
     },
