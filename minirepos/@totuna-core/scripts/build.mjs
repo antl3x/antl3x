@@ -1,5 +1,7 @@
 import { build } from "esbuild";
 import { replaceTscAliasPaths } from "tsc-alias";
+import { replaceExtensionInImports } from "./fixDeclarations.mjs";
+import path from "path";
 
 /** @type (any) => esbuild.Plugin */
 const tscAliasPlugin = (format) => {
@@ -7,7 +9,7 @@ const tscAliasPlugin = (format) => {
     name: "tsc-alias",
     setup(build) {
       build.onEnd(async () => {
-        await replaceTscAliasPaths({ outDir: "./dist/" + format, resolveFullPaths: true });
+        await replaceTscAliasPaths({ outDir: "./dist/" + format });
       });
     },
   };
@@ -31,5 +33,13 @@ const tscAliasPlugin = (format) => {
     target: "es2022",
     format: "cjs",
     plugins: [tscAliasPlugin("cjs")],
+  });
+
+  replaceExtensionInImports(path.resolve("./dist/types"));
+
+  await replaceTscAliasPaths({
+    outDir: "./dist/types",
+    resolveFullPaths: true,
+    verbose: true,
   });
 })();

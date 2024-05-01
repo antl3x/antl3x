@@ -1,84 +1,74 @@
-import { reaction, when } from "mobx";
-import { Model, _async, _await, model, modelFlow, prop } from "mobx-keystone";
+import type { defineConfig } from "@config/index.js";
+import { satisfies } from "@utils/index.js";
+import { observable, when } from "mobx";
 import pg from "pg";
+import { RootStore, RootStore_Ready, defRootStore } from "./_impl_/defRootStore.js";
 
-import type { Config, defineConfig } from "@config";
-
-import { rootCtx } from "./_impl_/rootCtx";
-import { SystemVariables } from "./_impl_/SystemVariables";
-
+satisfies<defRootStore, typeof import("./index.js")>();
 /* -------------------------------------------------------------------------- */
-/*                                  RootStore                                 */
+/* RootStore */
 /* -------------------------------------------------------------------------- */
-
-let rootStore: RootStore;
+let rootStore: RootStore = observable({
+  _metaStatus_: "notReady" as const,
+});
 
 /* ------------------------------ initRootStore ----------------------------- */
 
-export const initRootStore = (config: ReturnType<typeof defineConfig>) =>
-  new Promise<void>((resolve) => {
-    rootStore = new RootStore({
-      config,
-    });
-
-    reaction(
-      () => rootStore?.isDBReady,
-      (isDBReady) => {
-        if (isDBReady) {
-          resolve();
-        }
-      },
-    );
-  });
+export const initRootStore = async (userConfig: ReturnType<typeof defineConfig>): Promise<RootStore_Ready> => {
+  const _rootStore = {
+    _metaStatus_: "ready" as const,
+    userConfig,
+    pgClient: await _pgClient(userConfig),
+    systemVariables: _systemVariables(userConfig),
+  };
+  rootStore = _rootStore;
+  return rootStore;
+};
 
 /* ------------------------------ getRootStore ------------------------------ */
 
-export const getRootStore = () =>
-  new Promise<RootStore>((resolve) => {
-    when(
-      () => rootStore?.isDBReady,
+export const getRootStore = () => {
+  return new Promise<RootStore_Ready>((resolve, reject) => {
+    const react = when(
+      () => rootStore._metaStatus_ === "ready",
       () => {
-        if (rootStore.isDBReady) {
-          resolve(rootStore);
-        }
+        resolve(rootStore as RootStore_Ready);
       },
     );
+
+    setTimeout(() => {
+      reject(new Error("[timeout] RootStore was not initialized or is not ready."));
+      react();
+    }, 1000);
   });
+};
 
-/* -------------------------------- RootStore ------------------------------- */
+export const _pgClient = async (userConfig: ReturnType<typeof defineConfig>) => {
+  const pgClient = new pg.Client(userConfig.pgConfig);
+  await pgClient.connect();
+  return pgClient;
+};
 
-@model("@totuna/RootStore")
-class RootStore extends Model({
-  config: prop<Config>(),
-  // PrivilegesManager: prop<PrivilegesManager>(() => new PrivilegesManager({})),
-  SystemVariables: prop<SystemVariables>(() => new SystemVariables({})),
-  isDBReady: prop<boolean>(false),
-}) {
-  pgClient: pg.Client = new pg.Client(this.config.pgConfig);
-  pgPool: pg.Pool = new pg.Pool(this.config.pgConfig);
+/* ---------------------------- _systemVariables ---------------------------- */
 
-  async onInit() {
-    console.log("RootStore initialized");
-    await this.connectToDB();
-  }
-  @modelFlow
-  connectToDB = _async(function* (this: RootStore) {
-    try {
-      yield* _await(this.pgClient.connect());
-      yield* _await(this.pgPool.connect());
+export const _systemVariables = (userConfig: ReturnType<typeof defineConfig>): RootStore_Ready["systemVariables"] =>
+  observable({
+    INTERNAL_PATH: "._totuna_",
+    PUBLIC_PATH: "@totuna",
 
-      rootCtx.set(this, {
-        pgClient: this.pgClient,
-        pgPool: this.pgPool,
-        config: this.config,
-        SystemVariables: this.SystemVariables,
-      });
+    get PUBLIC_DATABASE_PATH() {
+      return `${this.PUBLIC_PATH}/${userConfig.pgConfig.database}`;
+    },
 
-      this.isDBReady = true;
+    get INTERNAL_DATABASE_PATH() {
+      return `${this.INTERNAL_PATH}/${userConfig.pgConfig.database}`;
+    },
 
-      console.log("Connected to database");
-    } catch (e) {
-      console.error("Error connecting to database", e);
-    }
+    get INTERNAL_STATE_PRIVILEGES_PATH() {
+      return `${this.INTERNAL_DATABASE_PATH}/privileges`;
+    },
+
+    get PUBLIC_STATE_PRIVILEGES_PATH() {
+      return `${this.PUBLIC_DATABASE_PATH}/privileges`;
+    },
   });
-}

@@ -1,2 +1,2 @@
-export { defineConfig } from "./@config";
-export { initRootStore, getRootStore } from "./@rootStore";
+export { defineConfig } from "./@config/index.js";
+export { initRootStore, getRootStore } from "./@rootStore/index.js";

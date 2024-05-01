@@ -1,16 +1,16 @@
 import { z } from "zod";
-import { satisfies } from "@utils";
+import { satisfies } from "@utils/index.js";
 
-import { defPrivilegeModule } from "./_impl_/defPrivilegeModule";
-import { getRootStore } from "@rootStore";
+import { defPrivilegeModule } from "./_impl_/defPrivilegeModule.js";
+import { getRootStore } from "@rootStore/index.js";
 
 type module = defPrivilegeModule<typeof StateSchema>;
-satisfies<module, typeof import("./@onFunction")>();
+satisfies<module, typeof import("./@onFunction.js")>();
 
 export const _metaId_ = "onFunction";
 
-export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).SystemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/functions`;
-export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).SystemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/functions`;
+export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).systemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/functions`;
+export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).systemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/functions`;
 export const INTERNAL_STATE_FILE_PATH = async () => `${await INTERNAL_STATE_FOLDER_PATH()}/state.json`;
 
 /* -------------------------------------------------------------------------- */

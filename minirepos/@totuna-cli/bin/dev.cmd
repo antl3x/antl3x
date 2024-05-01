@@ -1,3 +1,3 @@
 @echo off
 
-node --loader ts-node/esm --no-warnings=ExperimentalWarning "%~dp0\dev" %*
+node_modules/.bin/tsx --no-warnings=ExperimentalWarning "%~dp0\dev" %*

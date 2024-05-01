@@ -1,10 +1,10 @@
-import { getRootStore } from "@rootStore";
-import { map as aggregatorsMap } from "@aggregators/@map";
+import { getRootStore } from "@rootStore/index.js";
+import { map as aggregatorsMap } from "@aggregators/@map.js";
 
 import fs from "fs";
 import path from "path";
-import { defSyncEngine } from "./_impl_/defSyncEngine";
-import { diffArr } from "@utils";
+import type { defSyncEngine } from "./_impl_/defSyncEngine.js";
+import { diffArr } from "@utils/index.js";
 import { TypeOf } from "zod";
 
 /* ------------------------------ pullPrivilege ----------------------------- */

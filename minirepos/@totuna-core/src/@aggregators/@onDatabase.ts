@@ -1,11 +1,11 @@
-import { StateSchema } from "@privileges/@onDatabase";
-import { AggregateFile, defAggregatorModule } from "./_impl_/types";
+import { StateSchema } from "@privileges/@onDatabase.js";
+import { AggregateFile, defAggregatorModule } from "./_impl_/types.js";
 
 import parse from "parse-es-import";
 import RJSON from "relaxed-json";
-import { satisfies } from "@utils";
+import { satisfies } from "@utils/index.js";
 
-satisfies<defAggregatorModule<StateSchema, Aggregates>, typeof import("@aggregators/@onDatabase")>();
+satisfies<defAggregatorModule<StateSchema, Aggregates>, typeof import("@aggregators/@onDatabase.js")>();
 
 /* -------------------------------------------------------------------------- */
 /*                                 Interfaces                                 */

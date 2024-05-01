@@ -1,10 +1,10 @@
-import { StateSchema as onTableSS } from "@privileges/@onTable";
-import { StateSchema as onFunctionSS } from "@privileges/@onFunction";
-import { StateSchema as onColumnSS } from "@privileges/@onColumn";
-import { StateSchema as onDatabaseSS } from "@privileges/@onDatabase";
-import { StateSchema as onViewSS } from "@privileges/@onView";
-import { StateSchema as onSchemaSS } from "@privileges/@onSchema";
-import { StateSchema as onSequenceSS } from "@privileges/@onSequence";
+import { StateSchema as onTableSS } from "@privileges/@onTable.js";
+import { StateSchema as onFunctionSS } from "@privileges/@onFunction.js";
+import { StateSchema as onColumnSS } from "@privileges/@onColumn.js";
+import { StateSchema as onDatabaseSS } from "@privileges/@onDatabase.js";
+import { StateSchema as onViewSS } from "@privileges/@onView.js";
+import { StateSchema as onSchemaSS } from "@privileges/@onSchema.js";
+import { StateSchema as onSequenceSS } from "@privileges/@onSequence.js";
 import { TypeOf } from "zod";
 
 /* -------------------------------------------------------------------------- */

@@ -1,10 +1,10 @@
-import * as ofColumn from "@privileges/@onColumn";
-import * as ofTable from "@privileges/@onTable";
-import * as onFunction from "@privileges/@onFunction";
-import * as onDatabase from "@privileges/@onDatabase";
-import * as onView from "@privileges/@onView";
-import * as onSchema from "@privileges/@onSchema";
-import * as onSequence from "@privileges/@onSequence";
+import * as ofColumn from "@privileges/@onColumn.js";
+import * as ofTable from "@privileges/@onTable.js";
+import * as onFunction from "@privileges/@onFunction.js";
+import * as onDatabase from "@privileges/@onDatabase.js";
+import * as onView from "@privileges/@onView.js";
+import * as onSchema from "@privileges/@onSchema.js";
+import * as onSequence from "@privileges/@onSequence.js";
 
 import { TypeOf } from "zod";
 
@@ -13,7 +13,7 @@ import { TypeOf } from "zod";
 /* -------------------------------------------------------------------------- */
 
 export interface defSyncEngine {
-  pullPrivilege: (privilegeModule: PrivilegeModule) => void;
+  pullPrivilege: (privilegeModule: PrivilegeModule) => Promise<void>;
   checkDiff: (privilegeModule: PrivilegeModule) => checkDiffResult;
 }
 

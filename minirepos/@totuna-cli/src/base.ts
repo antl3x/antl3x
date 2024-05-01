@@ -1,12 +1,14 @@
 import {Command, Flags, Interfaces} from '@oclif/core'
-import {initRootStore} from '@totuna/core/@rootStore'
 import type {defineConfig} from '@totuna/core/@config'
+import {getRootStore, initRootStore} from '@totuna/core/@rootStore'
 import path from 'path'
 
 export type Flags<T extends typeof Command> = Interfaces.InferredFlags<(typeof BaseCommand)['baseFlags'] & T['flags']>
 export type Args<T extends typeof Command> = Interfaces.InferredArgs<T['args']>
 
 export abstract class BaseCommand<T extends typeof Command> extends Command {
+  totunaConfig!: ReturnType<typeof defineConfig>
+
   // define flags that can be inherited by any command that extends BaseCommand
   static baseFlags = {
     configFilePath: Flags.string({
@@ -30,6 +32,7 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
   }
 
   protected async finally(_: Error | undefined): Promise<unknown> {
+    ;(await getRootStore()).pgClient.end()
     return super.finally(_)
   }
 
@@ -45,14 +48,14 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
 
     this.flags = flags as Flags<T>
     this.args = args as Args<T>
-    await this.loadTotunaConfig()
+    await this._initRootStore()
   }
 
-  protected async loadTotunaConfig(): Promise<void> {
+  protected async _initRootStore(): Promise<void> {
     try {
       const configFilePath = path.join(process.cwd(), this.flags.configFilePath)
       const config = (await import(configFilePath)).default as ReturnType<typeof defineConfig>
-      initRootStore(config)
+      await initRootStore(config)
     } catch (error) {
       this.error(`Error loading totuna config file: ${error}`)
     }

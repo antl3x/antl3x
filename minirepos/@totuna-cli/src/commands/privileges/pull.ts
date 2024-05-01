@@ -17,10 +17,10 @@ export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
   }
 
   public async run(): Promise<void> {
+    this.log(`Running pull`)
     const {args, flags} = await this.parse(PrivilegesSync)
     const rootStore = await getRootStore()
-
+    const syncEngineInstance = await syncEngine.pullPrivilege(onTable)
     this.log(`Pulling`)
-    syncEngine.pullPrivilege(onTable)
   }
 }
