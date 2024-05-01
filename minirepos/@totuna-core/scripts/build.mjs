@@ -1,36 +1,35 @@
 import { build } from "esbuild";
-import { aliasPath } from "esbuild-plugin-alias-path";
-import path from "path";
+import { replaceTscAliasPaths } from "tsc-alias";
+
+/** @type (any) => esbuild.Plugin */
+const tscAliasPlugin = (format) => {
+  return {
+    name: "tsc-alias",
+    setup(build) {
+      build.onEnd(async () => {
+        await replaceTscAliasPaths({ outDir: "./dist/" + format, resolveFullPaths: true });
+      });
+    },
+  };
+};
 
 (async () => {
   await build({
-    entryPoints: ["src/index.ts"],
-    bundle: true,
+    entryPoints: ["src/**/*.ts"],
+    bundle: false,
     platform: "node",
-    target: "es2015",
+    target: "es2022",
     format: "esm",
-    outfile: "dist/esm/index.js",
-    plugins: [
-      aliasPath({
-        alias: {
-          "@/*": path.resolve(process.cwd(), "./src"),
-        },
-      }),
-    ],
+    outdir: "dist/esm",
+    plugins: [tscAliasPlugin("esm")],
   });
   await build({
-    entryPoints: ["src/index.ts"],
-    bundle: true,
+    entryPoints: ["src/**/*.ts"],
+    outdir: "dist/cjs",
+    bundle: false,
     platform: "node",
-    target: "es2015",
+    target: "es2022",
     format: "cjs",
-    outfile: "dist/cjs/index.js",
-    plugins: [
-      aliasPath({
-        alias: {
-          "@/*": path.resolve(process.cwd(), "./src"),
-        },
-      }),
-    ],
+    plugins: [tscAliasPlugin("cjs")],
   });
 })();

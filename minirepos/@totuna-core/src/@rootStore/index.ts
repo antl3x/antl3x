@@ -1,6 +1,6 @@
 import { reaction, when } from "mobx";
 import { Model, _async, _await, model, modelFlow, prop } from "mobx-keystone";
-import { Client, Pool } from "pg";
+import pg from "pg";
 
 import type { Config, defineConfig } from "@config";
 
@@ -22,7 +22,7 @@ export const initRootStore = (config: ReturnType<typeof defineConfig>) =>
     });
 
     reaction(
-      () => rootStore.isDBReady,
+      () => rootStore?.isDBReady,
       (isDBReady) => {
         if (isDBReady) {
           resolve();
@@ -36,7 +36,7 @@ export const initRootStore = (config: ReturnType<typeof defineConfig>) =>
 export const getRootStore = () =>
   new Promise<RootStore>((resolve) => {
     when(
-      () => rootStore.isDBReady,
+      () => rootStore?.isDBReady,
       () => {
         if (rootStore.isDBReady) {
           resolve(rootStore);
@@ -54,8 +54,8 @@ class RootStore extends Model({
   SystemVariables: prop<SystemVariables>(() => new SystemVariables({})),
   isDBReady: prop<boolean>(false),
 }) {
-  pgClient: Client = new Client(this.config.pgConfig);
-  pgPool: Pool = new Pool(this.config.pgConfig);
+  pgClient: pg.Client = new pg.Client(this.config.pgConfig);
+  pgPool: pg.Pool = new pg.Pool(this.config.pgConfig);
 
   async onInit() {
     console.log("RootStore initialized");

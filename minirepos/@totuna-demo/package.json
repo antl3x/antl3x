@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@totuna/cli": "workspace:^",
     "@totuna/core": "workspace:^"
   }
 }

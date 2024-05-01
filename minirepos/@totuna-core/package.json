@@ -3,14 +3,44 @@
   "version": "0.0.1",
   "description": "totuna core allows you to control postgresql objects as IaaC",
   "homepage": "https://github.com/antl3x/antl3x/tree/master/minirepos/@totuna-core",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "type": "module",
   "files": [
     "dist",
     "LICENSE",
     "README.md"
   ],
+  "exports": {
+    "./dist": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./@config": {
+      "import": "./dist/esm/@config/index.js",
+      "require": "./dist/cjs/@config/index.js",
+      "types": "./dist/types/@config/index.d.ts"
+    },
+    "./@config/*": {
+      "import": "./dist/esm/@config/*.js",
+      "require": "./dist/cjs/@config/*.js",
+      "types": "./dist/types/@config/*.d.ts"
+    },
+    "./@privileges/*": {
+      "import": "./dist/esm/@privileges/*.js",
+      "require": "./dist/cjs/@privileges/*.js",
+      "types": "./dist/types/@privileges/*.d.ts"
+    },
+    "./@rootStore": {
+      "import": "./dist/esm/@rootStore/index.js",
+      "require": "./dist/cjs/@rootStore/index.js",
+      "types": "./dist/types/@rootStore/index.d.ts"
+    },
+    "./@rootStore/*": {
+      "import": "./dist/esm/@rootStore/*.js",
+      "require": "./dist/cjs/@rootStore/*.js",
+      "types": "./dist/types/@rootStore/*.d.ts"
+    }
+  },
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
@@ -63,5 +93,10 @@
     "pg": "^8.11.5",
     "relaxed-json": "^1.0.3",
     "tsc-alias": "^1.8.8"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "parse-es-import@0.6.0": "patches/parse-es-import@0.6.0.patch"
+    }
   }
 }

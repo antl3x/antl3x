@@ -11,7 +11,7 @@ import type { z } from "zod";
  */
 export interface defPrivilegeModule<StateSchema extends z.ZodSchema> {
   /** A string that represents the URL of the meta file. */
-  _metaUrl_: string;
+  _metaId_: string;
 
   /** A function that returns the path to the folder where the internal state file is stored. */
   INTERNAL_STATE_FOLDER_PATH: () => Promise<string>;

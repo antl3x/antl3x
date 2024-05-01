@@ -6,13 +6,13 @@ import * as onView from "./@onView";
 import * as onSchema from "./@onSchema";
 import * as onSequence from "./@onSequence";
 
-import { _metaUrl_ as onColumnPrivilege } from "@privileges/@onColumn";
-import { _metaUrl_ as onTablePrivilege } from "@privileges/@onTable";
-import { _metaUrl_ as onFunctionPrivilege } from "@privileges/@onFunction";
-import { _metaUrl_ as onDatabasePrivilege } from "@privileges/@onDatabase";
-import { _metaUrl_ as onViewPrivilege } from "@privileges/@onView";
-import { _metaUrl_ as onSchemaPrivilege } from "@privileges/@onSchema";
-import { _metaUrl_ as onSequencePrivilege } from "@privileges/@onSequence";
+import { _metaId_ as onColumnPrivilege } from "@privileges/@onColumn";
+import { _metaId_ as onTablePrivilege } from "@privileges/@onTable";
+import { _metaId_ as onFunctionPrivilege } from "@privileges/@onFunction";
+import { _metaId_ as onDatabasePrivilege } from "@privileges/@onDatabase";
+import { _metaId_ as onViewPrivilege } from "@privileges/@onView";
+import { _metaId_ as onSchemaPrivilege } from "@privileges/@onSchema";
+import { _metaId_ as onSequencePrivilege } from "@privileges/@onSequence";
 
 export const map = new Map<
   string,

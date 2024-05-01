@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@totuna/cli':
+    specifier: workspace:^
+    version: link:../@totuna-cli
   '@totuna/core':
     specifier: workspace:^
     version: link:../@totuna-core

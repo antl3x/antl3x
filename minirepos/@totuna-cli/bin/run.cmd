@@ -1,3 +1,3 @@
 @echo off
 
-node "%~dp0\run" %*
+node_modules/@totuna/cli/node_modules/tsx/dist/cli.mjs "%~dp0\run" %*

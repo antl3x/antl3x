@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node_modules/@totuna/cli/node_modules/tsx/dist/cli.mjs
 
 import {execute} from '@oclif/core'
 

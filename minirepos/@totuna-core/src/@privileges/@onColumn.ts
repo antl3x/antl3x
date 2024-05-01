@@ -8,7 +8,7 @@ import { defPrivilegeModule } from "./_impl_/defPrivilegeModule";
 type module = defPrivilegeModule<typeof StateSchema>;
 satisfies<module, typeof import("./@onColumn")>();
 
-export const _metaUrl_ = import.meta.url;
+export const _metaId_ = "onColumn";
 
 /* -------------------------------------------------------------------------- */
 /*                             Privilege_On_Column                            */

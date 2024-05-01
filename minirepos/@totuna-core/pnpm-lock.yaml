@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  parse-es-import@0.6.0:
+    hash: patthhkxsf6yorj7gerjfd6koe
+    path: patches/parse-es-import@0.6.0.patch
+
 dependencies:
   '@antl3x/func':
     specifier: workspace:^
@@ -25,7 +30,7 @@ dependencies:
     version: 1.10.1(mobx@6.12.3)
   parse-es-import:
     specifier: ^0.6.0
-    version: 0.6.0
+    version: 0.6.0(patch_hash=patthhkxsf6yorj7gerjfd6koe)
   pg:
     specifier: ^8.11.5
     version: 8.11.5
@@ -3131,12 +3136,13 @@ packages:
       callsites: 3.1.0
     dev: true
 
-  /parse-es-import@0.6.0:
+  /parse-es-import@0.6.0(patch_hash=patthhkxsf6yorj7gerjfd6koe):
     resolution: {integrity: sha512-9JS+ahgEGKEYQZX4sIkGoqKlCgjMR50554STGFwIrh7tqmEJqejA2yDPxuW1jlw5Ug79+2BTfWNPkuCUBzeISQ==}
     dependencies:
       acorn: 8.11.3
       acorn-jsx: 5.3.2(acorn@8.11.3)
     dev: false
+    patched: true
 
   /parse-json@5.2.0:
     resolution: {integrity: sha512-ayCKvm/phCGxOkYRSCM82iDwct8/EonSEgCSxWxD7ve6jHggsFl4fZVQBPRNgQoKiuV/odhFrGzQXZwbifC8Rg==}

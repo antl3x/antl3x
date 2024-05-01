@@ -7,7 +7,7 @@ import { getRootStore } from "@rootStore";
 type module = defPrivilegeModule<typeof StateSchema>;
 satisfies<module, typeof import("./@onFunction")>();
 
-export const _metaUrl_ = import.meta.url;
+export const _metaId_ = "onFunction";
 
 export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).SystemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/functions`;
 export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).SystemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/functions`;

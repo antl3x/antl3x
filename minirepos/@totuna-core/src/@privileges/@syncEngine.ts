@@ -34,9 +34,9 @@ export const pullPrivilege: defSyncEngine["pullPrivilege"] = async (privMod) => 
 
   // Aggregate all state files into one public state file using an Aggregator
 
-  const agg = aggregatorsMap.get(privMod._metaUrl_);
+  const agg = aggregatorsMap.get(privMod._metaId_);
 
-  if (!agg) throw new Error(`Aggregator not found for ${privMod._metaUrl_}`);
+  if (!agg) throw new Error(`Aggregator not found for ${privMod._metaId_}`);
 
   // @ts-expect-error - This is a valid call
   const publicStateFiles = agg.aggregatesToFiles(agg.privilegesToAggregates(privStates));
@@ -55,8 +55,8 @@ export const checkDiff: defSyncEngine["checkDiff"] = async (privMod) => {
   const PUBLIC_STATE_FILE_PATH = await privMod.PUBLIC_STATE_FILE_PATH();
 
   // Grab Aggregator
-  const agg = aggregatorsMap.get(privMod._metaUrl_);
-  if (!agg) throw new Error(`Aggregator not found for ${privMod._metaUrl_}`);
+  const agg = aggregatorsMap.get(privMod._metaId_);
+  if (!agg) throw new Error(`Aggregator not found for ${privMod._metaId_}`);
 
   // Check if folder exists, if not return early
 
@@ -76,8 +76,6 @@ export const checkDiff: defSyncEngine["checkDiff"] = async (privMod) => {
       return content;
     }),
   );
-
-  console.log(publicStateArr);
 
   // Parse internal state file to Privileges Array
   const internalStateArr = JSON.parse(fs.readFileSync(INTERNAL_STATE_FILE_PATH, "utf-8")) as TypeOf<typeof privMod.StateSchema>[];
