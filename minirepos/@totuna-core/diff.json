@@ -1,0 +1,58 @@
+[
+  {
+    "<type>": "Privilege_On_Schema",
+    "database": "totuna",
+    "schema": "public_views",
+    "grantee": "postgres",
+    "privilege": "USAGE"
+  },
+  {
+    "<type>": "Privilege_On_Schema",
+    "database": "totuna",
+    "schema": "public_views",
+    "grantee": "postgres",
+    "privilege": "CREATE"
+  },
+  {
+    "<type>": "Privilege_On_Schema",
+    "database": "totuna",
+    "schema": "public_views",
+    "grantee": "customer:xyz",
+    "privilege": "USAGE"
+  },
+  {
+    "<type>": "Privilege_On_Schema",
+    "database": "totuna",
+    "schema": "public_views",
+    "grantee": "group:customer",
+    "privilege": "USAGE"
+  },
+  {
+    "<type>": "Privilege_On_Schema",
+    "database": "totuna",
+    "schema": "private_tables",
+    "grantee": "postgres",
+    "privilege": "USAGE"
+  },
+  {
+    "<type>": "Privilege_On_Schema",
+    "database": "totuna",
+    "schema": "private_tables",
+    "grantee": "postgres",
+    "privilege": "CREATE"
+  },
+  {
+    "<type>": "Privilege_On_Schema",
+    "database": "totuna",
+    "schema": "private_tables",
+    "grantee": "customer:xyz",
+    "privilege": "USAGE"
+  },
+  {
+    "<type>": "Privilege_On_Schema",
+    "database": "totuna",
+    "schema": "private_tables",
+    "grantee": "group:customer",
+    "privilege": "USAGE"
+  }
+]

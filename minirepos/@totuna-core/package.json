@@ -53,10 +53,14 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "@antl3x/func": "workspace:^",
     "@totuna/core": "workspace:^",
+    "@types/relaxed-json": "^1.0.4",
+    "fast-json-patch": "^3.1.1",
     "mobx": "^6.12.3",
     "mobx-keystone": "^1.10.1",
     "parse-es-import": "^0.6.0",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "relaxed-json": "^1.0.3"
   }
 }

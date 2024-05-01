@@ -3,7 +3,6 @@ import { Privilege_On_Schema } from "./Privilege_On_Schema";
 import { Pool, QueryResult } from "pg";
 import { rootCtx } from "@/RootCtx";
 import { Privilege_On_Table } from "./Privilege_On_Table";
-import { Privilege_On_Column } from "./Privilege_On_Column";
 import { Privilege_On_Database } from "./Privilege_On_Database";
 import { Privilege_On_View } from "./Privilege_On_View";
 import { Privilege_On_Function } from "./Privilege_On_Function";
@@ -96,30 +95,6 @@ export const PRIVILEGES_MAP: PRIVILEGES_MAP = {
    AND t.relkind = 'v'
    AND r.rolname NOT LIKE 'pg_%'
    AND has_table_privilege(r.oid, t.oid, p.perm) = true;`,
-      ),
-  },
-  Privilege_Column: {
-    zodSchema: Privilege_On_Column,
-    query: (dbQuery) =>
-      dbQuery(
-        `SELECT 
-    t.relname::text AS table_name,                   
-    current_database() AS database,             
-    t.relnamespace::regnamespace::name AS table_schema,  
-    c.attname AS column_name,                        
-    r.rolname AS grantee,                            
-    p.perm AS privilege_type                         
-FROM pg_catalog.pg_class AS t
-    JOIN pg_catalog.pg_attribute AS c ON t.oid = c.attrelid
-    CROSS JOIN pg_catalog.pg_roles AS r
-    CROSS JOIN (VALUES ('SELECT'), ('INSERT'), ('UPDATE'), ('REFERENCES')) AS p(perm)
-WHERE t.relnamespace::regnamespace::name <> 'information_schema'
-    AND t.relnamespace::regnamespace::name NOT LIKE 'pg_%'
-    AND c.attnum > 0 AND NOT c.attisdropped
-    AND t.relkind IN ('r', 'v')
-    AND r.rolname NOT LIKE 'pg_%'
-    AND has_column_privilege(r.oid, t.oid, c.attnum, p.perm) = true;
-`,
       ),
   },
   Privilege_On_Schema: {
