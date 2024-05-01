@@ -1,0 +1,79 @@
+[
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "postgres",
+    "privilege": "SELECT"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "customer:xyz",
+    "privilege": "SELECT"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "group:customer",
+    "privilege": "SELECT"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "postgres",
+    "privilege": "INSERT"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "postgres",
+    "privilege": "UPDATE"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "customer:xyz",
+    "privilege": "UPDATE"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "group:customer",
+    "privilege": "UPDATE"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "postgres",
+    "privilege": "DELETE"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "postgres",
+    "privilege": "TRUNCATE"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "postgres",
+    "privilege": "REFERENCES"
+  },
+  {
+    "database": "totuna",
+    "schema": "public_views",
+    "view": "customers",
+    "grantee": "postgres",
+    "privilege": "TRIGGER"
+  }
+]

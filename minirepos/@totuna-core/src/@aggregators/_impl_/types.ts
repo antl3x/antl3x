@@ -1,5 +1,10 @@
 import { StateSchema as onTableSS } from "@privileges/@onTable";
+import { StateSchema as onFunctionSS } from "@privileges/@onFunction";
 import { StateSchema as onColumnSS } from "@privileges/@onColumn";
+import { StateSchema as onDatabaseSS } from "@privileges/@onDatabase";
+import { StateSchema as onViewSS } from "@privileges/@onView";
+import { StateSchema as onSchemaSS } from "@privileges/@onSchema";
+import { StateSchema as onSequenceSS } from "@privileges/@onSequence";
 import { TypeOf } from "zod";
 
 /* -------------------------------------------------------------------------- */
@@ -11,7 +16,15 @@ export interface AggregateFile {
   content: string;
 }
 
-type PrivilegeSchemas = TypeOf<typeof onTableSS | typeof onColumnSS>;
+type PrivilegeSchemas = TypeOf<
+  | typeof onTableSS
+  | typeof onColumnSS
+  | typeof onFunctionSS
+  | typeof onDatabaseSS
+  | typeof onViewSS
+  | typeof onSchemaSS
+  | typeof onSequenceSS
+>;
 
 export interface defAggregatorModule<PrivilegeSchema extends PrivilegeSchemas, Aggregates> {
   /** Converts a privileges array to an aggregates object */

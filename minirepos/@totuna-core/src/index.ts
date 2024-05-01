@@ -1,1 +1,1 @@
-export { defineConfig } from "./TotunaConfig";
+export { defineConfig } from "./@config";

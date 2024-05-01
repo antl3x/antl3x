@@ -61,6 +61,7 @@
     "mobx-keystone": "^1.10.1",
     "parse-es-import": "^0.6.0",
     "pg": "^8.11.5",
-    "relaxed-json": "^1.0.3"
+    "relaxed-json": "^1.0.3",
+    "tsc-alias": "^1.8.8"
   }
 }

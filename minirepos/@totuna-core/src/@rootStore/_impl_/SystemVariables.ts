@@ -1,5 +1,5 @@
 import { Model, model, prop } from "mobx-keystone";
-import { rootCtx } from "./RootCtx";
+import { rootCtx } from "./rootCtx";
 
 @model("@totuna/SystemVariables")
 export class SystemVariables extends Model({

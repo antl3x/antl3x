@@ -1,11 +1,11 @@
-import { Privilege_On_Sequence } from "@/privileges/Privilege_On_Sequence";
-import { AggregateFile, AggregatorModule } from "./@types";
-import { satisfies } from "@/@utils/satisfies";
+import { StateSchema } from "@privileges/@onSequence";
+import { AggregateFile, defAggregatorModule } from "./_impl_/types";
+import { satisfies } from "@utils";
 
 import parse from "parse-es-import";
 import RJSON from "relaxed-json";
 
-satisfies<AggregatorModule<Privilege_On_Sequence, Aggregates>, typeof import("./Agreggator__Sequence")>();
+satisfies<defAggregatorModule<StateSchema, Aggregates>, typeof import("./@onSequence")>();
 
 /* -------------------------------------------------------------------------- */
 /*                                 Interfaces                                 */
@@ -13,7 +13,7 @@ satisfies<AggregatorModule<Privilege_On_Sequence, Aggregates>, typeof import("./
 
 export interface Aggregate {
   privileges: {
-    [grantee: string]: Privilege_On_Sequence["privilege"][];
+    [grantee: string]: StateSchema["privilege"][];
   };
   meta: {
     sequence: string;
@@ -51,22 +51,23 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
 /* ------------------------- aggregatesToPrivileges ------------------------- */
 
 /** Converts an aggregate object back to a state array */
-export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_Sequence[] => {
-  const privileges = [] as Privilege_On_Sequence[];
+export const aggregatesToPrivileges = (aggregates: Aggregates): StateSchema[] => {
+  const privileges = [] as StateSchema[];
 
   for (const key in aggregates) {
     const { meta, privileges: privs } = aggregates[key];
 
     for (const grantee in privs) {
       for (const privilege of privs[grantee]) {
-        privileges.push({
-          "<type>": "Privilege_On_Sequence",
-          grantee,
-          privilege,
-          database: meta.database,
-          sequence: meta.sequence,
-          schema: meta.schema,
-        });
+        privileges.push(
+          StateSchema.parse({
+            grantee,
+            privilege,
+            database: meta.database,
+            sequence: meta.sequence,
+            schema: meta.schema,
+          }),
+        );
       }
     }
   }
@@ -96,13 +97,13 @@ export const filesToAggregates = (files: string[]): Aggregates => {
 
 /* ---------------------------- filesToPrivileges --------------------------- */
 
-export const filesToPrivileges = (files: string[]): Privilege_On_Sequence[] => {
+export const filesToPrivileges = (files: string[]): StateSchema[] => {
   return aggregatesToPrivileges(filesToAggregates(files));
 };
 
 /* ------------------------- privilegesToAggregates ------------------------- */
 
-export const privilegesToAggregates = (privileges: Privilege_On_Sequence[]): Aggregates => {
+export const privilegesToAggregates = (privileges: StateSchema[]): Aggregates => {
   return privileges.reduce(
     (acc, privilege) => {
       const key = `${privilege.schema}.${privilege.sequence}`;
@@ -132,6 +133,6 @@ export const privilegesToAggregates = (privileges: Privilege_On_Sequence[]): Agg
 
 /* ---------------------------- privilegesToFiles --------------------------- */
 
-export const privilegesToFiles = (privileges: Privilege_On_Sequence[]): AggregateFile[] => {
+export const privilegesToFiles = (privileges: StateSchema[]): AggregateFile[] => {
   return aggregatesToFiles(privilegesToAggregates(privileges));
 };

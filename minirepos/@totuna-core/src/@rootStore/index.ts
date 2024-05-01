@@ -1,10 +1,11 @@
 import { reaction, when } from "mobx";
 import { Model, _async, _await, model, modelFlow, prop } from "mobx-keystone";
 import { Client, Pool } from "pg";
-import type { Config, defineConfig } from "./@Config";
-import { PrivilegesManager } from "./PrivilegesManager";
-import { rootCtx } from "./RootCtx";
-import { SystemVariables } from "./SystemVariables";
+
+import type { Config, defineConfig } from "@config";
+
+import { rootCtx } from "./_impl_/rootCtx";
+import { SystemVariables } from "./_impl_/SystemVariables";
 
 /* -------------------------------------------------------------------------- */
 /*                                  RootStore                                 */

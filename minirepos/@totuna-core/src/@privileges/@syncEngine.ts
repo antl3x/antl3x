@@ -50,24 +50,42 @@ export const pullPrivilege: defSyncEngine["pullPrivilege"] = async (privMod) => 
 /* -------------------------------- checkDiff ------------------------------- */
 
 export const checkDiff: defSyncEngine["checkDiff"] = async (privMod) => {
+  // Define paths
   const INTERNAL_STATE_FILE_PATH = await privMod.INTERNAL_STATE_FILE_PATH();
   const PUBLIC_STATE_FILE_PATH = await privMod.PUBLIC_STATE_FILE_PATH();
 
+  // Grab Aggregator
   const agg = aggregatorsMap.get(privMod._metaUrl_);
   if (!agg) throw new Error(`Aggregator not found for ${privMod._metaUrl_}`);
 
-  const publicStateFileNames = fs.readdirSync(PUBLIC_STATE_FILE_PATH);
+  // Check if folder exists, if not return early
 
-  const publicStateFiles = publicStateFileNames.map((fileName) => {
-    const content = fs.readFileSync(path.resolve(PUBLIC_STATE_FILE_PATH, fileName), "utf-8");
-    return content;
-  });
+  if (!fs.existsSync(INTERNAL_STATE_FILE_PATH)) {
+    return {
+      additions: [],
+      removals: [],
+      revokeRawQueries: [],
+      grantRawQueries: [],
+    };
+  }
 
+  // Parse public state files to Privileges Array
+  const publicStateArr = agg.filesToPrivileges(
+    fs.readdirSync(PUBLIC_STATE_FILE_PATH).map((fileName) => {
+      const content = fs.readFileSync(path.resolve(PUBLIC_STATE_FILE_PATH, fileName), "utf-8");
+      return content;
+    }),
+  );
+
+  console.log(publicStateArr);
+
+  // Parse internal state file to Privileges Array
   const internalStateArr = JSON.parse(fs.readFileSync(INTERNAL_STATE_FILE_PATH, "utf-8")) as TypeOf<typeof privMod.StateSchema>[];
-  const publicStateArr = agg.filesToPrivileges(publicStateFiles);
 
+  // Do a diff for additions and removals
   const { additions, removals } = diffArr(internalStateArr, publicStateArr);
 
+  // Generate revoke and grant raw queries
   // @ts-expect-error - This is a valid call
   const revokeRawQueries = removals.map((state) => privMod.revokeRawQuery(state));
   // @ts-expect-error - This is a valid call

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { satisfies } from "@utils";
 import { getRootStore } from "@rootStore";
 
-import { defPrivilegeModule } from "./_impl_/types";
+import { defPrivilegeModule } from "./_impl_/defPrivilegeModule";
 
 type module = defPrivilegeModule<typeof StateSchema>;
 satisfies<module, typeof import("./@onColumn")>();

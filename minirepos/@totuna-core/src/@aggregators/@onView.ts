@@ -1,11 +1,12 @@
-import { AggregateFile, AggregatorModule } from "./@types";
-import { Privilege_On_Schema } from "@/privileges/Privilege_On_Schema";
-import { satisfies } from "@/@utils/satisfies";
+import { StateSchema } from "@privileges/@onView";
+import { satisfies } from "@utils";
+
+import { AggregateFile, defAggregatorModule } from "./_impl_/types";
 
 import parse from "parse-es-import";
 import RJSON from "relaxed-json";
 
-satisfies<AggregatorModule<Privilege_On_Schema, Aggregates>, typeof import("@/aggregators/Aggregator__Schema")>();
+satisfies<defAggregatorModule<StateSchema, Aggregates>, typeof import("@aggregators/@onView")>();
 
 /* -------------------------------------------------------------------------- */
 /*                                 Interfaces                                 */
@@ -13,11 +14,12 @@ satisfies<AggregatorModule<Privilege_On_Schema, Aggregates>, typeof import("@/ag
 
 export interface Aggregate {
   privileges: {
-    [grantee: string]: Privilege_On_Schema["privilege"][];
+    [grantee: string]: StateSchema["privilege"][];
   };
   meta: {
-    schema: Privilege_On_Schema["schema"];
-    database: Privilege_On_Schema["database"];
+    schema: StateSchema["schema"];
+    view: StateSchema["view"];
+    database: StateSchema["database"];
   };
 }
 
@@ -36,7 +38,7 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
   for (const key in aggregates) {
     const { meta, privileges } = aggregates[key];
 
-    const fileName = `${meta.schema}.ts`;
+    const fileName = `${meta.schema}.${meta.view}.ts`;
 
     let content = `export const privileges = ${JSON.stringify(privileges, null, 2)};\n\n`;
     content += `export const meta = ${JSON.stringify(meta, null, 2)};`;
@@ -50,20 +52,22 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
 /* ------------------------- aggregatesToPrivileges ------------------------- */
 
 /** Converts an aggregate object back to a state array */
-export const aggregatesToPrivileges = (aggregates: Aggregates): Privilege_On_Schema[] => {
-  const privileges = [] as Privilege_On_Schema[];
+export const aggregatesToPrivileges = (aggregates: Aggregates): StateSchema[] => {
+  const privileges = [] as StateSchema[];
 
   for (const key in aggregates) {
     const { meta, privileges: privs } = aggregates[key];
 
     for (const grantee in privs) {
       for (const privilege of privs[grantee]) {
-        privileges.push({
-          "<type>": "Privilege_On_Schema",
-          ...meta,
-          grantee,
-          privilege,
-        });
+        privileges.push(
+          StateSchema.parse({
+            "<type>": "StateSchema",
+            ...meta,
+            grantee,
+            privilege: privilege,
+          }),
+        );
       }
     }
   }
@@ -83,7 +87,7 @@ export const filesToAggregates = (files: string[]): Aggregates => {
     const privileges = RJSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "privileges")!.value) as Aggregate["privileges"];
     const meta = RJSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "meta")!.value) as Aggregate["meta"];
 
-    const key = `${meta.schema}.${meta.table_name}`;
+    const key = `${meta.schema}.${meta.view}`;
 
     aggregates[key] = { privileges, meta };
   }
@@ -93,22 +97,23 @@ export const filesToAggregates = (files: string[]): Aggregates => {
 
 /* ---------------------------- filesToPrivileges --------------------------- */
 
-export const filesToPrivileges = (files: string[]): Privilege_On_Schema[] => {
+export const filesToPrivileges = (files: string[]): StateSchema[] => {
   return aggregatesToPrivileges(filesToAggregates(files));
 };
 
 /* ------------------------- privilegesToAggregates ------------------------- */
 
-export const privilegesToAggregates = (privileges: Privilege_On_Schema[]): Aggregates => {
+export const privilegesToAggregates = (privileges: StateSchema[]): Aggregates => {
   return privileges.reduce(
     (acc, privilege) => {
-      const key = `${privilege.schema}`;
+      const key = `${privilege.schema}.${privilege.view}`;
 
       if (!acc[key]) {
         acc[key] = {
           privileges: {},
           meta: {
             schema: privilege.schema,
+            view: privilege.view,
             database: privilege.database,
           },
         };
@@ -128,6 +133,6 @@ export const privilegesToAggregates = (privileges: Privilege_On_Schema[]): Aggre
 
 /* ---------------------------- privilegesToFiles --------------------------- */
 
-export const privilegesToFiles = (privileges: Privilege_On_Schema[]): AggregateFile[] => {
+export const privilegesToFiles = (privileges: StateSchema[]): AggregateFile[] => {
   return aggregatesToFiles(privilegesToAggregates(privileges));
 };

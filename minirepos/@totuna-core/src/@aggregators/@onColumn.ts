@@ -1,12 +1,12 @@
 import { satisfies } from "@utils";
-import { StateSchema as OnColumn } from "@privileges/@onColumn";
+import { StateSchema } from "@privileges/@onColumn";
 
 import parse from "parse-es-import";
 import RJSON from "relaxed-json";
 
 import { AggregateFile, defAggregatorModule } from "./_impl_/types";
 
-satisfies<defAggregatorModule<OnColumn, Aggregates>, typeof import("@aggregators/@onColumn")>();
+satisfies<defAggregatorModule<StateSchema, Aggregates>, typeof import("@aggregators/@onColumn")>();
 
 /* -------------------------------------------------------------------------- */
 /*                                 Interfaces                                 */
@@ -15,13 +15,13 @@ satisfies<defAggregatorModule<OnColumn, Aggregates>, typeof import("@aggregators
 export interface Aggregate {
   privileges: {
     [grantee: string]: {
-      [privilege: OnColumn["privilege_type"]]: string[];
+      [privilege: StateSchema["privilege_type"]]: string[];
     };
   };
   meta: {
-    table_schema: OnColumn["table_schema"];
-    table_name: OnColumn["table_name"];
-    database: OnColumn["database"];
+    table_schema: StateSchema["table_schema"];
+    table_name: StateSchema["table_name"];
+    database: StateSchema["database"];
   };
 }
 
@@ -54,8 +54,8 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
 /* ------------------------- aggregatesToPrivileges ------------------------- */
 
 /** Converts an aggregate object back to a state array */
-export const aggregatesToPrivileges = (aggregates: Aggregates): OnColumn[] => {
-  const privileges = [] as OnColumn[];
+export const aggregatesToPrivileges = (aggregates: Aggregates): StateSchema[] => {
+  const privileges = [] as StateSchema[];
 
   for (const key in aggregates) {
     const { meta, privileges: privs } = aggregates[key];
@@ -64,7 +64,7 @@ export const aggregatesToPrivileges = (aggregates: Aggregates): OnColumn[] => {
       for (const privilege_type in privs[grantee]) {
         for (const column_name of privs[grantee][privilege_type]) {
           privileges.push(
-            OnColumn.parse({
+            StateSchema.parse({
               ...meta,
               grantee,
               column_name,
@@ -101,13 +101,13 @@ export const filesToAggregates = (files: string[]): Aggregates => {
 
 /* ---------------------------- filesToPrivileges --------------------------- */
 
-export const filesToPrivileges = (files: string[]): OnColumn[] => {
+export const filesToPrivileges = (files: string[]): StateSchema[] => {
   return aggregatesToPrivileges(filesToAggregates(files));
 };
 
 /* ------------------------- privilegesToAggregates ------------------------- */
 
-export const privilegesToAggregates = <T extends OnColumn[]>(privileges: T): Aggregates => {
+export const privilegesToAggregates = <T extends StateSchema[]>(privileges: T): Aggregates => {
   return privileges.reduce(
     (acc, privilege) => {
       const key = `${privilege.table_schema}.${privilege.table_name}`;
@@ -143,6 +143,6 @@ export const privilegesToAggregates = <T extends OnColumn[]>(privileges: T): Agg
 
 /* ---------------------------- privilegesToFiles --------------------------- */
 
-export const privilegesToFiles = (privileges: OnColumn[]): AggregateFile[] => {
+export const privilegesToFiles = (privileges: StateSchema[]): AggregateFile[] => {
   return aggregatesToFiles(privilegesToAggregates(privileges));
 };

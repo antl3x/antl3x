@@ -1,20 +1,21 @@
+import { z } from "zod";
+
 import { satisfies } from "@utils";
 import { getRootStore } from "@rootStore";
 
-import { z } from "zod";
 import { defPrivilegeModule } from "./_impl_/defPrivilegeModule";
 
 type module = defPrivilegeModule<typeof StateSchema>;
-satisfies<module, typeof import("./@onTable")>();
+satisfies<module, typeof import("./@onView")>();
 
 export const _metaUrl_ = import.meta.url;
 
 /* -------------------------------------------------------------------------- */
-/*                             Privilege_On_Table                             */
+/*                            onView Privilege                            */
 /* -------------------------------------------------------------------------- */
 
-export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).SystemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/tables`;
-export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).SystemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/tables`;
+export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).SystemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/views`;
+export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).SystemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/views`;
 export const INTERNAL_STATE_FILE_PATH = async () => `${await INTERNAL_STATE_FOLDER_PATH()}/state.json`;
 
 /* -------------------------------- zodSchema ------------------------------- */
@@ -23,12 +24,11 @@ export type StateSchema = z.TypeOf<typeof StateSchema>;
 
 export const StateSchema = z
   .object({
-    "<type>": z.literal("Privilege_On_Table").default("Privilege_On_Table"),
-    table_name: z.string(),
     database: z.string(),
-    table_schema: z.string(),
+    schema: z.string(),
+    view: z.string(),
     grantee: z.string(),
-    privilege_type: z.union([
+    privilege: z.union([
       z.literal("SELECT"),
       z.literal("INSERT"),
       z.literal("UPDATE"),
@@ -38,31 +38,35 @@ export const StateSchema = z
       z.literal("TRIGGER"),
     ]),
   })
-  .brand("PrivilegeOnTable");
+  .brand("PrivilegeOnView");
 
 /* -------------------------------- pullQuery ------------------------------- */
 
 export const pullQuery: module["pullQuery"] = (dbQuery) =>
   dbQuery(
-    `SELECT t.relname::text AS table_name,
+    `SELECT t.relname::text AS view,
     current_database() AS database,
-    t.relnamespace::regnamespace::name AS table_schema,
+    t.relnamespace::regnamespace::name AS schema,
     r.rolname AS grantee,
-    p.perm AS privilege_type
+    p.perm AS privilege
 FROM pg_catalog.pg_class AS t
 CROSS JOIN pg_catalog.pg_roles AS r
 CROSS JOIN (VALUES (TEXT 'SELECT'), ('INSERT'), ('UPDATE'), ('DELETE'), ('TRUNCATE'), ('REFERENCES'), ('TRIGGER')) AS p(perm)
 WHERE t.relnamespace::regnamespace::name <> 'information_schema'
 AND t.relnamespace::regnamespace::name NOT LIKE 'pg_%'
-AND t.relkind = 'r'
+AND t.relkind = 'v'
 AND r.rolname NOT LIKE 'pg_%'
 AND has_table_privilege(r.oid, t.oid, p.perm) = true;`,
   );
 
+/* ------------------------------ grantRawQuery ----------------------------- */
+
 export const grantRawQuery: module["grantRawQuery"] = (state) => {
-  return `GRANT ${state.privilege_type} ON ${state.table_schema}.${state.table_name} TO ${state.grantee};`;
+  return `GRANT ${state.privilege} ON ${state.schema}.${state.view} TO ${state.grantee};`;
 };
 
+/* ----------------------------- revokeRawQuery ----------------------------- */
+
 export const revokeRawQuery: module["revokeRawQuery"] = (state) => {
-  return `REVOKE ${state.privilege_type} ON ${state.table_schema}.${state.table_name} FROM ${state.grantee};`;
+  return `REVOKE ${state.privilege} ON ${state.schema}.${state.view} FROM ${state.grantee};`;
 };
