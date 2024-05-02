@@ -26,7 +26,8 @@ export interface module
           database: StateSchema["database"];
         };
       }
-    >
+    >,
+    "onSchema"
   > {}
 
 satisfies<module>()(import("./@onSchemaAggregator.js"));
@@ -34,8 +35,10 @@ satisfies<module>()(import("./@onSchemaAggregator.js"));
 type _StateSchema = z.TypeOf<(typeof atOnSchemaPrivilege)["StateSchema"]>;
 
 /* -------------------------------------------------------------------------- */
-/*                             Transformation Functions                       */
+/*                               Implementation                               */
 /* -------------------------------------------------------------------------- */
+
+export const _metaId_ = "onSchema";
 
 /* ---------------------------- aggregatesToFiles --------------------------- */
 

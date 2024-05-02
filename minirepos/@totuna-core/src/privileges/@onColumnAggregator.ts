@@ -27,14 +27,17 @@ export interface module
           database: string;
         };
       }
-    >
+    >,
+    "onColumn"
   > {}
 
 satisfies<module>()(import("./@onColumnAggregator.js"));
 
 /* -------------------------------------------------------------------------- */
-/*                             Transformation Functions                       */
+/*                               Implementation                               */
 /* -------------------------------------------------------------------------- */
+
+export const _metaId_ = "onColumn";
 
 /* ---------------------------- aggregatesToFiles --------------------------- */
 
@@ -140,7 +143,7 @@ export const privilegesToAggregates: module["privilegesToAggregates"] = (privile
         acc[key].privileges[grantee][privilege_type] = [];
       }
 
-      acc[key].privileges[grantee][privilege_type].push(column_name);
+      acc[key].privileges[grantee][privilege_type].push(column_name as never);
 
       return acc;
     },

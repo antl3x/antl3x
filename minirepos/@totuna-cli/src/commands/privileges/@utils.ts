@@ -1,10 +1,10 @@
-import * as onTable from '@totuna/core/@privileges/@onTable'
-import * as onFunction from '@totuna/core/@privileges/@onFunction'
-import * as onView from '@totuna/core/@privileges/@onView'
-import * as onColumn from '@totuna/core/@privileges/@onColumn'
-import * as onSchema from '@totuna/core/@privileges/@onSchema'
-import * as onDatabase from '@totuna/core/@privileges/@onDatabase'
-import * as onSequence from '@totuna/core/@privileges/@onSequence'
+import * as onTable from '@totuna/core/privileges/@onTablePrivilege'
+import * as onFunction from '@totuna/core/privileges/@onFunctionPrivilege'
+import * as onView from '@totuna/core/privileges/@onViewPrivilege'
+import * as onColumn from '@totuna/core/privileges/@onColumnPrivilege'
+import * as onSchema from '@totuna/core/privileges/@onSchemaPrivilege'
+import * as onDatabase from '@totuna/core/privileges/@onDatabasePrivilege'
+import * as onSequence from '@totuna/core/privileges/@onSequencePrivilege'
 
 /* -------------------------------------------------------------------------- */
 /*                                    Misc                                    */

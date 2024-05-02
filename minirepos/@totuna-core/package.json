@@ -20,30 +20,20 @@
       "require": "./dist/cjs/*.js",
       "types": "./dist/types/*.d.ts"
     },
+    "./privileges/*": {
+      "import": "./dist/esm/privileges/*.js",
+      "require": "./dist/cjs/privileges/*.js",
+      "types": "./dist/types/privileges/*.d.ts"
+    },
     "./@config": {
-      "import": "./dist/esm/@config/index.js",
-      "require": "./dist/cjs/@config/index.js",
-      "types": "./dist/types/@config/index.d.ts"
-    },
-    "./@config/*": {
-      "import": "./dist/esm/@config/*.js",
-      "require": "./dist/cjs/@config/*.js",
-      "types": "./dist/types/@config/*.d.ts"
-    },
-    "./@privileges/*": {
-      "import": "./dist/esm/@privileges/*.js",
-      "require": "./dist/cjs/@privileges/*.js",
-      "types": "./dist/types/@privileges/*.d.ts"
+      "import": "./dist/esm/@config.js",
+      "require": "./dist/cjs/@config.js",
+      "types": "./dist/types/@config.d.ts"
     },
     "./@rootStore": {
-      "import": "./dist/esm/@rootStore/index.js",
-      "require": "./dist/cjs/@rootStore/index.js",
-      "types": "./dist/types/@rootStore/index.d.ts"
-    },
-    "./@rootStore/*": {
-      "import": "./dist/esm/@rootStore/*.js",
-      "require": "./dist/cjs/@rootStore/*.js",
-      "types": "./dist/types/@rootStore/*.d.ts"
+      "import": "./dist/esm/@rootStore.js",
+      "require": "./dist/cjs/@rootStore.js",
+      "types": "./dist/types/@rootStore.d.ts"
     }
   },
   "scripts": {

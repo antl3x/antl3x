@@ -3,7 +3,7 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import {printTable, Table} from 'console-table-printer'
 
-import * as syncEngine from '@totuna/core/@privileges/@syncEngine'
+import * as atPrivilegeApi from '@totuna/core/privileges/@api'
 
 import {BaseCommand} from '../../base.js'
 import {objectMapping, privileges} from './@utils.js'
@@ -41,12 +41,12 @@ export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
 
     if (this.args.object !== 'all') {
       const module = privileges[objectMapping[this.args.object]]
-      const {grantRawQueries, revokeRawQueries} = await syncEngine.checkDiff(module)
+      const {grantRawQueries, revokeRawQueries} = await atPrivilegeApi.checkDiff(module)
     } else {
       await Promise.all(
         Object.values(objectMapping).map(async (object) => {
           const module = privileges[object]
-          const {additions, removals} = await syncEngine.checkDiff(module)
+          const {additions, removals} = await atPrivilegeApi.checkDiff(module)
 
           additions.forEach((res: any) => {
             totalAdds++

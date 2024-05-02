@@ -1,10 +1,7 @@
-import inquirer from 'inquirer'
-import ora from 'ora'
+import * as syncEngine from '@totuna/core/privileges/@api'
 import {BaseCommand} from '../../base.js'
-import * as syncEngine from '@totuna/core/@privileges/@syncEngine'
 
 import {logger} from '@log.js'
-import {objectMapping, privileges} from './@utils.js'
 
 /* -------------------------------------------------------------------------- */
 /*                               PrivilegesSync                               */

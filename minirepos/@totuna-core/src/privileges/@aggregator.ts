@@ -1,11 +1,15 @@
 import type * as atPrivileges from "./@privileges.js";
 import type { z } from "zod";
+
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
+
 type PrivilegeStateSchema = z.TypeOf<(typeof atPrivileges)[keyof typeof atPrivileges]["StateSchema"]>;
 
-export interface module<PrivilegeSchema extends PrivilegeStateSchema, Aggregates> {
+export interface module<PrivilegeSchema extends PrivilegeStateSchema, Aggregates, _metaId_> {
+  readonly _metaId_: _metaId_;
+
   /** Converts a privileges array to an aggregates object */
   privilegesToAggregates(privileges: PrivilegeSchema[]): Aggregates;
 

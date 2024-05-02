@@ -2,7 +2,7 @@ import {Args, Flags} from '@oclif/core'
 import inquirer from 'inquirer'
 import ora from 'ora'
 import {BaseCommand} from '../../base.js'
-import * as syncEngine from '@totuna/core/@privileges/@syncEngine'
+import * as atPrivilegesApi from '@totuna/core/privileges/@api'
 
 import {logger} from '@log.js'
 import {objectMapping, privileges} from './@utils.js'
@@ -59,13 +59,13 @@ export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
     if (this.args.object !== 'all') {
       const module = privileges[objectMapping[this.args.object]]
       this.log(`Pulling privileges for ${this.args.object}s..`)
-      await syncEngine.pullPrivilege(module)
+      await atPrivilegesApi.pullPrivilege(module)
     } else {
       await Promise.all(
         Object.values(objectMapping).map(async (object) => {
           const module = privileges[object]
           this.log(`Pulling privileges for ${object.slice(2)}s..`)
-          await syncEngine.pullPrivilege(module)
+          await atPrivilegesApi.pullPrivilege(module)
         }),
       )
     }
@@ -109,7 +109,7 @@ export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
         const object = _object.slice(1).toLowerCase()
         const module = privileges[objectMapping[object.toLowerCase()]]
         spinner.start(`Pulling privileges for ${object.toLowerCase()}s..`)
-        await syncEngine.pullPrivilege(module)
+        await atPrivilegesApi.pullPrivilege(module)
       }),
     )
 

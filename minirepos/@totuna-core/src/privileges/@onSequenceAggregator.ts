@@ -27,7 +27,8 @@ export interface module
           database: string;
         };
       }
-    >
+    >,
+    "onSequence"
   > {}
 
 satisfies<module>()(import("./@onSequenceAggregator.js"));
@@ -35,8 +36,10 @@ satisfies<module>()(import("./@onSequenceAggregator.js"));
 type _StateSchema = z.TypeOf<(typeof atOnSequencePrivilege)["StateSchema"]>;
 
 /* -------------------------------------------------------------------------- */
-/*                             Transformation Sequences                       */
+/*                               Implementation                               */
 /* -------------------------------------------------------------------------- */
+
+export const _metaId_ = "onSequence";
 
 /* ---------------------------- aggregatesToFiles --------------------------- */
 
