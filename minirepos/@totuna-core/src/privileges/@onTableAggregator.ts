@@ -1,30 +1,38 @@
-import { AggregateFile, defAggregator } from "./@aggregator.def.js";
-
-import { satisfies } from "_utils_/@utils.js";
+import { StateSchema } from "privileges/@onTablePrivilege.js";
+import { z } from "zod";
 
 import parse from "parse-es-import";
 import RJSON from "relaxed-json";
-import { StateSchema } from "privileges/@onTablePrivilege.js";
+import { satisfies } from "_utils_/@utils.js";
 
-type module = defAggregator<StateSchema, Aggregates>;
-satisfies<typeof import("./@onTableAggregator.js")>()<module>();
+import { module as atAggregator } from "./@aggregator.js";
+import * as atOnTablePrivilege from "./@onTablePrivilege.js";
 
 /* -------------------------------------------------------------------------- */
-/*                                 Interfaces                                 */
+/*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface Aggregate {
-  privileges: {
-    [grantee: string]: StateSchema["privilege_type"][];
-  };
-  meta: {
-    table_schema: StateSchema["table_schema"];
-    table_name: StateSchema["table_name"];
-    database: StateSchema["database"];
-  };
-}
+export interface module
+  extends atAggregator<
+    _StateSchema,
+    Record<
+      string,
+      {
+        privileges: {
+          [grantee: string]: StateSchema["privilege_type"][];
+        };
+        meta: {
+          table_schema: StateSchema["table_schema"];
+          table_name: StateSchema["table_name"];
+          database: StateSchema["database"];
+        };
+      }
+    >
+  > {}
 
-export type Aggregates = Record<string, Aggregate>;
+satisfies<module>()(import("./@onTableAggregator.js"));
+
+type _StateSchema = z.TypeOf<(typeof atOnTablePrivilege)["StateSchema"]>;
 
 /* -------------------------------------------------------------------------- */
 /*                             Transformation Functions                       */
@@ -33,8 +41,8 @@ export type Aggregates = Record<string, Aggregate>;
 /* ---------------------------- aggregatesToFiles --------------------------- */
 
 /** Generates SQL files from an aggregate object */
-export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
-  const aggregateFiles = [] as AggregateFile[];
+export const aggregatesToFiles: module["aggregatesToFiles"] = (aggregates) => {
+  const aggregateFiles = [] as ReturnType<module["aggregatesToFiles"]>;
 
   for (const key in aggregates) {
     const { meta, privileges } = aggregates[key];
@@ -53,8 +61,8 @@ export const aggregatesToFiles = (aggregates: Aggregates): AggregateFile[] => {
 /* ------------------------- aggregatesToPrivileges ------------------------- */
 
 /** Converts an aggregate object back to a state array */
-export const aggregatesToPrivileges = (aggregates: Aggregates): StateSchema[] => {
-  const privileges = [] as StateSchema[];
+export const aggregatesToPrivileges: module["aggregatesToPrivileges"] = (aggregates) => {
+  const privileges = [] as ReturnType<module["aggregatesToPrivileges"]>;
 
   for (const key in aggregates) {
     const { meta, privileges: privs } = aggregates[key];
@@ -78,14 +86,15 @@ export const aggregatesToPrivileges = (aggregates: Aggregates): StateSchema[] =>
 /* ---------------------------- filesToAggregates --------------------------- */
 
 /** Generates AggregateFiles from a files array */
-export const filesToAggregates = (files: string[]): Aggregates => {
-  const aggregates = {} as Aggregates;
+export const filesToAggregates: module["filesToAggregates"] = (files) => {
+  type _return = ReturnType<module["filesToAggregates"]>;
+  const aggregates = {} as _return;
 
   for (const file of files) {
     const parsedFile = parse(file);
 
-    const privileges = RJSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "privileges")!.value) as Aggregate["privileges"];
-    const meta = RJSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "meta")!.value) as Aggregate["meta"];
+    const privileges = RJSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "privileges")!.value) as _return[0]["privileges"];
+    const meta = RJSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "meta")!.value) as _return[0]["meta"];
 
     const key = `${meta.table_schema}.${meta.table_name}`;
 
@@ -97,13 +106,13 @@ export const filesToAggregates = (files: string[]): Aggregates => {
 
 /* ---------------------------- filesToPrivileges --------------------------- */
 
-export const filesToPrivileges = (files: string[]): StateSchema[] => {
+export const filesToPrivileges: module["filesToPrivileges"] = (files) => {
   return aggregatesToPrivileges(filesToAggregates(files));
 };
 
 /* ------------------------- privilegesToAggregates ------------------------- */
 
-export const privilegesToAggregates = <T extends StateSchema[]>(privileges: T): Aggregates => {
+export const privilegesToAggregates: module["privilegesToAggregates"] = (privileges) => {
   return privileges.reduce(
     (acc, privilege) => {
       const key = `${privilege.table_schema}.${privilege.table_name}`;
@@ -127,12 +136,12 @@ export const privilegesToAggregates = <T extends StateSchema[]>(privileges: T): 
 
       return acc;
     },
-    {} as Record<string, Aggregate>,
+    {} as ReturnType<module["privilegesToAggregates"]>,
   );
 };
 
 /* ---------------------------- privilegesToFiles --------------------------- */
 
-export const privilegesToFiles = (privileges: StateSchema[]): AggregateFile[] => {
+export const privilegesToFiles: module["privilegesToFiles"] = (privileges) => {
   return aggregatesToFiles(privilegesToAggregates(privileges));
 };
