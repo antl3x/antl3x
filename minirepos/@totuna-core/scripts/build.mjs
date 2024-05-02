@@ -1,7 +1,7 @@
 import { build } from "esbuild";
 import { replaceTscAliasPaths } from "tsc-alias";
 import { replaceExtensionInImports } from "./fixDeclarations.mjs";
-import path from "path";
+import path from "node:path";
 
 /** @type (any) => esbuild.Plugin */
 const tscAliasPlugin = (format) => {
@@ -16,6 +16,7 @@ const tscAliasPlugin = (format) => {
 };
 
 (async () => {
+
   await build({
     entryPoints: ["src/**/*.ts"],
     bundle: false,

@@ -54,7 +54,7 @@
         "description": "Diff local and remote privilege states to compare."
       },
       "privileges:generate": {
-        "description": "Generate .sql migration files from local changes."
+        "description": "Generate .sql migration files based on local schema changes without applying the migrations to the database."
       }
     }
   },
