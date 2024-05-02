@@ -8,6 +8,9 @@ import { PoolConfig, ClientConfig } from "pg";
 @model("@totuna/Config/v1")
 export class Config extends Model({
   pgConfig: prop<PoolConfig | ClientConfig>(),
+  cli: prop<{
+    useTTY: boolean;
+  }>(),
 }) {}
 
 /* ------------------------------ defineConfig ------------------------------ */

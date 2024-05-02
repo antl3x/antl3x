@@ -1,5 +1,9 @@
-#!/usr/bin/env node_modules/@totuna/cli/node_modules/tsx/dist/cli.mjs
+#!/usr/bin/env node_modules/@totuna/cli/node_modules/tsx/dist/cli.mjs --no-warnings=ExperimentalWarning
 
-import {execute} from '@oclif/core'
+import {run, handle, flush} from '@oclif/core'
 
-await execute({dir: import.meta.url})
+await run(process.argv.slice(2), import.meta.url)
+  .catch(async (error) => {
+    return handle(error)
+  })
+  .finally(async () => flush())

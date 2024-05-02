@@ -5,9 +5,11 @@ import pg from "pg";
 import { RootStore, RootStore_Ready, defRootStore } from "./_impl_/defRootStore.js";
 
 satisfies<defRootStore, typeof import("./index.js")>();
+
 /* -------------------------------------------------------------------------- */
 /* RootStore */
 /* -------------------------------------------------------------------------- */
+
 let rootStore: RootStore = observable({
   _metaStatus_: "notReady" as const,
 });
@@ -44,9 +46,13 @@ export const getRootStore = () => {
 };
 
 export const _pgClient = async (userConfig: ReturnType<typeof defineConfig>) => {
-  const pgClient = new pg.Client(userConfig.pgConfig);
-  await pgClient.connect();
-  return pgClient;
+  try {
+    const pgClient = new pg.Client(userConfig.pgConfig);
+    await pgClient.connect();
+    return pgClient;
+  } catch (error) {
+    throw new Error(`Error connecting to the database: ${error}`);
+  }
 };
 
 /* ---------------------------- _systemVariables ---------------------------- */

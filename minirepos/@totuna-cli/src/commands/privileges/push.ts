@@ -3,9 +3,39 @@ import inquirer from 'inquirer'
 import ora from 'ora'
 import {BaseCommand} from '../../base.js'
 import * as syncEngine from '@totuna/core/@privileges/@syncEngine'
+import * as onTable from '@totuna/core/@privileges/@onTable'
+import * as onFunction from '@totuna/core/@privileges/@onFunction'
+import * as onView from '@totuna/core/@privileges/@onView'
+import * as onColumn from '@totuna/core/@privileges/@onColumn'
+import * as onSchema from '@totuna/core/@privileges/@onSchema'
+import * as onDatabase from '@totuna/core/@privileges/@onDatabase'
+import * as onSequence from '@totuna/core/@privileges/@onSequence'
 
 import {logger} from '@log.js'
-import {objectMapping, privileges} from './@utils.js'
+
+/* -------------------------------------------------------------------------- */
+/*                                    Misc                                    */
+/* -------------------------------------------------------------------------- */
+
+const privileges = {
+  onTable,
+  onFunction,
+  onView,
+  onColumn,
+  onSchema,
+  onDatabase,
+  onSequence,
+}
+
+const objectMapping: Record<string, keyof typeof privileges> = {
+  table: 'onTable',
+  function: 'onFunction',
+  view: 'onView',
+  column: 'onColumn',
+  schema: 'onSchema',
+  database: 'onDatabase',
+  sequence: 'onSequence',
+}
 
 /* -------------------------------------------------------------------------- */
 /*                               PrivilegesSync                               */
@@ -20,7 +50,7 @@ export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
     }),
   }
 
-  static override description = 'Pull the current privilege states from PostgreSQL and generate .ts files.'
+  static override description = 'Push the current local privilege changes from .ts files to the PostgreSQL database.'
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   static override flags = {
@@ -41,20 +71,6 @@ export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
 
   public async _runPipe(): Promise<void> {
     logger.debug('Running pull command')
-
-    const {doPull} = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'doPull',
-        prefix: '[\x1b[33mWARNING\x1b[37m] > \x1b[33m',
-        message: 'This will override the local files. Are you sure you want to continue?',
-      },
-    ])
-
-    if (!doPull) {
-      ora().start().fail('Operation was cancelled.')
-      return
-    }
 
     if (this.args.object !== 'all') {
       const module = privileges[objectMapping[this.args.object]]

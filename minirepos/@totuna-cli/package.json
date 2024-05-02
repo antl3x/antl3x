@@ -1,7 +1,7 @@
 {
   "name": "@totuna/cli",
-  "version": "0.0.0",
-  "description": "Hello",
+  "version": "0.1.0",
+  "description": "totuna | Your PostgreSQL Full Stack Platform",
   "keywords": [
     "oclif"
   ],
@@ -41,8 +41,20 @@
     ],
     "topicSeparator": " ",
     "topics": {
-      "hello": {
-        "description": "Say hello to the world and others"
+      "privileges": {
+        "description": "Easily manage PostgreSQL privileges (GRANT/REVOKE) using a declarative code-based approach."
+      },
+      "privileges:pull": {
+        "description": "Pull the current state of PostgreSQL privileges from the database and generate descriptive .ts files for easy modification."
+      },
+      "privileges:push": {
+        "description": "Push the changes made in the local .ts files to the database by transforming them into SQL statements and executing them."
+      },
+      "privileges:diff": {
+        "description": "Diff local and remote privilege states to compare."
+      },
+      "privileges:generate": {
+        "description": "Generate .sql migration files from local changes."
       }
     }
   },
@@ -51,14 +63,20 @@
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",
     "@totuna/core": "workspace:^",
+    "console-table-printer": "^2.12.0",
+    "debug-level": "^3.1.4",
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
+    "inquirer": "^9.2.20",
+    "ora": "^8.0.1",
     "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",
     "@oclif/test": "^3",
     "@types/chai": "^4",
+    "@types/debug": "^4.1.12",
+    "@types/inquirer": "^9.0.7",
     "@types/mocha": "^10",
     "@types/node": "^18",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
