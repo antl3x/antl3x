@@ -11,22 +11,22 @@ export interface module<PrivilegeSchema extends PrivilegeStateSchema, Aggregates
   readonly _metaId_: _metaId_;
 
   /** Converts a privileges array to an aggregates object */
-  privilegesToAggregates(privileges: PrivilegeSchema[]): Aggregates;
+  statesToAggregates(privileges: PrivilegeSchema[]): Aggregates;
 
   /** Converts an aggregate object back to a privileges array */
-  aggregatesToPrivileges(aggregates: Aggregates): PrivilegeSchema[];
+  aggregatesToStates(aggregates: Aggregates): PrivilegeSchema[];
 
   /** Generates .ts files from an aggregate object */
-  aggregatesToFiles(aggregates: Aggregates): File[];
+  genAggregatesFiles(aggregates: Aggregates): File[];
 
   /** Converts .ts files to an aggregate object */
-  filesToAggregates(files: string[]): Aggregates;
+  filesToAggregates(files: [path: string, content: string][]): Promise<Aggregates>;
 
   /** Converts .ts files to a privileges array */
-  filesToPrivileges(files: string[]): PrivilegeSchema[];
+  aggFilesToStates(files: [path: string, content: string][]): Promise<PrivilegeSchema[]>;
 
   /** Converts a privileges array to .ts files */
-  privilegesToFiles(privileges: PrivilegeSchema[]): File[];
+  statesToAggFiles(privileges: PrivilegeSchema[]): File[];
 
   /* -------------------------------------------------------------------------- */
 }

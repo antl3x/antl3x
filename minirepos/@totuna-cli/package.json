@@ -42,6 +42,7 @@
     "topicSeparator": " ",
     "topics": {
       "privileges": {
+        "alias": "p",
         "description": "Easily manage PostgreSQL privileges (GRANT/REVOKE) using a declarative code-based approach."
       },
       "privileges:pull": {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 
 import { getRootStore } from "@rootStore.js";
 import type { module as atPrivilege } from "./@privilege.js";
@@ -8,9 +8,9 @@ import type { module as atPrivilege } from "./@privilege.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface module extends atPrivilege<typeof StateSchema, "onFunction"> {}
+satisfies<module, typeof import("./@onFunctionPrivilege.js")>;
 
-satisfies<module>()(import("./@onFunctionPrivilege.js"));
+export interface module extends atPrivilege<typeof StateSchema, "onFunction"> {}
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */
@@ -19,8 +19,6 @@ satisfies<module>()(import("./@onFunctionPrivilege.js"));
 export const _metaId_ = "onFunction";
 
 export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).systemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/functions`;
-export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).systemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/functions`;
-export const INTERNAL_STATE_FILE_PATH = async () => `${await INTERNAL_STATE_FOLDER_PATH()}/state.json`;
 
 /* -------------------------------------------------------------------------- */
 /*                             StateSchema                          */
@@ -58,9 +56,9 @@ export const pullQuery: module["pullQuery"] = (dbQuery) =>
   );
 
 export const grantRawQuery: module["grantRawQuery"] = (state) => {
-  return `GRANT EXECUTE ON FUNCTION ${state.schema}.${state.function} TO ${state.grantee};`;
+  return `GRANT EXECUTE ON FUNCTION ${state.schema}.${state.function} TO "${state.grantee}";`;
 };
 
 export const revokeRawQuery: module["revokeRawQuery"] = (state) => {
-  return `REVOKE EXECUTE ON FUNCTION ${state.schema}.${state.function} FROM ${state.grantee};`;
+  return `REVOKE EXECUTE ON FUNCTION ${state.schema}.${state.function} FROM "${state.grantee}";`;
 };

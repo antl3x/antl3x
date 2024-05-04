@@ -1,4 +1,4 @@
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 import { getRootStore } from "@rootStore.js";
 
 import { z } from "zod";
@@ -8,9 +8,9 @@ import type { module as atPrivilege } from "./@privilege.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface module extends atPrivilege<typeof StateSchema, "onTable"> {}
+satisfies<module, typeof import("./@onTablePrivilege.js")>;
 
-satisfies<module>()(import("./@onTablePrivilege.js"));
+export interface module extends atPrivilege<typeof StateSchema, "onTable"> {}
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */
@@ -19,8 +19,6 @@ satisfies<module>()(import("./@onTablePrivilege.js"));
 export const _metaId_ = "onTable";
 
 export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).systemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/tables`;
-export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).systemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/tables`;
-export const INTERNAL_STATE_FILE_PATH = async () => `${await INTERNAL_STATE_FOLDER_PATH()}/state.json`;
 
 /* -------------------------------- zodSchema ------------------------------- */
 
@@ -65,9 +63,9 @@ AND has_table_privilege(r.oid, t.oid, p.perm) = true;`,
   );
 
 export const grantRawQuery: module["grantRawQuery"] = (state) => {
-  return `GRANT ${state.privilege_type} ON ${state.table_schema}.${state.table_name} TO ${state.grantee};`;
+  return `GRANT ${state.privilege_type} ON ${state.table_schema}.${state.table_name} TO "${state.grantee}";`;
 };
 
 export const revokeRawQuery: module["revokeRawQuery"] = (state) => {
-  return `REVOKE ${state.privilege_type} ON ${state.table_schema}.${state.table_name} FROM ${state.grantee};`;
+  return `REVOKE ${state.privilege_type} ON ${state.table_schema}.${state.table_name} FROM "${state.grantee}";`;
 };

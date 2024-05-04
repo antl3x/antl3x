@@ -12,6 +12,12 @@
   "license": "ISC",
   "dependencies": {
     "@totuna/cli": "workspace:^",
-    "@totuna/core": "workspace:^"
+    "@totuna/core": "workspace:^",
+    "dbdiff": "^0.5.3",
+    "ddl": "^2.0.2",
+    "pg-tables-to-jsonschema": "^1.1.2"
+  },
+  "devDependencies": {
+    "tsx": "^4.8.2"
   }
 }

@@ -82,6 +82,7 @@
     "@antl3x/func": "workspace:^",
     "@totuna/core": "workspace:^",
     "@types/relaxed-json": "^1.0.4",
+    "ddl": "^2.0.2",
     "fast-json-patch": "^3.1.1",
     "mobx": "^6.12.3",
     "mobx-keystone": "^1.10.1",

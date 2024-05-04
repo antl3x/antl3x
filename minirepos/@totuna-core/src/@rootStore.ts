@@ -1,15 +1,15 @@
 import type { defineConfig } from "@config.js";
-import { satisfies } from "_utils_/@utils.js";
 import { observable, when } from "mobx";
 
 import { Config } from "@config.js";
 import pg from "pg";
+import { satisfies } from "_utils_/_@utils_.js";
 
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-satisfies<module>()(import("./@rootStore.js"));
+satisfies<module, typeof import("./@rootStore.js")>;
 
 export interface module {
   initRootStore: (config: Config) => Promise<RootStore_Ready>;
@@ -19,11 +19,11 @@ export interface module {
 export type RootStore = RootStore_NotReady | RootStore_Ready;
 
 export interface RootStore_NotReady {
-  _metaStatus_: "notReady";
+  __meta_Status_: "notReady";
 }
 
 export interface RootStore_Ready {
-  _metaStatus_: "ready";
+  __meta_Status_: "ready";
   userConfig: Config;
   pgClient: pg.Client;
   systemVariables: SystemVariables;
@@ -34,9 +34,9 @@ interface SystemVariables {
   PUBLIC_PATH: string;
   PUBLIC_DATABASE_PATH: string;
   INTERNAL_DATABASE_PATH: string;
-  INTERNAL_STATE_PRIVILEGES_PATH: string;
   PUBLIC_STATE_PRIVILEGES_PATH: string;
   PUBLIC_MIGRATIONS_PATH: string;
+  PUBLIC_MIGRATIONS_PLAN_PATH: string;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -44,14 +44,14 @@ interface SystemVariables {
 /* -------------------------------------------------------------------------- */
 
 let rootStore: RootStore = observable({
-  _metaStatus_: "notReady" as const,
+  __meta_Status_: "notReady" as const,
 });
 
 /* ------------------------------ initRootStore ----------------------------- */
 
 export const initRootStore = async (userConfig: ReturnType<typeof defineConfig>): Promise<RootStore_Ready> => {
   const _rootStore = {
-    _metaStatus_: "ready" as const,
+    __meta_Status_: "ready" as const,
     userConfig,
     pgClient: await _pgClient(userConfig),
     systemVariables: _systemVariables(userConfig),
@@ -65,7 +65,7 @@ export const initRootStore = async (userConfig: ReturnType<typeof defineConfig>)
 export const getRootStore = () => {
   return new Promise<RootStore_Ready>((resolve, reject) => {
     const react = when(
-      () => rootStore._metaStatus_ === "ready",
+      () => rootStore.__meta_Status_ === "ready",
       () => {
         resolve(rootStore as RootStore_Ready);
       },
@@ -103,15 +103,14 @@ const _systemVariables = (userConfig: ReturnType<typeof defineConfig>): RootStor
       return `${this.INTERNAL_PATH}/${userConfig.pgConfig.database}`;
     },
 
-    get INTERNAL_STATE_PRIVILEGES_PATH() {
-      return `${this.INTERNAL_DATABASE_PATH}/privileges`;
-    },
-
     get PUBLIC_STATE_PRIVILEGES_PATH() {
       return `${this.PUBLIC_DATABASE_PATH}/privileges`;
     },
 
     get PUBLIC_MIGRATIONS_PATH() {
       return `${this.PUBLIC_DATABASE_PATH}/migrations`;
+    },
+    get PUBLIC_MIGRATIONS_PLAN_PATH() {
+      return `${this.PUBLIC_DATABASE_PATH}/migrations/plan`;
     },
   });

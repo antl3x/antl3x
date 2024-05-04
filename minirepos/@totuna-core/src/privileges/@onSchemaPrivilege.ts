@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 import { getRootStore } from "@rootStore.js";
 import type { module as atPrivilege } from "./@privilege.js";
 
@@ -8,9 +8,9 @@ import type { module as atPrivilege } from "./@privilege.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface atOnSchemaPrivilege extends atPrivilege<typeof StateSchema, "onSchema"> {}
+satisfies<module, typeof import("./@onSchemaPrivilege.js")>;
 
-satisfies<atOnSchemaPrivilege>()(import("./@onSchemaPrivilege.js"));
+export interface module extends atPrivilege<typeof StateSchema, "onSchema"> {}
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */
@@ -19,8 +19,6 @@ satisfies<atOnSchemaPrivilege>()(import("./@onSchemaPrivilege.js"));
 export const _metaId_ = "onSchema";
 
 export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).systemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/schemas`;
-export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).systemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/schemas`;
-export const INTERNAL_STATE_FILE_PATH = async () => `${await INTERNAL_STATE_FOLDER_PATH()}/state.json`;
 
 /* -------------------------------- zodSchema ------------------------------- */
 
@@ -38,7 +36,7 @@ export const StateSchema = z
 
 /* -------------------------------- pullQuery ------------------------------- */
 
-export const pullQuery: atOnSchemaPrivilege["pullQuery"] = (dbQuery) =>
+export const pullQuery: module["pullQuery"] = (dbQuery) =>
   dbQuery(
     `SELECT current_database() AS database, r.rolname AS grantee,
     n.nspname AS schema,
@@ -55,9 +53,9 @@ WHERE has_schema_privilege(r.oid, n.oid, p.perm)
 
 /* ------------------------------ grantRawQuery ----------------------------- */
 
-export const grantRawQuery: atOnSchemaPrivilege["grantRawQuery"] = (state) =>
-  `GRANT ${state.privilege} ON SCHEMA ${state.schema} TO ${state.grantee};`;
+export const grantRawQuery: module["grantRawQuery"] = (state) =>
+  `GRANT ${state.privilege} ON SCHEMA ${state.schema} TO "${state.grantee}";`;
 
 /* ------------------------------ revokeRawQuery ---------------------------- */
-export const revokeRawQuery: atOnSchemaPrivilege["revokeRawQuery"] = (state) =>
-  `REVOKE ${state.privilege} ON SCHEMA ${state.schema} FROM ${state.grantee};`;
+export const revokeRawQuery: module["revokeRawQuery"] = (state) =>
+  `REVOKE ${state.privilege} ON SCHEMA ${state.schema} FROM "${state.grantee}";`;

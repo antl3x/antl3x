@@ -12,6 +12,7 @@ import {objectMapping, privileges} from './@utils.js'
 /* -------------------------------------------------------------------------- */
 
 export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
+  static aliases = ['p:pull', 'priv:pull']
   static override args = {
     object: Args.string({
       description: 'The object to pull privileges from.',
@@ -42,30 +43,16 @@ export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
   public async _runPipe(): Promise<void> {
     logger.debug('Running pull command')
 
-    const {doPull} = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'doPull',
-        prefix: '[\x1b[33mWARNING\x1b[37m] > \x1b[33m',
-        message: 'This will override the local files. Are you sure you want to continue?',
-      },
-    ])
-
-    if (!doPull) {
-      ora().start().fail('Operation was cancelled.')
-      return
-    }
-
     if (this.args.object !== 'all') {
       const module = privileges[objectMapping[this.args.object]]
       this.log(`Pulling privileges for ${this.args.object}s..`)
-      await atPrivilegesApi.pullPrivilege(module)
+      await atPrivilegesApi.pullPrivilege(module, false)
     } else {
       await Promise.all(
         Object.values(objectMapping).map(async (object) => {
           const module = privileges[object]
           this.log(`Pulling privileges for ${object.slice(2)}s..`)
-          await atPrivilegesApi.pullPrivilege(module)
+          await atPrivilegesApi.pullPrivilege(module, false)
         }),
       )
     }
@@ -88,28 +75,14 @@ export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
 
     const _toPull = toPull as string[]
 
-    const {doPull} = await inquirer.prompt([
-      {
-        type: 'confirm',
-        name: 'doPull',
-        prefix: '[\x1b[33mWARNING\x1b[37m] > \x1b[33m',
-        message: 'This will override the local files. Are you sure you want to continue?',
-      },
-    ])
-
     const spinner = ora().start()
-
-    if (!doPull) {
-      spinner.fail('Operation was cancelled.')
-      return
-    }
 
     await Promise.all(
       _toPull.map(async (_object) => {
         const object = _object.slice(1).toLowerCase()
         const module = privileges[objectMapping[object.toLowerCase()]]
         spinner.start(`Pulling privileges for ${object.toLowerCase()}s..`)
-        await atPrivilegesApi.pullPrivilege(module)
+        await atPrivilegesApi.pullPrivilege(module, false)
       }),
     )
 

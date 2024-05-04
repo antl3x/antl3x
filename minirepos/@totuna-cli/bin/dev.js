@@ -1,4 +1,4 @@
-#!/usr/bin/env -S node_modules/.bin/tsx --no-warnings=ExperimentalWarning
+#!/usr/bin/env -S node_modules/.bin/tsx  --no-warnings=ExperimentalWarning
 
 import {run, handle, flush} from '@oclif/core'
 process.env.NODE_ENV = 'development'

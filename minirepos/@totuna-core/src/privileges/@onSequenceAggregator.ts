@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import parse from "parse-es-import";
 import RJSON from "relaxed-json";
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 
 import { module as atAggregator } from "./@aggregator.js";
 import * as atOnSequencePrivilege from "./@onSequencePrivilege.js";
@@ -12,26 +12,20 @@ import * as atOnSequencePrivilege from "./@onSequencePrivilege.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface module
-  extends atAggregator<
-    _StateSchema,
-    Record<
-      string,
-      {
-        privileges: {
-          [grantee: string]: _StateSchema["privilege"][];
-        };
-        meta: {
-          schema: string;
-          sequence: string;
-          database: string;
-        };
-      }
-    >,
-    "onSequence"
-  > {}
+satisfies<module, typeof import("./@onSequenceAggregator.js")>;
 
-satisfies<module>()(import("./@onSequenceAggregator.js"));
+export interface module extends atAggregator<_StateSchema, Record<string, AggregateObject>, "onSequence"> {}
+
+export type AggregateObject = {
+  privileges: {
+    [grantee: string]: _StateSchema["privilege"][];
+  };
+  _meta_: {
+    schema: _StateSchema["schema"];
+    sequence: _StateSchema["sequence"];
+    database: _StateSchema["database"];
+  };
+};
 
 type _StateSchema = z.TypeOf<(typeof atOnSequencePrivilege)["StateSchema"]>;
 
@@ -41,19 +35,24 @@ type _StateSchema = z.TypeOf<(typeof atOnSequencePrivilege)["StateSchema"]>;
 
 export const _metaId_ = "onSequence";
 
-/* ---------------------------- aggregatesToFiles --------------------------- */
+/* ---------------------------- genAggregatesFiles --------------------------- */
 
 /** Generates SQL files from an aggregate object */
-export const aggregatesToFiles: module["aggregatesToFiles"] = (aggregates) => {
-  const aggregateFiles = [] as ReturnType<module["aggregatesToFiles"]>;
+export const genAggregatesFiles: module["genAggregatesFiles"] = (aggregates) => {
+  const aggregateFiles = [] as ReturnType<module["genAggregatesFiles"]>;
 
   for (const key in aggregates) {
-    const { meta, privileges } = aggregates[key];
+    const { _meta_, privileges } = aggregates[key];
 
-    const fileName = `${meta.schema}.${meta.sequence}.ts`;
+    const fileName = `${_meta_.schema}.${_meta_.sequence}.ts`;
 
-    let content = `export const privileges = ${JSON.stringify(privileges, null, 2)};\n\n`;
-    content += `export const meta = ${JSON.stringify(meta, null, 2)};`;
+    const obj = {
+      privileges,
+      _meta_,
+    };
+
+    const content = `import { AggregateObject } from "@totuna/core/privileges/@onSequenceAggregator";\n
+export default ${JSON.stringify(obj, null, 2)} satisfies AggregateObject; `;
 
     aggregateFiles.push({ fileName, content });
   }
@@ -61,14 +60,14 @@ export const aggregatesToFiles: module["aggregatesToFiles"] = (aggregates) => {
   return aggregateFiles;
 };
 
-/* ------------------------- aggregatesToPrivileges ------------------------- */
+/* ------------------------- aggregatesToStates ------------------------- */
 
 /** Converts an aggregate object back to a state array */
-export const aggregatesToPrivileges: module["aggregatesToPrivileges"] = (aggregates) => {
-  const privileges = [] as ReturnType<module["aggregatesToPrivileges"]>;
+export const aggregatesToStates: module["aggregatesToStates"] = (aggregates) => {
+  const privileges = [] as ReturnType<module["aggregatesToStates"]>;
 
   for (const key in aggregates) {
-    const { meta, privileges: privs } = aggregates[key];
+    const { _meta_, privileges: privs } = aggregates[key];
 
     for (const grantee in privs) {
       for (const privilege of privs[grantee]) {
@@ -76,9 +75,9 @@ export const aggregatesToPrivileges: module["aggregatesToPrivileges"] = (aggrega
           StateSchema.parse({
             grantee,
             privilege,
-            database: meta.database,
-            sequence: meta.sequence,
-            schema: meta.schema,
+            database: _meta_.database,
+            sequence: _meta_.sequence,
+            schema: _meta_.schema,
           }),
         );
       }
@@ -91,33 +90,30 @@ export const aggregatesToPrivileges: module["aggregatesToPrivileges"] = (aggrega
 /* ---------------------------- filesToAggregates --------------------------- */
 
 /** Generates AggregateFiles from a files array */
-export const filesToAggregates: module["filesToAggregates"] = (files) => {
-  type _return = ReturnType<module["filesToAggregates"]>;
-  const aggregates = {} as _return;
+export const filesToAggregates: module["filesToAggregates"] = async (files) => {
+  const aggregates = {} as Awaited<ReturnType<module["filesToAggregates"]>>;
 
-  for (const file of files) {
-    const parsedFile = parse(file);
+  for (const [path] of files) {
+    const file = await import(path);
 
-    const privileges = RJSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "privileges")!.value) as _return[0]["privileges"];
-    const meta = RJSON.parse(parsedFile.exports.find((exp) => exp.moduleName === "meta")!.value) as _return[0]["meta"];
+    const { _meta_, privileges } = file.default as AggregateObject;
+    const key = `${_meta_.schema}.${_meta_.sequence}`;
 
-    const key = `${meta.schema}.${meta.sequence}`;
-
-    aggregates[key] = { privileges, meta };
+    aggregates[key] = { privileges, _meta_ };
   }
 
   return aggregates;
 };
 
-/* ---------------------------- filesToPrivileges --------------------------- */
+/* ---------------------------- aggFilesToStates --------------------------- */
 
-export const filesToPrivileges: module["filesToPrivileges"] = (files) => {
-  return aggregatesToPrivileges(filesToAggregates(files));
+export const aggFilesToStates: module["aggFilesToStates"] = async (files) => {
+  return aggregatesToStates(await filesToAggregates(files));
 };
 
-/* ------------------------- privilegesToAggregates ------------------------- */
+/* ------------------------- statesToAggregates ------------------------- */
 
-export const privilegesToAggregates: module["privilegesToAggregates"] = (privileges) => {
+export const statesToAggregates: module["statesToAggregates"] = (privileges) => {
   return privileges.reduce(
     (acc, privilege) => {
       const key = `${privilege.schema}.${privilege.sequence}`;
@@ -125,7 +121,7 @@ export const privilegesToAggregates: module["privilegesToAggregates"] = (privile
       if (!acc[key]) {
         acc[key] = {
           privileges: {},
-          meta: {
+          _meta_: {
             sequence: privilege.sequence,
             schema: privilege.schema,
             database: privilege.database,
@@ -141,12 +137,12 @@ export const privilegesToAggregates: module["privilegesToAggregates"] = (privile
 
       return acc;
     },
-    {} as ReturnType<module["privilegesToAggregates"]>,
+    {} as ReturnType<module["statesToAggregates"]>,
   );
 };
 
-/* ---------------------------- privilegesToFiles --------------------------- */
+/* ---------------------------- statesToAggFiles --------------------------- */
 
-export const privilegesToFiles: module["privilegesToFiles"] = (privileges) => {
-  return aggregatesToFiles(privilegesToAggregates(privileges));
+export const statesToAggFiles: module["statesToAggFiles"] = (privileges) => {
+  return genAggregatesFiles(statesToAggregates(privileges));
 };

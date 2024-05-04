@@ -22,6 +22,9 @@ dependencies:
   '@types/relaxed-json':
     specifier: ^1.0.4
     version: 1.0.4
+  ddl:
+    specifier: ^2.0.2
+    version: 2.0.2
   fast-json-patch:
     specifier: ^3.1.1
     version: 3.1.1
@@ -1572,6 +1575,12 @@ packages:
       which: 2.0.2
     dev: true
 
+  /ddl@2.0.2:
+    resolution: {integrity: sha512-MBM6DZqpnHcVrl7InoWsoNQBDsoaV1HBfEUg9b0sAZibkmKcfi5TIHJo7PkqNZ+W3NDnQ/kVRAsD2h4pC4Hl5A==}
+    dependencies:
+      lazy-object: 1.0.1
+    dev: false
+
   /debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
     engines: {node: '>=6.0'}
@@ -2678,6 +2687,10 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
     dev: true
+
+  /lazy-object@1.0.1:
+    resolution: {integrity: sha512-MKxxKThNg1xepNDOfh4muZYpfWCLDD6atGBbi+esg2pH/nwqr3P6P1binXXZ6M2Lq/pPxr5hfHAzCvgSng8/Nw==}
+    dev: false
 
   /leven@3.1.0:
     resolution: {integrity: sha512-qsda+H8jTaUaN/x5vzW2rzc+8Rw4TAQ/4KjB46IwK5VH+IlVeeeje/EoZRpiXvIqjFgK84QffqPztGI3VBLG1A==}

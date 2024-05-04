@@ -1,0 +1,15 @@
+{
+  "configurations": [
+    {
+      "name": "Attach to process",
+      "type": "node",
+      "request": "attach",
+      "port": 9229,
+
+      "resolveSourceMapLocations": [
+        "/home/antl3x/repos/antl3x/antl3x/minirepos/@totuna-core/**"
+      ],
+      "outFiles": ["/home/antl3x/repos/antl3x/antl3x/minirepos/@totuna-core/**"]
+    }
+  ]
+}

@@ -1,27 +1,18 @@
-import {Args, Flags} from '@oclif/core'
-import inquirer from 'inquirer'
-import ora from 'ora'
-import {printTable, Table} from 'console-table-printer'
+import {Flags} from '@oclif/core'
+import {Table} from 'console-table-printer'
 
 import * as atPrivilegeApi from '@totuna/core/privileges/@api'
 
+import {logger} from '@log.js'
 import {BaseCommand} from '../../base.js'
 import {objectMapping, privileges} from './@utils.js'
-import {logger} from '@log.js'
 
 /* -------------------------------------------------------------------------- */
 /*                               PrivilegesSync                               */
 /* -------------------------------------------------------------------------- */
 
 export default class PrivilegesSync extends BaseCommand<typeof PrivilegesSync> {
-  static override args = {
-    object: Args.string({
-      description: 'The privilege object to diff.',
-      default: 'all',
-      options: ['all', ...Object.keys(objectMapping)],
-    }),
-  }
-
+  static aliases = ['p:diff', 'priv:diff']
   static override description = 'Diff local and remote privilege states to compare'
   static override examples = ['<%= config.bin %> <%= command.id %>']
 

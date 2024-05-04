@@ -18,12 +18,10 @@
  *
  * export const addUser = () => true
  *
- * satisfies<IUserManagement, typeof import('./test')>()
+ * satisfies<IUserManagement, typeof import('./test')>;
  * ```
  */
 
-export function satisfies<T>() {
-  return <U extends T>(module: Promise<U>) => {
-    void module as unknown as T;
-  };
+export function satisfies<U, T extends U>() {
+  return 0 ?? (void 0 as T);
 }

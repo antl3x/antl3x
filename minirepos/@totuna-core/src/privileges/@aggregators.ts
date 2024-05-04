@@ -1,4 +1,4 @@
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 
 import * as onColumn from "./@onColumnAggregator.js";
 import * as onDatabase from "./@onDatabaseAggregator.js";
@@ -12,6 +12,8 @@ import * as onSequence from "./@onSequenceAggregator.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
+satisfies<module, typeof import("./@aggregators.js")>;
+
 export interface module {
   onColumn: typeof onColumn;
   onDatabase: typeof onDatabase;
@@ -21,8 +23,6 @@ export interface module {
   onTable: typeof onTable;
   onSequence: typeof onSequence;
 }
-
-satisfies<module>()(import("./@aggregators.js"));
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */

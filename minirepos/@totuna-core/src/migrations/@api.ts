@@ -2,10 +2,24 @@ import { getRootStore } from "@rootStore.js";
 import { migrate as pmMigrate } from "postgres-migrations";
 import path from "node:path";
 import fs from "node:fs";
-import { defMigrationsEngine } from "./@api.d.js";
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 
-satisfies<defMigrationsEngine>()(import("./@api.js"));
+/* -------------------------------------------------------------------------- */
+/*                                 Definition                                 */
+/* -------------------------------------------------------------------------- */
+
+satisfies<module, typeof import("./@api.js")>;
+
+export interface module {
+  migrate: migrate;
+  getNextMigrationSeq: getNextMigrationSeq;
+}
+
+/* --------------------------------- migrate -------------------------------- */
+type migrate = () => Promise<void>;
+
+/* --------------------------- getNextMigrationSeq -------------------------- */
+type getNextMigrationSeq = (from: "remote" | "local") => Promise<number>;
 
 /* -------------------------------------------------------------------------- */
 /*                              Migrations Engine                             */
@@ -13,7 +27,7 @@ satisfies<defMigrationsEngine>()(import("./@api.js"));
 
 /* --------------------------------- migrate -------------------------------- */
 
-export const migrate: defMigrationsEngine["migrate"] = async () => {
+export const migrate: module["migrate"] = async () => {
   const rootStore = await getRootStore();
   try {
     const dbConfig = {
@@ -66,7 +80,7 @@ export const migrate: defMigrationsEngine["migrate"] = async () => {
 
 /* --------------------------- getNextMigrationSeq -------------------------- */
 
-export const getNextMigrationSeq: defMigrationsEngine["getNextMigrationSeq"] = async (from) => {
+export const getNextMigrationSeq: module["getNextMigrationSeq"] = async (from) => {
   const rootStore = await getRootStore();
 
   if (from === "remote") {
@@ -81,7 +95,17 @@ export const getNextMigrationSeq: defMigrationsEngine["getNextMigrationSeq"] = a
   } else {
     const migrationsPath = rootStore.systemVariables.PUBLIC_MIGRATIONS_PATH;
     const files = fs.readdirSync(migrationsPath);
-    const maxId = Math.max(...files.map((file) => parseInt(file.split("_")[0])));
+    const maxId =
+      files.length === 0
+        ? 0
+        : Math.max(
+            ...files.map((file) => {
+              const fileNumber = file.split("_")[0];
+              const parsedNumber = isNaN(fileNumber as never) ? 0 : parseInt(fileNumber);
+              return parsedNumber;
+            }),
+          );
+
     return maxId + 1;
   }
 };

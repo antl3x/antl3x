@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 import { getRootStore } from "@rootStore.js";
 import type { module as atPrivilege } from "./@privilege.js";
 
@@ -8,9 +8,9 @@ import type { module as atPrivilege } from "./@privilege.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface module extends atPrivilege<typeof StateSchema, "onDatabase"> {}
+satisfies<module, typeof import("./@onDatabasePrivilege.js")>;
 
-satisfies<module>()(import("./@onDatabasePrivilege.js"));
+export interface module extends atPrivilege<typeof StateSchema, "onDatabase"> {}
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */
@@ -19,8 +19,6 @@ satisfies<module>()(import("./@onDatabasePrivilege.js"));
 export const _metaId_ = "onDatabase";
 
 export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).systemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/database`;
-export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).systemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/database`;
-export const INTERNAL_STATE_FILE_PATH = async () => `${await INTERNAL_STATE_FOLDER_PATH()}/state.json`;
 
 /* -------------------------------- zodSchema ------------------------------- */
 
@@ -53,11 +51,11 @@ export const pullQuery: module["pullQuery"] = (dbQuery) =>
 /* ------------------------------ grantRawQuery ----------------------------- */
 
 export const grantRawQuery: module["grantRawQuery"] = (state) => {
-  return `GRANT ${state.privilege_type} ON DATABASE ${state.database} TO ${state.grantee};`;
+  return `GRANT ${state.privilege_type} ON DATABASE ${state.database} TO "${state.grantee}";`;
 };
 
 /* ----------------------------- revokeRawQuery ----------------------------- */
 
 export const revokeRawQuery: module["revokeRawQuery"] = (state) => {
-  return `REVOKE ${state.privilege_type} ON DATABASE ${state.database} FROM ${state.grantee};`;
+  return `REVOKE ${state.privilege_type} ON DATABASE ${state.database} FROM "${state.grantee}";`;
 };

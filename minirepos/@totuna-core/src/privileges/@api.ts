@@ -1,12 +1,13 @@
 import { getRootStore } from "@rootStore.js";
 
+import pg from "pg";
 import fs from "fs";
 import path from "path";
-import { diffArr, satisfies } from "_utils_/@utils.js";
+import { diffArr, satisfies } from "_utils_/_@utils_.js";
 import { TypeOf } from "zod";
-import { privMap } from "./utils.js";
 
-import { module as atPrivileges } from "./@privileges.js";
+import { module as modulePrivileges } from "./@privileges.js";
+import * as atPrivileges from "./@privileges.js";
 import * as migrationsEngine from "migrations/@api.js";
 
 import * as atAggregators from "./@aggregators.js";
@@ -15,38 +16,55 @@ import * as atAggregators from "./@aggregators.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-satisfies<module>()(import("./@api.js"));
+satisfies<module, typeof import("./@api.js")>;
 
 export interface module {
   pullPrivilege: pullPrivilege;
+  pullAllPrivileges: pullAllPrivileges;
   checkDiff: checkDiff;
-  generateMigrationFile: generateMigrationFile;
+  checkDiffs: checkDiffs;
+  generateMigrationPlanFile: generateMigrationPlanFile;
 }
 
 /* ------------------------------ pullPrivilege ----------------------------- */
 
-type pullPrivilege = (privilegeModule: atPrivileges[keyof atPrivileges]) => Promise<void>;
+type pullPrivilege = (privilegeModule: modulePrivileges[keyof modulePrivileges], forceWrite: boolean) => Promise<pullPrivilegeRes>;
+
+type pullPrivilegeRes = {
+  fileName: string;
+  status: "written" | "skipped-diff" | "skipped";
+}[];
+
+/* ------------------------------ pullPrivileges ----------------------------- */
+
+type pullAllPrivileges = (forceWrite: boolean) => Promise<pullPrivilegeRes[]>;
 
 /* -------------------------------- checkDiff ------------------------------- */
 
-type checkDiff = (privilegeModule: atPrivileges[keyof atPrivileges]) => Promise<{
-  additions: TypeOf<atPrivileges[keyof atPrivileges]["StateSchema"]>[];
-  removals: TypeOf<atPrivileges[keyof atPrivileges]["StateSchema"]>[];
+type checkDiff = (privilegeModule: modulePrivileges[keyof modulePrivileges]) => Promise<checkDiffRes>;
+
+type checkDiffRes = {
+  additions: TypeOf<modulePrivileges[keyof modulePrivileges]["StateSchema"]>[];
+  removals: TypeOf<modulePrivileges[keyof modulePrivileges]["StateSchema"]>[];
   revokeRawQueries: string[];
   grantRawQueries: string[];
-}>;
+};
 
-/* -------------------------- generateMigrationFile ------------------------- */
+/* ------------------------------- checkDiffs ------------------------------- */
+
+type checkDiffs = () => Promise<checkDiffRes[]>;
+
+/* -------------------------- generateMigrationPlanFile ------------------------- */
 /**
  * Generates a migration file based on the diff between the internal and public state files.
  * It's a single migration file for all the privileges changes.
  */
-type generateMigrationFile = () => Promise<
+type generateMigrationPlanFile = () => Promise<
   | {
-      _metaType_: "NoChangesToApply";
+      _metaType_: "NoMigrationPlan";
     }
   | {
-      _metaType_: "ChangesToApply";
+      _metaType_: "MigrationPlanGenerated";
       fileName: string;
       fileContent: string;
     }
@@ -61,25 +79,9 @@ type generateMigrationFile = () => Promise<
 export const pullPrivilege: module["pullPrivilege"] = async (privMod) => {
   const { pgClient } = await getRootStore();
 
-  const privStates = (await privMod.pullQuery(pgClient.query.bind(pgClient)))?.rows.map((row) => privMod.StateSchema.parse(row));
+  const privStates = await _queryRemoteStates(pgClient, privMod);
 
-  const INTERNAL_STATE_FILE_PATH = await privMod.INTERNAL_STATE_FILE_PATH();
-  const INTERNAL_STATE_FOLDER_PATH = await privMod.INTERNAL_STATE_FOLDER_PATH();
   const PUBLIC_STATE_FILE_PATH = await privMod.PUBLIC_STATE_FILE_PATH();
-
-  // Remove all state files first
-  if (fs.existsSync(INTERNAL_STATE_FILE_PATH)) {
-    fs.rmSync(path.resolve(INTERNAL_STATE_FILE_PATH), { recursive: true });
-  }
-
-  if (fs.existsSync(PUBLIC_STATE_FILE_PATH)) {
-    fs.rmSync(path.resolve(PUBLIC_STATE_FILE_PATH), { recursive: true });
-  }
-
-  // Write Internal State file
-
-  fs.mkdirSync(INTERNAL_STATE_FOLDER_PATH, { recursive: true });
-  fs.writeFileSync(INTERNAL_STATE_FILE_PATH, JSON.stringify(privStates, null, 2));
 
   // Aggregate all state files into one public state file using an Aggregator
 
@@ -88,28 +90,51 @@ export const pullPrivilege: module["pullPrivilege"] = async (privMod) => {
   if (!agg) throw new Error(`Aggregator not found for ${privMod._metaId_}`);
 
   // @ts-expect-error - This is a valid call
-  const publicStateFiles = agg.aggregatesToFiles(agg.privilegesToAggregates(privStates));
+  const localStateFiles = agg.genAggregatesFiles(agg.statesToAggregates(privStates));
 
-  publicStateFiles.forEach(({ fileName, content }) => {
+  return localStateFiles.map(({ fileName, content }) => {
     fs.mkdirSync(PUBLIC_STATE_FILE_PATH, { recursive: true });
+
+    // Check if the file already exists
+    if (fs.existsSync(path.resolve(PUBLIC_STATE_FILE_PATH, fileName))) {
+      const existingContent = fs.readFileSync(path.resolve(PUBLIC_STATE_FILE_PATH, fileName), "utf-8");
+
+      return {
+        fileName,
+        status: existingContent === content ? "skipped" : "skipped-diff",
+      };
+    }
+
     fs.writeFileSync(path.resolve(PUBLIC_STATE_FILE_PATH, fileName), content);
+
+    return {
+      fileName,
+      status: "written",
+    };
   });
+};
+
+/* ---------------------------- pullAllPrivileges --------------------------- */
+
+export const pullAllPrivileges: module["pullAllPrivileges"] = async (forceWrite) => {
+  return Promise.all([...Object.values(atPrivileges)].map((privMod) => pullPrivilege(privMod, forceWrite)));
 };
 
 /* -------------------------------- checkDiff ------------------------------- */
 
 export const checkDiff: module["checkDiff"] = async (privMod) => {
   // Define paths
-  const INTERNAL_STATE_FILE_PATH = await privMod.INTERNAL_STATE_FILE_PATH();
   const PUBLIC_STATE_FILE_PATH = await privMod.PUBLIC_STATE_FILE_PATH();
 
   // Grab Aggregator
   const agg = atAggregators[privMod._metaId_];
   if (!agg) throw new Error(`Aggregator not found for ${privMod._metaId_}`);
 
-  // Check if folder exists, if not return early
+  // Fetch remote states
+  const { pgClient } = await getRootStore();
+  const remoteStates = await _queryRemoteStates(pgClient, privMod);
 
-  if (!fs.existsSync(INTERNAL_STATE_FILE_PATH)) {
+  if (remoteStates.length === 0) {
     return {
       additions: [],
       removals: [],
@@ -118,19 +143,21 @@ export const checkDiff: module["checkDiff"] = async (privMod) => {
     };
   }
 
+  // If dir does not exists we automatically pull the privilege
+  if (!fs.existsSync(PUBLIC_STATE_FILE_PATH)) {
+    await pullPrivilege(privMod, true);
+  }
+
   // Parse public state files to Privileges Array
-  const publicStateArr = agg.filesToPrivileges(
+  const localStates = await agg.aggFilesToStates(
     fs.readdirSync(PUBLIC_STATE_FILE_PATH).map((fileName) => {
       const content = fs.readFileSync(path.resolve(PUBLIC_STATE_FILE_PATH, fileName), "utf-8");
-      return content;
+      return [path.resolve(PUBLIC_STATE_FILE_PATH, fileName), content];
     }),
   );
 
-  // Parse internal state file to Privileges Array
-  const internalStateArr = JSON.parse(fs.readFileSync(INTERNAL_STATE_FILE_PATH, "utf-8")) as TypeOf<typeof privMod.StateSchema>[];
-
   // Do a diff for additions and removals
-  const { additions, removals } = diffArr(internalStateArr, publicStateArr);
+  const { additions, removals } = diffArr(remoteStates, localStates);
 
   // Generate revoke and grant raw queries
   // @ts-expect-error - This is a valid call
@@ -146,42 +173,53 @@ export const checkDiff: module["checkDiff"] = async (privMod) => {
   };
 };
 
-/* -------------------------- generateMigrationFile ------------------------- */
-export const generateMigrationFile: module["generateMigrationFile"] = async () => {
+/* ------------------------------- checkDiffs ------------------------------- */
+
+export const checkDiffs: module["checkDiffs"] = async () => {
+  return Promise.all([...Object.values(atPrivileges)].map((privMod) => checkDiff(privMod)));
+};
+
+/* -------------------------- generateMigrationPlanFile ------------------------- */
+export const generateMigrationPlanFile: module["generateMigrationPlanFile"] = async () => {
   const rootStore = await getRootStore();
 
-  let fileContent = `-- Privileges Migration generated by @totuna
+  let fileContent = `-- Privileges Migration Plan generated by @totuna
   -- Generated at: ${new Date().toISOString()}`;
-  const diffs = await Promise.all([...privMap].map(([, privMod]) => checkDiff(privMod)));
+  const diffs = await Promise.all([...Object.values(atPrivileges)].map((privMod) => checkDiff(privMod)));
 
   const changes = diffs.flatMap((diff) => {
     const sections = [];
     if (diff.grantRawQueries.length > 0) {
-      sections.push(`-- Grant Statements\n${diff.grantRawQueries.join("\n")}`);
+      sections.push(`-- Grant Statements\n${diff.grantRawQueries.join("\n")}\n`);
     }
     if (diff.revokeRawQueries.length > 0) {
-      sections.push(`-- Revoke Statements\n${diff.revokeRawQueries.join("\n")}`);
+      sections.push(`-- Revoke Statements\n${diff.revokeRawQueries.join("\n")}\n`);
     }
     return sections;
   });
 
   if (changes.length === 0) {
     return {
-      _metaType_: "NoChangesToApply" as const,
+      _metaType_: "NoMigrationPlan" as const,
     };
   }
 
   fileContent += changes.join("\n");
 
-  const MIGRATIONS_PATH = rootStore.systemVariables.PUBLIC_MIGRATIONS_PATH;
-  fs.mkdirSync(MIGRATIONS_PATH, { recursive: true });
-  const fileId = await migrationsEngine.getNextMigrationSeq("local");
-  const fileName = `${fileId}_privileges_update.totuna.sql`;
-  fs.writeFileSync(path.resolve(MIGRATIONS_PATH, fileName), fileContent);
+  const MIGRATIONS_PLAN_PATH = rootStore.systemVariables.PUBLIC_MIGRATIONS_PLAN_PATH;
+  fs.mkdirSync(MIGRATIONS_PLAN_PATH, { recursive: true });
+
+  const fileName = `privileges.sql`;
+  fs.writeFileSync(path.resolve(MIGRATIONS_PLAN_PATH, fileName), fileContent);
 
   return {
-    _metaType_: "ChangesToApply" as const,
+    _metaType_: "MigrationPlanGenerated" as const,
     fileName,
     fileContent,
   };
 };
+
+/* --------------------------- _queryRemoteStates --------------------------- */
+
+const _queryRemoteStates = async (pgClient: pg.Client, privMod: modulePrivileges[keyof modulePrivileges]) =>
+  (await privMod.pullQuery(pgClient.query.bind(pgClient)))?.rows.map((row) => privMod.StateSchema.parse(row));

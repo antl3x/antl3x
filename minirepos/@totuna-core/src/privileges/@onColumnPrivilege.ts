@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 import { getRootStore } from "@rootStore.js";
 import type { module as atPrivilege } from "./@privilege.js";
 
@@ -8,9 +8,9 @@ import type { module as atPrivilege } from "./@privilege.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface module extends atPrivilege<typeof StateSchema, "onColumn"> {}
+satisfies<module, typeof import("./@onColumnPrivilege.js")>;
 
-satisfies<module>()(import("./@onColumnPrivilege.js"));
+export interface module extends atPrivilege<typeof StateSchema, "onColumn"> {}
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */
@@ -19,8 +19,6 @@ satisfies<module>()(import("./@onColumnPrivilege.js"));
 export const _metaId_ = "onColumn";
 
 export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).systemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/columns`;
-export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).systemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/columns`;
-export const INTERNAL_STATE_FILE_PATH = async () => `${await INTERNAL_STATE_FOLDER_PATH()}/state.json`;
 
 /* -------------------------------- zodSchema ------------------------------- */
 
@@ -33,7 +31,7 @@ export const StateSchema = z
     table_schema: z.string(),
     column_name: z.string(),
     grantee: z.string(),
-    privilege_type: z.string(),
+    privilege_type: z.union([z.literal("SELECT"), z.literal("INSERT"), z.literal("UPDATE"), z.literal("REFERENCES")]),
   })
   .brand("PrivilegeOnColumn");
 
@@ -62,9 +60,9 @@ AND has_column_privilege(r.oid, t.oid, c.attnum, p.perm) = true;
   );
 
 export const grantRawQuery: module["grantRawQuery"] = (state) => {
-  return `GRANT ${state.privilege_type} (${state.column_name}) ON ${state.table_schema}.${state.table_name} TO ${state.grantee};`;
+  return `GRANT ${state.privilege_type} ("${state.column_name}") ON "${state.table_schema}.${state.table_name}" TO "${state.grantee}";`;
 };
 
 export const revokeRawQuery: module["revokeRawQuery"] = (state) => {
-  return `REVOKE ${state.privilege_type} (${state.column_name}) ON ${state.table_schema}.${state.table_name} FROM ${state.grantee};`;
+  return `REVOKE ${state.privilege_type} ("${state.column_name}") ON "${state.table_schema}.${state.table_name}" FROM "${state.grantee}";`;
 };

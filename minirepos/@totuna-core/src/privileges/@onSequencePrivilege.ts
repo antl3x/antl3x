@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { satisfies } from "_utils_/@utils.js";
+import { satisfies } from "_utils_/_@utils_.js";
 import { getRootStore } from "@rootStore.js";
 import type { module as atPrivilege } from "./@privilege.js";
 
@@ -8,9 +8,9 @@ import type { module as atPrivilege } from "./@privilege.js";
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface module extends atPrivilege<typeof StateSchema, "onSequence"> {}
+satisfies<module, typeof import("./@onSequencePrivilege.js")>;
 
-satisfies<module>()(import("./@onSequencePrivilege.js"));
+export interface module extends atPrivilege<typeof StateSchema, "onSequence"> {}
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */
@@ -19,8 +19,6 @@ satisfies<module>()(import("./@onSequencePrivilege.js"));
 export const _metaId_ = "onSequence";
 
 export const PUBLIC_STATE_FILE_PATH = async () => `${(await getRootStore()).systemVariables.PUBLIC_STATE_PRIVILEGES_PATH}/sequences`;
-export const INTERNAL_STATE_FOLDER_PATH = async () => `${(await getRootStore()).systemVariables.INTERNAL_STATE_PRIVILEGES_PATH}/sequences`;
-export const INTERNAL_STATE_FILE_PATH = async () => `${await INTERNAL_STATE_FOLDER_PATH()}/state.json`;
 
 /* -------------------------------- zodSchema ------------------------------- */
 
@@ -60,9 +58,9 @@ export const pullQuery: module["pullQuery"] = (dbQuery) =>
 /* ------------------------------ grantRawQuery ----------------------------- */
 
 export const grantRawQuery: module["grantRawQuery"] = (state) =>
-  `GRANT ${state.privilege} ON SEQUENCE ${state.schema}.${state.sequence} TO ${state.grantee};`;
+  `GRANT ${state.privilege} ON SEQUENCE "${state.schema}.${state.sequence}" TO "${state.grantee}";`;
 
 /* ------------------------------ revokeRawQuery ----------------------------- */
 
 export const revokeRawQuery: module["revokeRawQuery"] = (state) =>
-  `REVOKE ${state.privilege} ON SEQUENCE ${state.schema}.${state.sequence} FROM ${state.grantee};`;
+  `REVOKE ${state.privilege} ON SEQUENCE "${state.schema}.${state.sequence}" FROM "${state.grantee}";`;

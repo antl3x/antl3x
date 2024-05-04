@@ -16,13 +16,14 @@ const tscAliasPlugin = (format) => {
 };
 
 (async () => {
-
   await build({
     entryPoints: ["src/**/*.ts"],
     bundle: false,
     platform: "node",
+    treeShaking: true,
     target: "es2022",
     format: "esm",
+    sourcemap: true,
     outdir: "dist/esm",
     plugins: [tscAliasPlugin("esm")],
   });
@@ -30,6 +31,7 @@ const tscAliasPlugin = (format) => {
     entryPoints: ["src/**/*.ts"],
     outdir: "dist/cjs",
     bundle: false,
+    sourcemap: true,
     platform: "node",
     target: "es2022",
     format: "cjs",
