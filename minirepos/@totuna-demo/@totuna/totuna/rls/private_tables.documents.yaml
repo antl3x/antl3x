@@ -2,7 +2,6 @@
 schema: private_tables
 table: documents
 ---
-
 rlsEnabled: true
 
 policies:
@@ -26,18 +25,11 @@ policies:
       )
     exprWithCheck: null
 
-  - name: select_policy_2
-    for: SELECT
-    to:
-      - group:customer
-    as: PERMISSIVE
-    exprUsing: "true"
-    exprWithCheck: null
-
   - name: select_policy_3
     for: INSERT
     to:
       - customer:xyz
+      - public
     as: PERMISSIVE
     exprUsing: null
     exprWithCheck: "true"

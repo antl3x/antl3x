@@ -2,20 +2,6 @@
 schema: private_tables
 table: Album
 ---
-
 rlsEnabled: true
 
-policies:
-  - name: Individuals can view their own todos.
-    for: SELECT
-    to:
-      - ""
-    as: PERMISSIVE
-    exprUsing: |-
-      (
-        (
-          SELECT
-            1
-        ) = "AlbumId"
-      )
-    exprWithCheck: null
+policies: []

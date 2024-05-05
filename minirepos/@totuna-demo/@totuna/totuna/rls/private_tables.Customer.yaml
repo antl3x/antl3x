@@ -6,12 +6,20 @@ table: Customer
 rlsEnabled: true
 
 policies:
+  - name: select_policy_2
+    for: SELECT
+    to:
+      - group:customer
+    as: PERMISSIVE
+    exprUsing: "true"
+    exprWithCheck: null
+
   - name: select_policy
     for: ALL
     to:
       - customer:xyz
     as: PERMISSIVE
-    exprUsing: "true"
+    exprUsing: "false"
     exprWithCheck: |-
       (
         (

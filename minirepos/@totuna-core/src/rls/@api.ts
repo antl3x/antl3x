@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { z } from "zod";
 import path from "node:path";
 import { stringify, parseAllDocuments } from "yaml";
 import { format } from "sql-formatter";
@@ -13,9 +14,31 @@ export type PullRemoteTableFilesRes = {
   status: "written" | "skipped-diff" | "skipped";
 };
 
+const DiffPolicy = z.object({
+  localState: z.union([z.literal("Present"), z.literal("Absent")]),
+  remoteState: z.union([z.literal("Present"), z.literal("Absent"), z.literal("Outdated")]),
+  plan: z.union([z.literal("Create Policy"), z.literal("Delete Policy"), z.literal("Update Policy")]),
+  planQuery: z.string(),
+  targetTable: z.string(),
+  policyName: z.string().nullable(),
+  onCommand: z.string().nullable(),
+  applyTo: z.array(z.string()),
+});
+
+const DiffTable = z.object({
+  localState: z.union([z.literal("RLS Enabled"), z.literal("RLS Disabled")]),
+  remoteState: z.union([z.literal("RLS Enabled"), z.literal("RLS Disabled")]),
+  plan: z.union([z.literal("Enable RLS"), z.literal("Disable RLS")]),
+  planQuery: z.string(),
+  targetTable: z.string(),
+});
+
+const Diff = z.union([DiffPolicy, DiffTable]);
+
 export const checkDiff = async () => {
   const remoteTableFiles = (await pullRemoteTableFiles()).map((res) => res.fileContent);
   const localTableFiles = await _getLocalTableFiles();
+  const diffs: z.TypeOf<typeof Diff>[] = [];
 
   // Group states to compare
   const remotePoliciesStates: PolicyState[] = [];
@@ -41,31 +64,82 @@ export const checkDiff = async () => {
   const tableStateDiff = diffArr(remoteTableStates, localTableStates);
   const policyStateDiff = diffArr(remotePoliciesStates, localPoliciesStates);
 
-  const rawQueries = new Map<string, string>();
-
   // Generate query for each table state
   for (const tableState of tableStateDiff.additions) {
-    rawQueries.set(
-      `alterTable:${tableState.schema}.${tableState.table}`,
-      `ALTER TABLE ${tableState.schema}."${tableState.table}" ${tableState.rlsEnabled ? "ENABLE" : "DISABLED"} ROW LEVEL SECURITY`,
+    diffs.push(
+      DiffTable.parse({
+        localState: "RLS Enabled",
+        remoteState: "RLS Disabled",
+        plan: "Enable RLS",
+        planQuery: `ALTER TABLE ${tableState.schema}."${tableState.table}" ENABLE ROW LEVEL SECURITY`,
+        targetTable: `${tableState.schema}.${tableState.table}`,
+      }),
     );
   }
 
-  for (const policyState of policyStateDiff.removals) {
-    rawQueries.set(
-      `dropPolicy:${policyState.schema}.${policyState.table}.${policyState.name}`,
-      `DROP POLICY "${policyState.name}" ON ${policyState.schema}."${policyState.table}"`,
+  for (const tableState of tableStateDiff.removals) {
+    const isUpdate = tableStateDiff.additions.some((table) => table.schema === tableState.schema && table.table === tableState.table);
+    if (isUpdate) {
+      continue;
+    }
+
+    diffs.push(
+      DiffTable.parse({
+        localState: "RLS Disabled",
+        remoteState: "RLS Enabled",
+        plan: "Disable RLS",
+        planQuery: `ALTER TABLE ${tableState.schema}."${tableState.table}" DISABLE ROW LEVEL SECURITY`,
+        targetTable: `${tableState.schema}.${tableState.table}`,
+      }),
     );
   }
 
   for (const policyState of policyStateDiff.additions) {
-    rawQueries.set(
-      `createPolicy:${policyState.schema}.${policyState.table}.${policyState.name}`,
-      `CREATE POLICY "${policyState.name}" ON ${policyState.schema}."${policyState.table}" FOR ${policyState.for} TO ${policyState.to.join(", ")} AS ${policyState.as} ${policyState.exprUsing ? `USING (${policyState.exprUsing})` : ""} ${policyState.exprWithCheck ? `WITH CHECK (${policyState.exprWithCheck})` : ""}`,
+    const isUpdate = policyStateDiff.removals.some(
+      (policy) => policy.name === policyState.name && policy.schema === policyState.schema && policy.table === policyState.table,
+    );
+    const createPolicyQuery = `CREATE POLICY "${policyState.name}" ON ${policyState.schema}."${policyState.table}" FOR ${policyState.for} TO ${policyState.to.map((role) => `"${role}"`).join(", ")} ${policyState.as} ${policyState.exprUsing ? `USING (${policyState.exprUsing})` : ""} ${policyState.exprWithCheck ? `WITH CHECK (${policyState.exprWithCheck})` : ""}`;
+    const dropPolicyQuery = `DROP POLICY "${policyState.name}" ON ${policyState.schema}."${policyState.table}"`;
+    const planQuery = isUpdate ? `${dropPolicyQuery}; ${createPolicyQuery};` : createPolicyQuery;
+
+    diffs.push(
+      DiffPolicy.parse({
+        localState: "Present",
+        remoteState: isUpdate ? "Outdated" : "Absent",
+        plan: isUpdate ? "Update Policy" : "Create Policy",
+        planQuery,
+        targetTable: `${policyState.schema}.${policyState.table}`,
+        policyName: policyState.name,
+        onCommand: policyState.for,
+        applyTo: policyState.to,
+      }),
     );
   }
 
-  return { tableStateDiff, policyStateDiff, rawQueries };
+  for (const policyState of policyStateDiff.removals) {
+    const isUpdate = policyStateDiff.additions.some(
+      (policy) => policy.name === policyState.name && policy.schema === policyState.schema && policy.table === policyState.table,
+    );
+    if (isUpdate) {
+      continue;
+    }
+
+    const dropPolicyQuery = `DROP POLICY "${policyState.name}" ON ${policyState.schema}."${policyState.table}"`;
+    diffs.push(
+      DiffPolicy.parse({
+        localState: "Absent",
+        remoteState: "Present",
+        plan: "Delete Policy",
+        planQuery: dropPolicyQuery,
+        targetTable: `${policyState.schema}.${policyState.table}`,
+        policyName: policyState.name,
+        onCommand: policyState.for,
+        applyTo: policyState.to,
+      }),
+    );
+  }
+
+  return diffs;
 };
 
 const _getLocalTableFiles = async (): Promise<TableFile[]> => {
@@ -176,10 +250,7 @@ export const _parseYAMLtoTableFile = async (fileContents: string, filePath: stri
 
 const SQL_QUERY = `SELECT n.nspname AS schema,
 c.relname AS table,
-CASE 
-    WHEN pol.polname IS NOT NULL THEN true 
-    ELSE false 
-END AS "rlsEnabled",
+c.relrowsecurity AS "rlsEnabled",  -- directly retrieving RLS enabled status
 pol.polname AS name,
 CASE 
     WHEN pol.polpermissive THEN 'PERMISSIVE'::text
@@ -188,9 +259,9 @@ END AS as,
 CASE
     WHEN pol.polroles = '{0}'::oid[] THEN string_to_array('public'::text, ''::text)::name[]
     ELSE ARRAY( SELECT pg_authid.rolname
-        FROM pg_authid
-      WHERE pg_authid.oid = ANY (pol.polroles)
-      ORDER BY pg_authid.rolname)
+                FROM pg_authid
+                WHERE pg_authid.oid = ANY (pol.polroles)
+                ORDER BY pg_authid.rolname)
 END AS to,
 CASE pol.polcmd
     WHEN 'r' THEN 'SELECT'
@@ -207,4 +278,5 @@ LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
 LEFT JOIN pg_policy pol ON c.oid = pol.polrelid
 WHERE c.relkind = 'r'
 AND n.nspname NOT LIKE 'pg_%'
-AND n.nspname != 'information_schema';`;
+AND n.nspname != 'information_schema';
+`;
