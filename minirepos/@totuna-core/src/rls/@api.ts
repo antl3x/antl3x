@@ -77,7 +77,7 @@ const _getLocalTableFiles = async (): Promise<TableFile[]> => {
     if (!file.endsWith(".yaml")) continue;
     const filePath = path.resolve(systemVariables.PUBLIC_STATE_RLS_PATH, file);
     const fileContents = fs.readFileSync(filePath, "utf-8");
-    const tableFile = await _parseYAMLtoTableFile(fileContents);
+    const tableFile = await _parseYAMLtoTableFile(fileContents, filePath);
     tableFiles.push(tableFile);
   }
 
@@ -161,7 +161,7 @@ const _parseTableFileToYAML = (tableFile: TableFile): string => {
  * @param fileContents The contents of the YAML file.
  * @returns A TableFile object.
  */
-export const _parseYAMLtoTableFile = async (fileContents: string): Promise<TableFile> => {
+export const _parseYAMLtoTableFile = async (fileContents: string, filePath: string): Promise<TableFile> => {
   try {
     const [metadata, content] = parseAllDocuments(fileContents);
 
@@ -170,7 +170,7 @@ export const _parseYAMLtoTableFile = async (fileContents: string): Promise<Table
       ...content.contents!.toJSON(),
     });
   } catch (error) {
-    throw new Error("Failed to parse the YAML file.", { cause: error });
+    throw new Error(`Failed to parse the YAML file. ${filePath} / ${error}`, { cause: error });
   }
 };
 

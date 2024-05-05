@@ -1,0 +1,6 @@
+---
+schema: private_tables
+table: InvoiceLine
+---
+rlsEnabled: true
+policies: []

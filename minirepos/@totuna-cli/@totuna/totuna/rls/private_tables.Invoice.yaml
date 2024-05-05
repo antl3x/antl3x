@@ -1,0 +1,7 @@
+---
+schema: private_tables
+table: Invoice
+---
+
+rlsEnabled: false
+policies: []

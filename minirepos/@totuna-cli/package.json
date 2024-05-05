@@ -22,14 +22,13 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "oclif-bin": "ts-node node_modules/.bin/oclif",
-    "build": "shx rm -rf dist && tsc -b && tsc-alias --outDir dist",
+    "build": "shx rm -rf dist && tsc -b",
     "lint": "eslint . --ext .ts",
-    "prepack": "pnpm oclif-bin manifest && pnpm oclif-bin readme",
     "postpack": "shx rm -f oclif.manifest.json",
+    "posttest": "npm run lint",
+    "prepack": "oclif manifest && oclif readme",
     "test": "mocha --forbid-only \"test/**/*.test.ts\"",
-    "posttest": "pnpm run lint",
-    "version": "pnpm oclif-bin readme && git add README.md"
+    "version": "oclif readme && git add README.md"
   },
   "oclif": {
     "bin": "totuna",
@@ -63,7 +62,9 @@
     "eslint-plugin-import": "^2.29.1",
     "inquirer": "^9.2.20",
     "ora": "^8.0.1",
-    "tsconfig-paths": "^4.2.0"
+    "ts-node": "^10",
+    "tsconfig-paths": "^4.2.0",
+    "zod": "^3.23.6"
   },
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",
