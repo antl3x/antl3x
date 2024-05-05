@@ -1,0 +1,7 @@
+---
+schema: private_tables
+table: Artist
+---
+
+rlsEnabled: false
+policies: []

@@ -35,6 +35,7 @@ interface SystemVariables {
   PUBLIC_DATABASE_PATH: string;
   INTERNAL_DATABASE_PATH: string;
   PUBLIC_STATE_PRIVILEGES_PATH: string;
+  PUBLIC_STATE_RLS_PATH: string;
   PUBLIC_MIGRATIONS_PATH: string;
   PUBLIC_MIGRATIONS_PLAN_PATH: string;
 }
@@ -105,6 +106,10 @@ const _systemVariables = (userConfig: ReturnType<typeof defineConfig>): RootStor
 
     get PUBLIC_STATE_PRIVILEGES_PATH() {
       return `${this.PUBLIC_DATABASE_PATH}/privileges`;
+    },
+
+    get PUBLIC_STATE_RLS_PATH() {
+      return `${this.PUBLIC_DATABASE_PATH}/rls`;
     },
 
     get PUBLIC_MIGRATIONS_PATH() {

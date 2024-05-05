@@ -1,5 +1,5 @@
-#!/usr/bin/env -S node_modules/.bin/tsx  --no-warnings=ExperimentalWarning
-
+#!/usr/bin/env -S node
+import 'tsx'
 import {run, handle, flush} from '@oclif/core'
 process.env.NODE_ENV = 'development'
 

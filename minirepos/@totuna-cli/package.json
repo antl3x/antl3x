@@ -1,7 +1,7 @@
 {
   "name": "@totuna/cli",
   "version": "0.1.0",
-  "description": "totuna | Your PostgreSQL Full Stack Platform",
+  "description": "☶ TOTUNA | Your PostgreSQL Full Stack Platform",
   "keywords": [
     "oclif"
   ],
@@ -11,7 +11,7 @@
   "license": "AGPL-3.0-only",
   "author": "Antonio Moura (@antl3x)",
   "type": "module",
-  "exports": "./lib/index.js",
+  "exports": "./dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "totuna": "./bin/run.js"
@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "oclif-bin": "ts-node node_modules/.bin/oclif",
-    "build": "shx rm -rf dist && tsc -b",
+    "build": "shx rm -rf dist && tsc -b && tsc-alias --outDir dist",
     "lint": "eslint . --ext .ts",
     "prepack": "pnpm oclif-bin manifest && pnpm oclif-bin readme",
     "postpack": "shx rm -f oclif.manifest.json",
@@ -42,20 +42,13 @@
     "topicSeparator": " ",
     "topics": {
       "privileges": {
-        "alias": "p",
-        "description": "Easily manage PostgreSQL privileges (GRANT/REVOKE) using a declarative code-based approach."
+        "description": "Manage your PostgreSQL Privileges as code."
       },
-      "privileges:pull": {
-        "description": "Pull the current state of PostgreSQL privileges from the database and generate descriptive .ts files for easy modification."
+      "migrations": {
+        "description": "Manage your PostgreSQL Migrations as code."
       },
-      "privileges:push": {
-        "description": "Push the changes made in the local .ts files to the database by transforming them into SQL statements and executing them."
-      },
-      "privileges:diff": {
-        "description": "Diff local and remote privilege states to compare."
-      },
-      "privileges:generate": {
-        "description": "Generate .sql migration files based on local schema changes without applying the migrations to the database."
+      "rls": {
+        "description": "Manage your PostgreSQL Row Level Security as code."
       }
     }
   },
@@ -90,7 +83,7 @@
     "mocha": "^10",
     "oclif": "^4.9.0",
     "shx": "^0.3.4",
-    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.8",
     "tsx": "^4.8.2",
     "typescript": "^5"
   },

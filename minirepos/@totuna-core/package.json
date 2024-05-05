@@ -1,7 +1,7 @@
 {
   "name": "@totuna/core",
   "version": "0.0.1",
-  "description": "totuna core allows you to control postgresql objects as IaaC",
+  "description": "☶ TOTUNA | Your PostgreSQL Full Stack Platform",
   "homepage": "https://github.com/antl3x/antl3x/tree/master/minirepos/@totuna-core",
   "type": "module",
   "files": [
@@ -24,6 +24,11 @@
       "import": "./dist/esm/privileges/*.js",
       "require": "./dist/cjs/privileges/*.js",
       "types": "./dist/types/privileges/*.d.ts"
+    },
+    "./rls/*": {
+      "import": "./dist/esm/rls/*.js",
+      "require": "./dist/cjs/rls/*.js",
+      "types": "./dist/types/rls/*.d.ts"
     },
     "./@config": {
       "import": "./dist/esm/@config.js",
@@ -90,7 +95,9 @@
     "pg": "^8.11.5",
     "postgres-migrations": "^5.3.0",
     "relaxed-json": "^1.0.3",
-    "tsc-alias": "^1.8.8"
+    "sql-formatter": "^15.3.1",
+    "tsc-alias": "^1.8.8",
+    "yaml": "^2.4.2"
   },
   "pnpm": {
     "patchedDependencies": {

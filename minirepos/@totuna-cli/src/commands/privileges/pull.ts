@@ -5,7 +5,7 @@ import {BaseCommand} from '../../base.js'
 import * as atPrivilegesApi from '@totuna/core/privileges/@api'
 
 import {logger} from '@log.js'
-import {objectMapping, privileges} from './@utils.js'
+import {objectMapping, privileges} from '../../@utils.js'
 
 /* -------------------------------------------------------------------------- */
 /*                               PrivilegesSync                               */
