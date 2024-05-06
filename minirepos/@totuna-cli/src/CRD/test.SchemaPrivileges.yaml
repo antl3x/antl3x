@@ -1,0 +1,10 @@
+kind: SchemaPrivileges
+metadata:
+  name: test-schema-privileges
+spec:
+  database: mydb
+  schema: test
+  rolePrivileges:
+    admin: [SELECT, INSERT, UPDATE, DELETE]
+    read-only: [SELECT]
+    data-entry: [SELECT, INSERT]

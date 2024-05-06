@@ -30,8 +30,11 @@ export interface RootStore__Ready {
 
 interface SystemVariables {
   PUBLIC_DATABASE_PATH: string
+  PUBLIC_SCHEMAS_PATH: string
   PUBLIC_MIGRATIONS_PATH: string
   PUBLIC_MIGRATIONS_PLAN_PATH: string
+
+  PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(schemaName: string): string
 }
 
 /* -------------------------------------------------------------------------- */
@@ -93,10 +96,18 @@ const _systemVariables = (userConfig: Config): RootStore__Ready['systemVariables
       return `${this.PUBLIC_PATH}/_databases_/${userConfig.pgConfig.database}`
     },
 
+    get PUBLIC_SCHEMAS_PATH() {
+      return `${this.PUBLIC_DATABASE_PATH}/_schemas_`
+    },
+
     get PUBLIC_MIGRATIONS_PATH() {
       return `${this.PUBLIC_DATABASE_PATH}/_migrations_`
     },
     get PUBLIC_MIGRATIONS_PLAN_PATH() {
       return `${this.PUBLIC_DATABASE_PATH}/_migrations_/_plan_`
+    },
+
+    PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(schemaName: string) {
+      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}`
     },
   })

@@ -1,6 +1,6 @@
 import {Config} from '@config.js'
-import {logger} from '+log.js'
-import {getRootStore, initRootStore} from '-rootStore.js'
+import {logger} from 'utils/@utils.js'
+import {getRootStore, initRootStore} from '@RootStore.js'
 
 import {Command, Flags, Interfaces} from '@oclif/core'
 import path from 'path'

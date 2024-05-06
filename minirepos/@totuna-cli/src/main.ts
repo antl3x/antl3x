@@ -1,7 +1,9 @@
-import migrations_run from './migrations/commands/run.js'
-import {default as exp} from './export/commands/export.js'
+import migrations_run from './commands/migrations/run.js'
+import pull from './commands/pull.js'
+import compare from './commands/compare.js'
 
 export const COMMANDS = {
   'migrations:run': migrations_run,
-  export: exp,
+  pull,
+  compare,
 }

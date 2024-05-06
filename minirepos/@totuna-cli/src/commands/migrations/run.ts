@@ -1,9 +1,9 @@
 import * as migrations from '@totuna/core/migrations/@api'
 import fs from 'fs'
 import path from 'path'
-import {BaseCommand} from '../BaseCommand.js'
+import {BaseCommand} from 'commands/BaseCommand.js'
 
-import {logger} from '@log.js'
+import {logger} from 'utils/@utils.js'
 import {Args} from '@oclif/core'
 import ora from 'ora'
 

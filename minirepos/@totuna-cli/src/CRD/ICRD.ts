@@ -1,3 +1,5 @@
+import {RootStore__Ready} from '@RootStore.js'
+import type {IRCDParser} from './ICRDParser.js'
 import {z} from 'zod'
 
 /* -------------------------------------------------------------------------- */
@@ -5,17 +7,18 @@ import {z} from 'zod'
 /* -------------------------------------------------------------------------- */
 
 export interface ICRD<
-  StateSchema extends z.Schema = z.Schema,
+  StateSchema extends z.Schema<unknown & {kind: string; metadata: {name: string}; spec: unknown}> = z.Schema,
   StateObject extends z.TypeOf<StateSchema> = z.TypeOf<StateSchema>,
   StateDiff = any,
 > {
+  _kind_: StateObject['kind']
   /* ------------------------------- StateSchema ------------------------------ */
 
   StateSchema: StateSchema
 
   /* --------------------------------- compare -------------------------------- */
 
-  compare: (stateA: StateObject, stateB: StateObject) => StateDiff
+  $compare: (parser: IRCDParser<ICRD>) => Promise<StateDiff>
 
   /* ---------------------------------- apply --------------------------------- */
 
@@ -39,7 +42,15 @@ export interface ICRD<
 
   /* ---------------------------------- $pull --------------------------------- */
 
-  $pull: () => {_kind_: 'Pulled'} | {_kind_: 'PulledWithFailure'; error: Error}
+  $pull: () => Promise<StateObject[]>
+
+  /* ---------------------------- $fetchLocalStates ---------------------------- */
+
+  $fetchLocalStates(parser: IRCDParser<ICRD>): Promise<StateObject[]>
+
+  /* --------------------------- $fetchRemoteStates --------------------------- */
+
+  $fetchRemoteStates(): Promise<StateObject[]>
 }
 
 export type MigrationFile = string
