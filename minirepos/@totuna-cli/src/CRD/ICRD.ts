@@ -34,7 +34,18 @@ export interface ICRD<
 
   /* ---------------------------------- $plan ---------------------------------- */
 
-  $plan: (state: StateObject) => {_kind_: 'PlanInfo'}
+  $plan: (state: StateObject) => Promise<
+    {
+      _kind_: 'PlanInfo'
+      localState: 'Present' | 'Absent'
+      remoteState: 'Present' | 'Absent' | 'Outdated'
+      plan: string
+      objectType: string
+      objectPath: string
+      oldValue: string
+      newValue: string
+    }[]
+  >
 
   /* -------------------------------- validate -------------------------------- */
 

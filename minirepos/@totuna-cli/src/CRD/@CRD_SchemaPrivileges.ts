@@ -55,30 +55,63 @@ export const $compare: thisModule['$compare'] = async (parser) => {
   const localStateObjects = await $fetchLocalStates(parser)
   const remoteStateObjects = await $fetchRemoteStates()
 
-  const delta = jdp.diff(localStateObjects, remoteStateObjects)
-  const queries = []
+  const operations: {
+    operation: 'GRANT' | 'REVOKE'
+    role: string
+    privilege: 'USAGE' | 'CREATE'
+  }[] = []
 
-  function revokeGrantQueries(role, privilegesToRemove, privilegesToAdd) {
-    if (privilegesToRemove) {
-      privilegesToRemove.forEach((priv) => {
-        queries.push(`REVOKE ${priv} ON SCHEMA private_tables FROM ${role};`)
-      })
-    }
-    if (privilegesToAdd) {
-      privilegesToAdd.forEach((priv) => {
-        queries.push(`GRANT ${priv} ON SCHEMA private_tables TO ${role};`)
-      })
+  const delta = jdp.diff(remoteStateObjects, localStateObjects)
+
+  for (const diffKey in delta) {
+    const rolesPrivilegesChanges =
+      delta.hasOwnProperty(diffKey) && delta[diffKey].spec && delta[diffKey].spec.rolePrivileges
+
+    if (rolesPrivilegesChanges) {
+      for (const role in rolesPrivilegesChanges) {
+        const privilegesDelta = rolesPrivilegesChanges[role]
+
+        console.log(privilegesDelta)
+
+        for (const privDelta in privilegesDelta) {
+          if (privDelta == '_t') continue
+
+          const [privilegeValue, privilegeNewValue, isDeletion] = privilegesDelta[privDelta]
+
+          if (isDeletion === 0) {
+            operations.push({
+              operation: 'REVOKE',
+              role,
+              privilege: privilegeValue,
+            })
+          }
+
+          if (privilegeValue && privilegesDelta[privDelta].length === 2) {
+            operations.push({
+              operation: 'REVOKE',
+              role,
+              privilege: privilegeValue,
+            })
+            operations.push({
+              operation: 'GRANT',
+              role,
+              privilege: privilegeNewValue,
+            })
+          }
+
+          if (privilegeValue && privilegesDelta[privDelta].length === 1) {
+            operations.push({
+              operation: 'GRANT',
+              role,
+              privilege: privilegeValue,
+            })
+          }
+        }
+      }
     }
   }
 
-  for (const role in delta) {
-    console.log(delta[role])
-    console.log(remoteStateObjects[role])
-    if (Array.isArray(delta[role])) {
-    }
-  }
-
-  return queries
+  console.log(operations)
 }
 
 /* ---------------------------------- plan ---------------------------------- */
