@@ -1,7 +1,0 @@
----
-schema: private_tables
-table: Album
----
-rlsEnabled: true
-
-policies: []

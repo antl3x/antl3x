@@ -1,18 +1,17 @@
-import * as api from '@totuna/core/privileges/@api'
 import * as migrations from '@totuna/core/migrations/@api'
 import fs from 'fs'
 import path from 'path'
-import {BaseCommand} from '../../base.js'
+import {BaseCommand} from '../BaseCommand.js'
 
 import {logger} from '@log.js'
 import {Args} from '@oclif/core'
 import ora from 'ora'
 
 /* -------------------------------------------------------------------------- */
-/*                                MigrationRun                                */
+/*                                  Command                                   */
 /* -------------------------------------------------------------------------- */
 
-export default class MigrationRun extends BaseCommand<typeof MigrationRun> {
+export default class Command extends BaseCommand<typeof Command> {
   static override description = 'Run all the migrations'
   static override examples = ['<%= config.bin %> <%= command.id %>']
 

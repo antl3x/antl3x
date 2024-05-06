@@ -1,7 +1,0 @@
----
-schema: _totuna_
-table: migrations
----
-
-rlsEnabled: false
-policies: []

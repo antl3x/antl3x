@@ -1,7 +1,0 @@
----
-schema: private_tables
-table: Playlist
----
-
-rlsEnabled: false
-policies: []

@@ -1,7 +1,0 @@
----
-schema: private_tables
-table: MediaType
----
-
-rlsEnabled: false
-policies: []

@@ -1,0 +1,14 @@
+state: SchemaPrivileges
+spec:
+  database: totuna
+  schema: private_tables
+  privileges:
+
+    - role: admin
+      privileges:
+        - usage
+        - create
+
+    - role: user
+      privileges:
+        - usage

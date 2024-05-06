@@ -22,7 +22,7 @@
     "/oclif.manifest.json"
   ],
   "scripts": {
-    "build": "shx rm -rf dist && tsc -b",
+    "build": "shx rm -rf dist && tsc -b && tsc-alias",
     "lint": "eslint . --ext .ts",
     "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "npm run lint",
@@ -32,24 +32,17 @@
   },
   "oclif": {
     "bin": "totuna",
-    "commands": "./dist/commands",
+    "commands": {
+      "strategy": "explicit",
+      "target": "./dist/main.js",
+      "identifier": "COMMANDS"
+    },
     "dirname": "totuna",
     "plugins": [
       "@oclif/plugin-help",
       "@oclif/plugin-plugins"
     ],
-    "topicSeparator": " ",
-    "topics": {
-      "privileges": {
-        "description": "Manage your PostgreSQL Privileges as code."
-      },
-      "migrations": {
-        "description": "Manage your PostgreSQL Migrations as code."
-      },
-      "rls": {
-        "description": "Manage your PostgreSQL Row Level Security as code."
-      }
-    }
+    "topicSeparator": " "
   },
   "dependencies": {
     "@oclif/core": "^3",
@@ -61,7 +54,9 @@
     "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-import": "^2.29.1",
     "inquirer": "^9.2.20",
+    "mobx": "^6.12.3",
     "ora": "^8.0.1",
+    "pg": "^8.11.5",
     "ts-node": "^10",
     "tsconfig-paths": "^4.2.0",
     "zod": "^3.23.6"
@@ -74,6 +69,7 @@
     "@types/inquirer": "^9.0.7",
     "@types/mocha": "^10",
     "@types/node": "^18",
+    "@types/pg": "^8.11.5",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
     "chai": "^4",

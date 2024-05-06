@@ -5,14 +5,9 @@ import { stringify, parseAllDocuments } from "yaml";
 import { format } from "sql-formatter";
 
 import { getRootStore } from "@rootStore.js";
-import { PolicyState, TableFile, TableState } from "./@misc.js";
+import { PolicyState, TableState } from "./@state.js";
 import { diffArr } from "_utils_/_@utils_.js";
 
-export type PullRemoteTableFilesRes = {
-  fileName: string;
-  fileContent: TableFile;
-  status: "written" | "skipped-diff" | "skipped";
-};
 
 const DiffPolicy = z.object({
   localState: z.union([z.literal("Present"), z.literal("Absent")]),
@@ -142,7 +137,7 @@ export const checkDiff = async () => {
   return diffs;
 };
 
-const _getLocalTableFiles = async (): Promise<TableFile[]> => {
+const _getLocalTableFiles = async () => {
   const { systemVariables } = await getRootStore();
   const files = fs.readdirSync(systemVariables.PUBLIC_STATE_RLS_PATH);
   const tableFiles = [];
@@ -158,7 +153,7 @@ const _getLocalTableFiles = async (): Promise<TableFile[]> => {
   return tableFiles;
 };
 
-export const pullRemoteTableFiles = async (): Promise<PullRemoteTableFilesRes[]> => {
+export const pullRemoteTableFiles = async () => {
   const { pgClient, systemVariables } = await getRootStore();
 
   if (!fs.existsSync(systemVariables.PUBLIC_STATE_RLS_PATH)) {
@@ -168,7 +163,7 @@ export const pullRemoteTableFiles = async (): Promise<PullRemoteTableFilesRes[]>
   const { rows } = await pgClient.query<PolicyState & { rlsEnabled: boolean }>(SQL_QUERY);
 
   const tableFiles = [];
-  const results: PullRemoteTableFilesRes[] = [];
+  const results = [];
 
   for (const row of rows) {
     let policies: Omit<PolicyState, "schema" | "table">[] = [];
