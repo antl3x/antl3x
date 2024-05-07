@@ -39,9 +39,9 @@ export interface ICRD<
 
   /* ------------------------ diffStateObjects ------------------------ */
 
-  diffStateObjects(
-    a: StateObject[],
-    b: StateObject[],
+  diffStateObjects<A extends StateObject[], B extends StateObject[]>(
+    a: A,
+    b: B,
   ): {
     uniqueToA: StateObject[]
     uniqueToB: StateObject[]

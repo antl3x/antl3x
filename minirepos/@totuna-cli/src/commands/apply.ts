@@ -21,6 +21,9 @@ export default class Command extends BaseCommand<typeof Command> {
   /* ----------------------------------- run ---------------------------------- */
 
   public async run() {
+    // We used this to track file names in order to delete them in a error case
+    const planFileNames = []
+
     try {
       const spinner = ora()
 
@@ -39,12 +42,16 @@ export default class Command extends BaseCommand<typeof Command> {
         return []
       }
 
+      await this.config.runCommand('migrations:pull')
+
       for (const migrationPlanFile of migrationPlanFiles) {
         const migrationPlan = fs.readFileSync(migrationPlanFile, 'utf-8')
         // Append the migration id to the start of the file name
         const nextMigrationFileId = await migrationApi.getNextMigrationSeq('local')
         const migrationFileName = `${nextMigrationFileId}_${path.basename(migrationPlanFile)}`
         const migrationFilePath = path.join(this.rootStore.systemVariables.PUBLIC_MIGRATIONS_PATH, migrationFileName)
+
+        planFileNames.push(migrationFilePath)
 
         fs.writeFileSync(migrationFilePath, migrationPlan)
         fs.unlinkSync(migrationPlanFile)
@@ -56,6 +63,16 @@ export default class Command extends BaseCommand<typeof Command> {
 
       return res
     } catch (error) {
+      // Move back the files
+      planFileNames.forEach((file) => {
+        const planFile = fs.readFileSync(file, 'utf-8')
+        // Remove the migration id from the start of the file name
+        const planFileName = path.basename(file).split('_').slice(1).join('_')
+        const planFilePath = path.join(this.rootStore.systemVariables.PUBLIC_MIGRATIONS_PLAN_PATH, planFileName)
+        fs.writeFileSync(planFilePath, planFile)
+        fs.unlinkSync(file)
+      })
+
       throw new Error(`Failed to export: ${error}`, {cause: error})
     }
   }

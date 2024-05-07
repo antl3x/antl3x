@@ -35,6 +35,7 @@ interface SystemVariables {
   PUBLIC_MIGRATIONS_PLAN_PATH: string
 
   PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(schemaName: string): string
+  PUBLIC_CRD_FUNCTION_PRIVILEGES_PATH(schemaName: string): string
 }
 
 /* -------------------------------------------------------------------------- */
@@ -108,6 +109,10 @@ const _systemVariables = (userConfig: Config): RootStore__Ready['systemVariables
     },
 
     PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(schemaName: string) {
+      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}`
+    },
+
+    PUBLIC_CRD_FUNCTION_PRIVILEGES_PATH(schemaName: string) {
       return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}`
     },
   })

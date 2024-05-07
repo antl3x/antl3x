@@ -21,12 +21,13 @@ export default class Command extends BaseCommand<typeof Command> {
 
   public async run() {
     if (!this.flags.silence) {
-      this.log(`\x1b[90m❯ Pulling the latest state from the remote database..\x1b[0m`)
+      this.log(`\x1b[90m❯ Pulling the latest state from the remote database...\x1b[0m`)
     }
 
     await this.config.runCommand('migrations:pull', ['--silence'])
 
     let jsonRes = []
+
     try {
       for (const crd of Object.values(CRDs)) {
         const parser = CRDYAMLParsers[`CRDParser_${crd._kind_}_YAML`]
@@ -42,6 +43,7 @@ export default class Command extends BaseCommand<typeof Command> {
         // We filter out the state objects that are unique to the local state
         // so that we only export the state objects that are unique to the remote state
         // IMPORTANT: The orders of the state objects are important
+        // @ts-expect-error
         const diffObjects = crd.diffStateObjects(remoteStateObjects, localStateObjects)
 
         for (const stateObject of diffObjects.uniqueToA) {
@@ -57,12 +59,11 @@ export default class Command extends BaseCommand<typeof Command> {
 
         if (!this.flags.silence && diffObjects.common.length > 0) {
           this.log(
-            `\x1b[90mSkipped ${diffObjects.common.length} state objects that already exists as local files.\x1b[0m`,
+            `\x1b[90mSkipped ${diffObjects.common.length} ${diffObjects.common[0].kind} state objects that already exist as local files.\x1b[0m`,
           )
         }
-
-        return jsonRes
       }
+      return jsonRes
     } catch (error) {
       throw new Error(`Failed to export: ${error}`, {cause: error})
     }

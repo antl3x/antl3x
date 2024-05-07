@@ -2,10 +2,9 @@ import {z} from 'zod'
 
 import type {ICRD} from './ICRD.js'
 
-import {satisfies} from 'utils/@utils.js'
 import {getRootStore} from '@RootStore.js'
-import * as glob from 'glob'
-import fs from 'node:fs'
+import {satisfies} from 'utils/@utils.js'
+import {$fetchLocalStates} from './@utils.js'
 
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
@@ -33,18 +32,16 @@ export const StateSchema = z
   .object({
     kind: z.literal('FunctionPrivileges'),
     metadata: z.object({
-      name: z.string(),
-    }),
-    spec: z.object({
       database: z.string(),
       schema: z.string(),
-      grants: z.array(
-        z.object({
-          role: z.string(),
-          privileges: z.array(z.literal('EXECUTE')),
-        }),
-      ),
+      function: z.string(),
     }),
+    spec: z.array(
+      z.object({
+        role: z.string(),
+        privileges: z.array(z.literal('EXECUTE')),
+      }),
+    ),
   })
   .brand('CRD_FunctionPrivileges_StateSchema')
 
@@ -66,16 +63,18 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   /* ------------------ Find absent privileges in local state ----------------- */
 
   for (const localSchema of localStateObjects) {
-    const remoteSchema = remoteStateObjects.find((remoteSchema) => remoteSchema.spec.schema === localSchema.spec.schema)
+    const remoteSchema = remoteStateObjects.find(
+      (remoteSchema) => remoteSchema.metadata.schema === localSchema.metadata.schema,
+    )
 
     if (remoteSchema) {
-      for (const remoteGrant of remoteSchema.spec.grants) {
-        const localGrant = localSchema.spec.grants.find((localGrant) => localGrant.role === remoteGrant.role)
+      for (const remoteGrant of remoteSchema.spec) {
+        const localGrant = localSchema.spec.find((localGrant) => localGrant.role === remoteGrant.role)
 
         for (const privilege of remoteGrant.privileges) {
           if (!localGrant?.privileges.includes(privilege)) {
             absentPrivilegesInLocalState.push({
-              schema: localSchema.spec.schema,
+              schema: localSchema.metadata.schema,
               role: remoteGrant.role,
               privilege,
             })
@@ -84,11 +83,11 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               localState: 'Absent',
               remoteState: 'Present',
               plan: `Revoke`,
-              objectType: 'Schema Privilege',
-              objectPath: `${localSchema.spec.database}.${localSchema.spec.schema}`,
+              objectType: 'Function Privilege',
+              objectPath: `${localSchema.metadata.schema}.${localSchema.metadata.function}`,
               oldState: `Granted ${privilege} TO ${remoteGrant.role}`,
               newState: `Revoked ${privilege} FROM ${remoteGrant.role}`,
-              sqlQuery: `REVOKE ${privilege} ON SCHEMA "${localSchema.spec.schema}" FROM "${remoteGrant.role}";`,
+              sqlQuery: `REVOKE ${privilege} ON FUNCTION ${localSchema.metadata.schema}.${localSchema.metadata.function} FROM "${remoteGrant.role}";`,
             })
           }
         }
@@ -98,16 +97,18 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
 
   /* ----------------- Find absent privileges in remote state ----------------- */
   for (const remoteSchema of remoteStateObjects) {
-    const localSchema = localStateObjects.find((localSchema) => localSchema.spec.schema === remoteSchema.spec.schema)
+    const localSchema = localStateObjects.find(
+      (localSchema) => localSchema.metadata.schema === remoteSchema.metadata.schema,
+    )
 
     if (localSchema) {
-      for (const localGrant of localSchema.spec.grants) {
-        const remoteGrant = remoteSchema.spec.grants.find((remoteGrant) => remoteGrant.role === localGrant.role)
+      for (const localGrant of localSchema.spec) {
+        const remoteGrant = remoteSchema.spec.find((remoteGrant) => remoteGrant.role === localGrant.role)
 
         for (const privilege of localGrant.privileges) {
           if (!remoteGrant?.privileges.includes(privilege)) {
             absentPrivilegesInRemoteState.push({
-              schema: remoteSchema.spec.schema,
+              schema: remoteSchema.metadata.schema,
               role: localGrant.role,
               privilege,
             })
@@ -116,11 +117,11 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               localState: 'Present',
               remoteState: 'Absent',
               plan: `Grant`,
-              objectType: 'Schema Privilege',
-              objectPath: `${remoteSchema.spec.database}.${remoteSchema.spec.schema}`,
+              objectType: 'Function Privilege',
+              objectPath: `${remoteSchema.metadata.schema}.${remoteSchema.metadata.function}`,
               oldState: `No ${privilege} TO ${localGrant.role}`,
               newState: `Granted ${privilege} TO ${localGrant.role}`,
-              sqlQuery: `GRANT ${privilege} ON SCHEMA "${remoteSchema.spec.schema}" TO "${localGrant.role}";`,
+              sqlQuery: `GRANT ${privilege} ON FUNCTION ${localSchema.metadata.schema}.${localSchema.metadata.function} TO "${localGrant.role}";`,
             })
           }
         }
@@ -131,36 +132,6 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   return res
 }
 
-/* ---------------------------- $fetchLocalStates --------------------------- */
-
-export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (parser) => {
-  // Fetch all .yaml files in the directory
-  // Then check if the file is a valid FunctionPrivileges file
-  // If not, log and skip
-  // If valid, parse and return
-  const rootStore = await getRootStore()
-  const globPath = rootStore.userConfig.useFlatFolder
-    ? `${rootStore.systemVariables.PUBLIC_DATABASE_PATH}/**/*.${parser.FILE_EXTENSION}`
-    : rootStore.systemVariables.PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(`*/*.${parser.FILE_EXTENSION}`)
-  const files = glob.sync(globPath)
-  const validFiles: StateObject[] = []
-
-  for (const file of files) {
-    if (!file.endsWith(parser.FILE_EXTENSION)) {
-      continue
-    }
-
-    const state = parser.parseFileToStateObject(fs.readFileSync(file, 'utf8'))
-
-    if (state.kind !== 'FunctionPrivileges') {
-      continue
-    }
-    validFiles.push(state)
-  }
-
-  return validFiles
-}
-
 /* --------------------------- $fetchRemoteStates --------------------------- */
 export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => {
   const rootStore = await getRootStore()
@@ -169,46 +140,91 @@ export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => 
     database: string
     schema: string
     grantee: string
-    privilege: 'USAGE' | 'CREATE'
+    privilege: 'EXECUTE'
+    function: string
   }>(`
-  SELECT current_database() AS database, r.rolname AS grantee,
-  n.nspname AS schema,
-  p.perm AS privilege
-FROM pg_catalog.pg_namespace AS n
-CROSS JOIN pg_catalog.pg_roles AS r
-CROSS JOIN (VALUES ('USAGE'), ('CREATE')) AS p(perm)
-WHERE has_schema_privilege(r.oid, n.oid, p.perm)
- AND n.nspname <> 'information_schema'
- AND n.nspname not LIKE 'pg_%'
- AND r.rolname not LIKE 'pg_%'
---      AND NOT r.rolsuper`)
+  SELECT 
+    r.rolname AS grantee,
+    current_database() AS database,
+    f.pronamespace::regnamespace::name AS schema,
+    split_part(f.oid::regprocedure::text, '.', 2) AS function,
+    'EXECUTE' AS privilege,
+    has_function_privilege(r.oid, f.oid, 'EXECUTE') = true
+    FROM pg_catalog.pg_proc f
+    CROSS JOIN pg_catalog.pg_roles AS r
+    WHERE f.pronamespace::regnamespace::name <> 'information_schema'
+    AND f.pronamespace::regnamespace::name NOT LIKE 'pg_%'
+    AND r.rolname NOT LIKE 'pg_%'
+    and has_function_privilege(r.oid, f.oid, 'EXECUTE') = true;`)
 
   const stateObjects: StateObject[] = []
 
   for (const row of rows) {
     // Find the state object for the schema
-    let stateObj = stateObjects.find((state) => state.spec.schema === row.schema)
+    let stateObj = stateObjects.find((state) => state.metadata.schema === row.schema)
 
     // If not found, create a new state object
     if (!stateObj) {
       stateObj = StateSchema.parse({
         kind: 'FunctionPrivileges',
-        metadata: {name: row.schema},
-        spec: {database: row.database, schema: row.schema, grants: []},
+        metadata: {database: row.database, schema: row.schema, function: row.function},
+        spec: [],
       })
       stateObjects.push(stateObj)
     }
 
     // Find the role grants for the role
-    const roleGrants = stateObj.spec.grants.find((grant) => grant.role === row.grantee)
+    const roleGrants = stateObj.spec.find((grant) => grant.role === row.grantee)
 
     // If not found, create a new role grant
     if (!roleGrants) {
-      stateObj.spec.grants.push({role: row.grantee, privileges: [row.privilege]})
+      stateObj.spec.push({role: row.grantee, privileges: [row.privilege]})
     } else {
       roleGrants.privileges.push(row.privilege)
     }
   }
 
   return stateObjects
+}
+
+/* ------------------------ diffStateObjects ------------------------ */
+
+export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB) => {
+  const res = {
+    uniqueToA: [],
+    uniqueToB: [],
+    common: [],
+  } as ReturnType<thisModule['diffStateObjects']>
+
+  for (const objA of stateA) {
+    const objB = stateB.find(
+      (obj) =>
+        obj.kind === objA.kind &&
+        obj.metadata.schema === objA.metadata.schema &&
+        obj.metadata.database === objA.metadata.database &&
+        obj.metadata.function === objA.metadata.function,
+    )
+
+    if (!objB) {
+      res.uniqueToA.push(objA)
+    } else {
+      res.common.push(objA)
+    }
+  }
+
+  for (const objB of stateB) {
+    const objA = stateA.find(
+      (obj) =>
+        obj.kind === objB.kind &&
+        obj.metadata.schema === objB.metadata.schema &&
+        obj.metadata.database === objB.metadata.database &&
+        obj.metadata.function === objB.metadata.function,
+    )
+
+    if (!objA) {
+      res.uniqueToB.push(objB)
+    }
+  }
+
+  return res
 }

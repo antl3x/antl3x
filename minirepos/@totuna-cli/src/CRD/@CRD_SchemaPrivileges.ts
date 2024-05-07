@@ -2,10 +2,8 @@ import {z} from 'zod'
 
 import type {ICRD} from './ICRD.js'
 
-import {satisfies} from 'utils/@utils.js'
 import {getRootStore} from '@RootStore.js'
-import * as glob from 'glob'
-import fs from 'node:fs'
+import {satisfies} from 'utils/@utils.js'
 import {$fetchLocalStates} from './@utils.js'
 
 /* -------------------------------------------------------------------------- */
@@ -85,7 +83,7 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               remoteState: 'Present',
               plan: `Revoke`,
               objectType: 'Schema Privilege',
-              objectPath: `${localSchema.metadata.database}.${localSchema.metadata.schema}`,
+              objectPath: `${localSchema.metadata.schema}`,
               oldState: `Granted ${privilege} TO ${remoteGrant.role}`,
               newState: `Revoked ${privilege} FROM ${remoteGrant.role}`,
               sqlQuery: `REVOKE ${privilege} ON SCHEMA "${localSchema.metadata.schema}" FROM "${remoteGrant.role}";`,
@@ -119,7 +117,7 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               remoteState: 'Absent',
               plan: `Grant`,
               objectType: 'Schema Privilege',
-              objectPath: `${remoteSchema.metadata.database}.${remoteSchema.metadata.schema}`,
+              objectPath: `${remoteSchema.metadata.schema}`,
               oldState: `No ${privilege} TO ${localGrant.role}`,
               newState: `Granted ${privilege} TO ${localGrant.role}`,
               sqlQuery: `GRANT ${privilege} ON SCHEMA "${remoteSchema.metadata.schema}" TO "${localGrant.role}";`,

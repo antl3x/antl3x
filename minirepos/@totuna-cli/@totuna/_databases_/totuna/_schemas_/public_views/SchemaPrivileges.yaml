@@ -7,7 +7,3 @@ spec:
     privileges:
       - USAGE
       - CREATE
-  - role: xablau
-    privileges:
-      - USAGE
-      - CREATE
