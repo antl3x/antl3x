@@ -1,11 +1,11 @@
-import * as migrations from 'migrations/@api.js'
-import fs from 'fs'
-import path from 'path'
 import {BaseCommand} from 'commands/BaseCommand.js'
+import fs from 'fs'
+import * as migrations from 'migrations/@api.js'
+import path from 'path'
 
-import {logger} from 'utils/@utils.js'
 import {Args} from '@oclif/core'
 import ora from 'ora'
+import {logger} from 'utils/@utils.js'
 
 /* -------------------------------------------------------------------------- */
 /*                                  Command                                   */
@@ -24,8 +24,8 @@ export default class Command extends BaseCommand<typeof Command> {
 
   /* ----------------------------------- run ---------------------------------- */
 
-  public async run(): Promise<void> {
-    const spinner = ora().start()
+  public async run() {
+    const spinner = ora()
 
     try {
       logger.debug('Running migrations.')
@@ -64,11 +64,13 @@ export default class Command extends BaseCommand<typeof Command> {
       const res = await migrations.migrate()
       if (res.length > 0) {
         res.forEach((migration) => {
-          this.log(`\x1b[32m✔ Migration file executed: ${migration.name}\x1b[0m`)
+          this.log(`\x1b[32m✔ Migration file executed: ${migration.fileName}\x1b[0m`)
         })
         spinner.succeed('Migrations executed successfully!')
       } else {
-        spinner.info('No migrations to execute.')
+        if (!this.flags.json) {
+          spinner.info('\x1b[90m No migrations to execute.\x1b[0m')
+        }
       }
 
       return res

@@ -1,15 +1,15 @@
-import {BaseCommand} from './BaseCommand.js'
-import * as CRDs from 'CRD/@crds.js'
 import * as CRDYAMLParsers from 'CRD/@crdParsers.js'
+import * as CRDs from 'CRD/@crds.js'
 import fs from 'node:fs'
 import path from 'node:path'
+import {BaseCommand} from './BaseCommand.js'
 /* -------------------------------------------------------------------------- */
 /*                               Command                               */
 /* -------------------------------------------------------------------------- */
 
 export default class Command extends BaseCommand<typeof Command> {
   public static enableJsonFlag = true
-  static override description = 'Exports current database state to CRD files.'
+  static override description = 'Pull the latest state from the remote database and save it to the local filesystem.'
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async init(): Promise<void> {
@@ -19,7 +19,10 @@ export default class Command extends BaseCommand<typeof Command> {
   /* ----------------------------------- run ---------------------------------- */
 
   public async run() {
-    this.log(`\x1b[90m❯ Pulling the latest state from the remote database..\x1b[0m`)
+    if (!this.flags.silence) {
+      this.log(`\x1b[90m❯ Pulling the latest state from the remote database..\x1b[0m`)
+    }
+
     let jsonRes = []
     try {
       for (const crd of Object.values(CRDs)) {
@@ -45,6 +48,7 @@ export default class Command extends BaseCommand<typeof Command> {
           jsonRes.push({filePath, stateObject})
           fs.mkdirSync(path.dirname(filePath), {recursive: true})
           fs.writeFileSync(filePath, stateFile)
+          this.log(`❯ Saved ${filePath}`)
         }
 
         return jsonRes

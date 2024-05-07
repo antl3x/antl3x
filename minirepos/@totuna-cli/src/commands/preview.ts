@@ -1,9 +1,8 @@
-import {BaseCommand} from './BaseCommand.js'
-import * as CRDs from 'CRD/@crds.js'
 import * as CRDYAMLParsers from 'CRD/@crdParsers.js'
-import fs from 'node:fs'
-import path from 'node:path'
+import * as CRDs from 'CRD/@crds.js'
 import {Table} from 'console-table-printer'
+import ora from 'ora'
+import {BaseCommand} from './BaseCommand.js'
 
 /* -------------------------------------------------------------------------- */
 /*                               Command                               */
@@ -11,7 +10,7 @@ import {Table} from 'console-table-printer'
 
 export default class Command extends BaseCommand<typeof Command> {
   public static enableJsonFlag = true
-  static override description = 'Compare current local state with remote state.'
+  static override description = 'Show the differences between the local files and the remote database.'
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async init(): Promise<void> {
@@ -21,6 +20,7 @@ export default class Command extends BaseCommand<typeof Command> {
   /* ----------------------------------- run ---------------------------------- */
 
   public async run() {
+    const spinner = ora()
     this.log(`\x1b[90m❯ Pulling the latest state from the remote database..\x1b[0m`)
     await this.config.runCommand('pull', ['--silence'])
     let jsonRes = []
@@ -75,7 +75,9 @@ export default class Command extends BaseCommand<typeof Command> {
       }
 
       if (jsonRes.flat().length === 0) {
-        this.log('No differences found between the local files and the remote database. 🎉')
+        if (!this.flags.json) {
+          spinner.info('\x1b[90m No differences found between the local files and the remote database. 🎉\x1b[0m')
+        }
       }
 
       return jsonRes

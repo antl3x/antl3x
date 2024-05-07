@@ -1,10 +1,10 @@
-import {BaseCommand} from './BaseCommand.js'
-import * as CRDs from 'CRD/@crds.js'
 import * as CRDYAMLParsers from 'CRD/@crdParsers.js'
+import * as CRDs from 'CRD/@crds.js'
+import * as glob from 'glob'
 import fs from 'node:fs'
 import path from 'node:path'
-import * as glob from 'glob'
-import {Table} from 'console-table-printer'
+import ora from 'ora'
+import {BaseCommand} from './BaseCommand.js'
 
 /* -------------------------------------------------------------------------- */
 /*                               Command                               */
@@ -12,7 +12,7 @@ import {Table} from 'console-table-printer'
 
 export default class Command extends BaseCommand<typeof Command> {
   public static enableJsonFlag = true
-  static override description = 'Compare current local state with remote state.'
+  static override description = 'Generate migration plan files given the current local state vs remote database state.'
   static override examples = ['<%= config.bin %> <%= command.id %>']
 
   public async init(): Promise<void> {
@@ -22,9 +22,8 @@ export default class Command extends BaseCommand<typeof Command> {
   /* ----------------------------------- run ---------------------------------- */
 
   public async run() {
-    this.log(`\x1b[90m❯ Pulling the latest state from the remote database..\x1b[0m`)
-
     const migrationFiles: {filePath: string; migrationStatment: any}[] = []
+    const spinner = ora()
 
     try {
       for (const crd of Object.values(CRDs)) {
@@ -54,11 +53,15 @@ export default class Command extends BaseCommand<typeof Command> {
       for (const migrationFile of migrationFiles) {
         fs.mkdirSync(path.dirname(migrationFile.filePath), {recursive: true})
         fs.writeFileSync(migrationFile.filePath, migrationFile.migrationStatment)
-        this.log(`Migration plan file created at: ${migrationFile.filePath}`)
+        if (!this.flags.silence || !this.flags.json) {
+          this.log(`❯ Migration plan file created at: ${migrationFile.filePath}`)
+        }
       }
 
       if (migrationFiles.length === 0) {
-        this.log('No differences found between the local files and the remote database. 🎉')
+        if (!this.flags.silence && !this.flags.json) {
+          spinner.info('\x1b[90m No differences found between the local files and the remote database. 🎉\x1b[0m')
+        }
       }
 
       return migrationFiles

@@ -1,0 +1,11 @@
+kind: SchemaPrivileges
+metadata:
+  name: public_views
+spec:
+  database: totuna
+  schema: public_views
+  grants:
+    - role: postgres
+      privileges:
+        - USAGE
+        - CREATE

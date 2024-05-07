@@ -16,7 +16,7 @@ export interface module {
 }
 
 /* --------------------------------- migrate -------------------------------- */
-type migrate = () => Promise<void>
+type migrate = () => ReturnType<typeof pmMigrate>
 
 /* --------------------------- getNextMigrationSeq -------------------------- */
 type getNextMigrationSeq = (from: 'remote' | 'local') => Promise<number>
@@ -92,7 +92,10 @@ export const getNextMigrationSeq: module['getNextMigrationSeq'] = async (from) =
     }
   } else {
     const migrationsPath = rootStore.systemVariables.PUBLIC_MIGRATIONS_PATH
-    const files = fs.readdirSync(migrationsPath)
+    const files = fs
+      .readdirSync(migrationsPath)
+      .filter((file) => fs.lstatSync(path.join(migrationsPath, file)).isFile())
+
     const maxId =
       files.length === 0
         ? 0
