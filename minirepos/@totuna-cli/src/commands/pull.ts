@@ -23,6 +23,8 @@ export default class Command extends BaseCommand<typeof Command> {
       this.log(`\x1b[90m❯ Pulling the latest state from the remote database..\x1b[0m`)
     }
 
+    await this.config.runCommand('migrations:pull', ['--silence'])
+
     let jsonRes = []
     try {
       for (const crd of Object.values(CRDs)) {

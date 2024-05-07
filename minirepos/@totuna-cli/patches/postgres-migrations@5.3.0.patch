@@ -11,7 +11,7 @@ index 67faf35f22495fd9915b28381bdfd7cb244ca014..ff49f4a5ddf3fa77136359613b4fd5ac
      ].filter(isValidFile);
      const unorderedMigrations = await Promise.all(migrationFiles.map(migration_file_1.loadMigrationFile));
 diff --git a/dist/migrate.js b/dist/migrate.js
-index e804ef8a26de073e1cf80b32a68ee97abb18a11f..79f8c96fb1935eb70d36825110c71616742d45b2 100644
+index e804ef8a26de073e1cf80b32a68ee97abb18a11f..b21765558ef68d71ac951bb3b7c92eabba8c6ee7 100644
 --- a/dist/migrate.js
 +++ b/dist/migrate.js
 @@ -80,7 +80,7 @@ exports.migrate = migrate;
@@ -36,3 +36,16 @@ index e804ef8a26de073e1cf80b32a68ee97abb18a11f..79f8c96fb1935eb70d36825110c71616
 +    const result = await client.query(sql_template_strings_1.default `SELECT to_regclass(${tableName}) is not NULL as exists;`);
      return result.rows.length > 0 && result.rows[0].exists;
  }
+diff --git a/dist/run-migration.js b/dist/run-migration.js
+index 1bb39ed9bbf6f832395301aab10962a75242c5b5..871f78d1e4f09e7e09be5ad3fc70a264eba58255 100644
+--- a/dist/run-migration.js
++++ b/dist/run-migration.js
+@@ -9,7 +9,7 @@ const insertMigration = async (migrationTableName, client, migration, log) => {
+     log(`Saving migration to '${migrationTableName}': ${migration.id} | ${migration.name} | ${migration.hash}`);
+     const sql = sql_template_strings_1.default `INSERT INTO `
+         .append(migrationTableName)
+-        .append(sql_template_strings_1.default ` ("id", "name", "hash") VALUES (${migration.id},${migration.name},${migration.hash})`);
++        .append(sql_template_strings_1.default ` ("id", "name", "hash", "content") VALUES (${migration.id},${migration.name},${migration.hash},${migration.sql})`);
+     return client.query(sql);
+ };
+ const runMigration = (migrationTableName, client, log = noop) => async (migration) => {

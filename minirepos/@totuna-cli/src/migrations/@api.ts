@@ -12,6 +12,18 @@ satisfies<module, typeof import('./@api.js')>
 
 export interface module {
   migrate: migrate
+  $pullMigrations: () => Promise<
+    | {
+        id: number
+        name: string
+        hash: string
+        content: string
+        executed_at: Date
+      }[]
+    | {
+        _kind_: 'MigrationsTableDoesNotExist'
+      }
+  >
   getNextMigrationSeq: getNextMigrationSeq
 }
 
@@ -55,6 +67,7 @@ export const migrate: module['migrate'] = async () => {
     id integer PRIMARY KEY,
     name varchar(100) UNIQUE NOT NULL,
     hash varchar(40) NOT NULL, -- sha1 hex encoded hash of the file name and contents, to ensure it hasn't been altered since applying the migration
+    content text NOT NULL,
     executed_at timestamp DEFAULT current_timestamp
   );`
 
@@ -71,6 +84,32 @@ export const migrate: module['migrate'] = async () => {
     }
 
     return pmMigrate(dbConfig, migrationsPath)
+  } catch (error) {
+    throw error
+  }
+}
+
+/* ----------------------------- $pullMigrations ---------------------------- */
+
+export const $pullMigrations: module['$pullMigrations'] = async () => {
+  const rootStore = await getRootStore()
+
+  try {
+    // First check if the migrations table exists
+    const {rows: tableExists} = await rootStore.pgClient.query(
+      'SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = $1 AND table_name = $2)',
+      ['_totuna_', 'migrations'],
+    )
+
+    if (!tableExists[0].exists) {
+      return {_kind_: 'MigrationsTableDoesNotExist'}
+    }
+
+    const {rows} = (await rootStore.pgClient.query('SELECT * FROM _totuna_.migrations ORDER BY id ASC')) as any
+    if (rows.length === 0) {
+      return []
+    }
+    return rows
   } catch (error) {
     throw error
   }

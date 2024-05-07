@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   postgres-migrations@5.3.0:
-    hash: 3r4c352rsjoqvzgof55ls4rj64
+    hash: ypepkhpxwasxjxewonsips4eaq
     path: patches/postgres-migrations@5.3.0.patch
 
 dependencies:
@@ -54,7 +54,7 @@ dependencies:
     version: 8.11.5
   postgres-migrations:
     specifier: 5.3.0
-    version: 5.3.0(patch_hash=3r4c352rsjoqvzgof55ls4rj64)
+    version: 5.3.0(patch_hash=ypepkhpxwasxjxewonsips4eaq)
   ts-node:
     specifier: ^10
     version: 10.9.2(@types/node@18.19.31)(typescript@5.4.5)
@@ -5113,7 +5113,7 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /postgres-migrations@5.3.0(patch_hash=3r4c352rsjoqvzgof55ls4rj64):
+  /postgres-migrations@5.3.0(patch_hash=ypepkhpxwasxjxewonsips4eaq):
     resolution: {integrity: sha512-gnTHWJZVWbW8T3mXIxJm1JRU853TqBVWkhgfsTJr7zqT3VexjRmJj9kNi96rVhfTezDU4FVW6pf701kLOZiKIA==}
     engines: {node: '>10.17.0'}
     hasBin: true
