@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  postgres-migrations@5.3.0:
+    hash: 3r4c352rsjoqvzgof55ls4rj64
+    path: patches/postgres-migrations@5.3.0.patch
+
 dependencies:
   '@oclif/core':
     specifier: ^3
@@ -47,6 +52,9 @@ dependencies:
   pg:
     specifier: ^8.11.5
     version: 8.11.5
+  postgres-migrations:
+    specifier: 5.3.0
+    version: 5.3.0(patch_hash=3r4c352rsjoqvzgof55ls4rj64)
   ts-node:
     specifier: ^10
     version: 10.9.2(@types/node@18.19.31)(typescript@5.4.5)
@@ -5105,6 +5113,18 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
+  /postgres-migrations@5.3.0(patch_hash=3r4c352rsjoqvzgof55ls4rj64):
+    resolution: {integrity: sha512-gnTHWJZVWbW8T3mXIxJm1JRU853TqBVWkhgfsTJr7zqT3VexjRmJj9kNi96rVhfTezDU4FVW6pf701kLOZiKIA==}
+    engines: {node: '>10.17.0'}
+    hasBin: true
+    dependencies:
+      pg: 8.11.5
+      sql-template-strings: 2.2.2
+    transitivePeerDependencies:
+      - pg-native
+    dev: false
+    patched: true
+
   /postgres-range@1.1.4:
     resolution: {integrity: sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==}
     dev: true
@@ -5517,6 +5537,11 @@ packages:
 
   /sprintf-js@1.0.3:
     resolution: {integrity: sha512-D9cPgkvLlV3t3IzL0D0YLvGA9Ahk4PcvVwUbN0dSGr1aP0Nrt4AEnTUbuGvquEC0mA64Gqt1fzirlRs5ibXx8g==}
+
+  /sql-template-strings@2.2.2:
+    resolution: {integrity: sha512-UXhXR2869FQaD+GMly8jAMCRZ94nU5KcrFetZfWEMd+LVVG6y0ExgHAhatEcKZ/wk8YcKPdi+hiD2wm75lq3/Q==}
+    engines: {node: '>=4.0.0'}
+    dev: false
 
   /stdin-discarder@0.2.2:
     resolution: {integrity: sha512-UhDfHmA92YAlNnCfhmq0VeNL5bDbiZGg7sZ2IvPsXubGkiNa9EC+tUTsjBRsYUAz87btI6/1wf4XoVvQ3uRnmQ==}

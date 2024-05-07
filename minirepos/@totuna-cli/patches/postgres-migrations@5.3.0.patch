@@ -1,0 +1,38 @@
+diff --git a/dist/files-loader.js b/dist/files-loader.js
+index 67faf35f22495fd9915b28381bdfd7cb244ca014..ff49f4a5ddf3fa77136359613b4fd5ac99e5eb53 100644
+--- a/dist/files-loader.js
++++ b/dist/files-loader.js
+@@ -26,7 +26,6 @@ log = () => { }) => {
+         return [];
+     }
+     const migrationFiles = [
+-        path.join(__dirname, "migrations/0_create-migrations-table.sql"),
+         ...fileNames.map((fileName) => path.resolve(directory, fileName)),
+     ].filter(isValidFile);
+     const unorderedMigrations = await Promise.all(migrationFiles.map(migration_file_1.loadMigrationFile));
+diff --git a/dist/migrate.js b/dist/migrate.js
+index e804ef8a26de073e1cf80b32a68ee97abb18a11f..79f8c96fb1935eb70d36825110c71616742d45b2 100644
+--- a/dist/migrate.js
++++ b/dist/migrate.js
+@@ -80,7 +80,7 @@ exports.migrate = migrate;
+ function runMigrations(intendedMigrations, log) {
+     return async (client) => {
+         try {
+-            const migrationTableName = "migrations";
++            const migrationTableName = "_totuna_.migrations";
+             log("Starting migrations");
+             const appliedMigrations = await fetchAppliedMigrationFromDB(migrationTableName, client, log);
+             validation_1.validateMigrationHashes(intendedMigrations, appliedMigrations);
+@@ -133,11 +133,6 @@ function logResult(completedMigrations, log) {
+ }
+ /** Check whether table exists in postgres - http://stackoverflow.com/a/24089729 */
+ async function doesTableExist(client, tableName) {
+-    const result = await client.query(sql_template_strings_1.default `SELECT EXISTS (
+-  SELECT 1
+-  FROM   pg_catalog.pg_class c
+-  WHERE  c.relname = ${tableName}
+-  AND    c.relkind = 'r'
+-);`);
++    const result = await client.query(sql_template_strings_1.default `SELECT to_regclass(${tableName}) is not NULL as exists;`);
+     return result.rows.length > 0 && result.rows[0].exists;
+ }
