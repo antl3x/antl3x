@@ -33,5 +33,9 @@ export const buildFileName: thisModule['buildFileName'] = (state) => {
 }
 
 export const buildFilePath: thisModule['buildFilePath'] = (state, rootStore) => {
+  if (rootStore.userConfig.useFlatFolder) {
+    return `${rootStore.systemVariables.PUBLIC_DATABASE_PATH}/${buildFileName(state)}`
+  }
+
   return `${rootStore.systemVariables.PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(state.spec.schema)}/${buildFileName(state)}`
 }

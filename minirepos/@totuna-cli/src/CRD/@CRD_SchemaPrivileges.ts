@@ -4,7 +4,6 @@ import type {ICRD} from './ICRD.js'
 
 import {satisfies} from 'utils/@utils.js'
 import {getRootStore} from '@RootStore.js'
-import * as jdp from 'jsondiffpatch'
 import * as glob from 'glob'
 import fs from 'node:fs'
 
@@ -39,7 +38,12 @@ export const StateSchema = z
     spec: z.object({
       database: z.string(),
       schema: z.string(),
-      rolePrivileges: z.record(z.array(z.union([z.literal('USAGE'), z.literal('CREATE')]))),
+      grants: z.array(
+        z.object({
+          role: z.string(),
+          privileges: z.array(z.union([z.literal('USAGE'), z.literal('CREATE')])),
+        }),
+      ),
     }),
   })
   .brand('CRD_SchemaPrivilege_StateSchema')
@@ -49,61 +53,42 @@ export const StateDiff = z.object({
   privileges: z.array(z.string()),
 })
 
-/* --------------------------------- compare -------------------------------- */
+/* --------------------------------- getPreviewPlan -------------------------------- */
 
-export const $compare: thisModule['$compare'] = async (parser) => {
+export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => {
+  const res: Awaited<ReturnType<thisModule['$getPreviewPlan']>> = []
   const localStateObjects = await $fetchLocalStates(parser)
   const remoteStateObjects = await $fetchRemoteStates()
 
-  const operations: {
-    operation: 'GRANT' | 'REVOKE'
-    role: string
-    privilege: 'USAGE' | 'CREATE'
-  }[] = []
+  const absentPrivilegesInLocalState = []
+  const absentPrivilegesInRemoteState = []
 
-  const delta = jdp.diff(remoteStateObjects, localStateObjects)
+  /* ------------------ Find absent privileges in local state ----------------- */
 
-  for (const diffKey in delta) {
-    const rolesPrivilegesChanges =
-      delta.hasOwnProperty(diffKey) && delta[diffKey].spec && delta[diffKey].spec.rolePrivileges
+  for (const localSchema of localStateObjects) {
+    const remoteSchema = remoteStateObjects.find((remoteSchema) => remoteSchema.spec.schema === localSchema.spec.schema)
 
-    if (rolesPrivilegesChanges) {
-      for (const role in rolesPrivilegesChanges) {
-        const privilegesDelta = rolesPrivilegesChanges[role]
+    if (remoteSchema) {
+      for (const remoteGrant of remoteSchema.spec.grants) {
+        const localGrant = localSchema.spec.grants.find((localGrant) => localGrant.role === remoteGrant.role)
 
-        console.log(privilegesDelta)
-
-        for (const privDelta in privilegesDelta) {
-          if (privDelta == '_t') continue
-
-          const [privilegeValue, privilegeNewValue, isDeletion] = privilegesDelta[privDelta]
-
-          if (isDeletion === 0) {
-            operations.push({
-              operation: 'REVOKE',
-              role,
-              privilege: privilegeValue,
+        for (const privilege of remoteGrant.privileges) {
+          if (!localGrant?.privileges.includes(privilege)) {
+            absentPrivilegesInLocalState.push({
+              schema: localSchema.spec.schema,
+              role: remoteGrant.role,
+              privilege,
             })
-          }
-
-          if (privilegeValue && privilegesDelta[privDelta].length === 2) {
-            operations.push({
-              operation: 'REVOKE',
-              role,
-              privilege: privilegeValue,
-            })
-            operations.push({
-              operation: 'GRANT',
-              role,
-              privilege: privilegeNewValue,
-            })
-          }
-
-          if (privilegeValue && privilegesDelta[privDelta].length === 1) {
-            operations.push({
-              operation: 'GRANT',
-              role,
-              privilege: privilegeValue,
+            res.push({
+              _kind_: 'PlanInfo',
+              localState: 'Absent',
+              remoteState: 'Present',
+              plan: `Revoke`,
+              objectType: 'Schema Privilege',
+              objectPath: `${localSchema.spec.database}.${localSchema.spec.schema}`,
+              oldState: `Granted ${privilege} TO ${remoteGrant.role}`,
+              newState: `Revoked ${privilege} FROM ${remoteGrant.role}`,
+              sqlQuery: `REVOKE ${privilege} ON SCHEMA "${localSchema.spec.schema}" FROM "${remoteGrant.role}";`,
             })
           }
         }
@@ -111,37 +96,39 @@ export const $compare: thisModule['$compare'] = async (parser) => {
     }
   }
 
-  console.log(operations)
-}
+  /* ----------------- Find absent privileges in remote state ----------------- */
+  for (const remoteSchema of remoteStateObjects) {
+    const localSchema = localStateObjects.find((localSchema) => localSchema.spec.schema === remoteSchema.spec.schema)
 
-/* ---------------------------------- plan ---------------------------------- */
+    if (localSchema) {
+      for (const localGrant of localSchema.spec.grants) {
+        const remoteGrant = remoteSchema.spec.grants.find((remoteGrant) => remoteGrant.role === localGrant.role)
 
-export const plan: thisModule['plan'] = (state) => {
-  return `CREATE SCHEMA ${state.kind}`
-}
+        for (const privilege of localGrant.privileges) {
+          if (!remoteGrant?.privileges.includes(privilege)) {
+            absentPrivilegesInRemoteState.push({
+              schema: remoteSchema.spec.schema,
+              role: localGrant.role,
+              privilege,
+            })
+            res.push({
+              _kind_: 'PlanInfo',
+              localState: 'Present',
+              remoteState: 'Absent',
+              plan: `Grant`,
+              objectType: 'Schema Privilege',
+              objectPath: `${remoteSchema.spec.database}.${remoteSchema.spec.schema}`,
+              oldState: `No ${privilege} TO ${localGrant.role}`,
+              newState: `Granted ${privilege} TO ${localGrant.role}`,
+              sqlQuery: `GRANT ${privilege} ON SCHEMA "${remoteSchema.spec.schema}" TO "${localGrant.role}";`,
+            })
+          }
+        }
+      }
+    }
+  }
 
-/* -------------------------------- validate -------------------------------- */
-
-export const validate: thisModule['validate'] = (state) => {
-  return true
-}
-
-/* --------------------------------- $apply --------------------------------- */
-
-export const $apply: thisModule['$apply'] = (state) => {
-  return {_kind_: 'AppliedWithSuccess'}
-}
-
-/* ---------------------------------- $plan --------------------------------- */
-
-export const $plan: thisModule['$plan'] = (state) => {
-  return {_kind_: 'PlanInfo'}
-}
-
-/* ---------------------------------- $pull --------------------------------- */
-
-export const $pull: thisModule['$pull'] = async () => {
-  return $fetchRemoteStates()
+  return res
 }
 
 /* ---------------------------- $fetchLocalStates --------------------------- */
@@ -152,7 +139,10 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (parser)
   // If not, log and skip
   // If valid, parse and return
   const rootStore = await getRootStore()
-  const files = glob.sync(rootStore.systemVariables.PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(`*/*.${parser.FILE_EXTENSION}`))
+  const globPath = rootStore.userConfig.useFlatFolder
+    ? `${rootStore.systemVariables.PUBLIC_DATABASE_PATH}/**/*.${parser.FILE_EXTENSION}`
+    : rootStore.systemVariables.PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(`*/*.${parser.FILE_EXTENSION}`)
+  const files = glob.sync(globPath)
   const validFiles: StateObject[] = []
 
   for (const file of files) {
@@ -193,29 +183,32 @@ WHERE has_schema_privilege(r.oid, n.oid, p.perm)
  AND r.rolname not LIKE 'pg_%'
 --      AND NOT r.rolsuper`)
 
-  const schemas = rows.reduce((acc, row) => {
-    acc[row.schema] = acc[row.schema] || []
-    acc[row.schema].push(row)
-    return acc
-  }, {} as Record<string, typeof rows>)
+  const stateObjects: StateObject[] = []
 
-  const stateSchemas = Object.entries(schemas).map(([schema, rows]) => {
-    return StateSchema.parse({
-      kind: 'SchemaPrivileges',
-      metadata: {
-        name: `${rows[0].database}_${schema}_privileges`,
-      },
-      spec: {
-        database: rows[0].database,
-        schema,
-        rolePrivileges: rows.reduce((acc, row) => {
-          acc[row.grantee] = acc[row.grantee] || []
-          acc[row.grantee].push(row.privilege)
-          return acc
-        }, {} as z.TypeOf<typeof StateSchema>['spec']['rolePrivileges']),
-      },
-    } as z.TypeOf<typeof StateSchema>)
-  })
+  for (const row of rows) {
+    // Find the state object for the schema
+    let stateObj = stateObjects.find((state) => state.spec.schema === row.schema)
 
-  return stateSchemas
+    // If not found, create a new state object
+    if (!stateObj) {
+      stateObj = StateSchema.parse({
+        kind: 'SchemaPrivileges',
+        metadata: {name: row.schema},
+        spec: {database: row.database, schema: row.schema, grants: []},
+      })
+      stateObjects.push(stateObj)
+    }
+
+    // Find the role grants for the role
+    const roleGrants = stateObj.spec.grants.find((grant) => grant.role === row.grantee)
+
+    // If not found, create a new role grant
+    if (!roleGrants) {
+      stateObj.spec.grants.push({role: row.grantee, privileges: [row.privilege]})
+    } else {
+      roleGrants.privileges.push(row.privilege)
+    }
+  }
+
+  return stateObjects
 }

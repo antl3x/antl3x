@@ -6,4 +6,7 @@ await run(process.argv.slice(2), import.meta.url)
   .catch(async (error) => {
     return handle(error)
   })
-  .finally(async () => flush())
+  .finally(async (...args) => {
+    await flush()
+    process.exit(0)
+  })

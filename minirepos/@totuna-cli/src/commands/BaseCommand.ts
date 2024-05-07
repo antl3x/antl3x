@@ -24,6 +24,10 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
       description: 'Output as JSON',
       default: false,
     }),
+    silence: Flags.boolean({
+      description: 'Silence the output',
+      default: false,
+    }),
   }
 
   protected args!: Args<T>
@@ -62,13 +66,8 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
   }
 
   /* --------------------------------- finally -------------------------------- */
-
-  public async finally(_: Error | undefined): Promise<any> {
-    // We end the pgClient connection if it exists
-    if (this.rootStore?.pgClient) {
-      await this.rootStore.pgClient.end()
-    }
-  }
+  // PS: This is executed for EACH command when its ends
+  public async finally(_: Error | undefined): Promise<any> {}
 
   /* ----------------------------- _initRootStore ----------------------------- */
 

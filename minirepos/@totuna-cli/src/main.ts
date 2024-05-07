@@ -1,9 +1,11 @@
 import migrations_run from './commands/migrations/run.js'
 import pull from './commands/pull.js'
-import compare from './commands/compare.js'
+import preview from './commands/preview.js'
+import plan from './commands/plan.js'
 
 export const COMMANDS = {
   'migrations:run': migrations_run,
   pull,
-  compare,
+  preview,
+  plan,
 }

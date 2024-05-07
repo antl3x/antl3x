@@ -8,6 +8,7 @@ import {z} from 'zod'
 export const Config = z.object({
   _kind_: z.literal('_Config_'),
   pgConfig: z.union([z.custom<PoolConfig>(), z.custom<ClientConfig>()]),
+  useFlatFolder: z.optional(z.boolean().default(false)),
   cli: z.object({
     useTTY: z.boolean(),
   }),

@@ -8,4 +8,7 @@ await run(process.argv.slice(2), import.meta.url)
     error.message = '\x1b[31m✖\x1b[0m ' + error.message
     return handle(error)
   })
-  .finally(async () => flush())
+  .finally(async (...args) => {
+    await flush()
+    process.exit(0)
+  })

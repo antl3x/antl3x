@@ -1,0 +1,17 @@
+kind: SchemaPrivileges
+metadata:
+  name: public_views
+spec:
+  database: totuna
+  schema: public_views
+  grants:
+    - role: postgres
+      privileges:
+        - USAGE
+        - CREATE
+    - role: customer:xyz
+      privileges:
+        - USAGE
+    - role: group:customer
+      privileges:
+        - USAGE

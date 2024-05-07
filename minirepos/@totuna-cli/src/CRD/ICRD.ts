@@ -12,29 +12,14 @@ export interface ICRD<
   StateDiff = any,
 > {
   _kind_: StateObject['kind']
+
   /* ------------------------------- StateSchema ------------------------------ */
 
   StateSchema: StateSchema
 
-  /* --------------------------------- compare -------------------------------- */
-
-  $compare: (parser: IRCDParser<ICRD>) => Promise<StateDiff>
-
-  /* ---------------------------------- apply --------------------------------- */
-
-  apply: (state: StateObject) => MigrationFile
-
-  /* ---------------------------------- $apply --------------------------------- */
-
-  $apply: (state: StateObject) => {_kind_: 'AppliedWithSuccess'} | {_kind_: 'AppliedWithFailure'; error: Error}
-
-  /* ---------------------------------- plan ---------------------------------- */
-
-  plan: (state: StateObject) => MigrationFile
-
   /* ---------------------------------- $plan ---------------------------------- */
 
-  $plan: (state: StateObject) => Promise<
+  $getPreviewPlan: (parser: IRCDParser<ICRD>) => Promise<
     {
       _kind_: 'PlanInfo'
       localState: 'Present' | 'Absent'
@@ -42,18 +27,11 @@ export interface ICRD<
       plan: string
       objectType: string
       objectPath: string
-      oldValue: string
-      newValue: string
+      oldState: string
+      newState: string
+      sqlQuery: string
     }[]
   >
-
-  /* -------------------------------- validate -------------------------------- */
-
-  validate: (state: StateObject) => true | Error
-
-  /* ---------------------------------- $pull --------------------------------- */
-
-  $pull: () => Promise<StateObject[]>
 
   /* ---------------------------- $fetchLocalStates ---------------------------- */
 
