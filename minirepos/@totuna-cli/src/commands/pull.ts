@@ -50,7 +50,7 @@ export default class Command extends BaseCommand<typeof Command> {
           jsonRes.push({filePath, stateObject})
           fs.mkdirSync(path.dirname(filePath), {recursive: true})
           fs.writeFileSync(filePath, stateFile)
-          this.log(`❯ Saved ${filePath}`)
+          this.log(`Saved ${filePath}`)
         }
 
         return jsonRes

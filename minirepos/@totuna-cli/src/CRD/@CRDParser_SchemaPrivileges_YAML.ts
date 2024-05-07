@@ -1,7 +1,6 @@
 import {satisfies} from 'utils/@utils.js'
 import {IRCDParser} from './ICRDParser.js'
 import {ICRD_SchemaPrivilege} from './@CRD_SchemaPrivileges.js'
-import fs from 'node:fs'
 import {parse, stringify} from 'yaml'
 
 /* -------------------------------------------------------------------------- */
@@ -29,7 +28,7 @@ export const parseStateObjectToFile: thisModule['parseStateObjectToFile'] = (sta
 }
 
 export const buildFileName: thisModule['buildFileName'] = (state) => {
-  return `${state.spec.schema}.${state.kind}.${FILE_EXTENSION}`
+  return `${state.metadata.schema}.${state.kind}.${FILE_EXTENSION}`
 }
 
 export const buildFilePath: thisModule['buildFilePath'] = (state, rootStore) => {
@@ -37,5 +36,5 @@ export const buildFilePath: thisModule['buildFilePath'] = (state, rootStore) => 
     return `${rootStore.systemVariables.PUBLIC_DATABASE_PATH}/${buildFileName(state)}`
   }
 
-  return `${rootStore.systemVariables.PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(state.spec.schema)}/${buildFileName(state)}`
+  return `${rootStore.systemVariables.PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(state.metadata.schema)}/${buildFileName(state)}`
 }

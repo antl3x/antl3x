@@ -1,4 +1,3 @@
-import {RootStore__Ready} from '@RootStore.js'
 import type {IRCDParser} from './ICRDParser.js'
 import {z} from 'zod'
 
@@ -7,9 +6,8 @@ import {z} from 'zod'
 /* -------------------------------------------------------------------------- */
 
 export interface ICRD<
-  StateSchema extends z.Schema<unknown & {kind: string; metadata: {name: string}; spec: unknown}> = z.Schema,
+  StateSchema extends z.Schema<unknown & {kind: string; metadata: unknown; spec: unknown}> = z.Schema,
   StateObject extends z.TypeOf<StateSchema> = z.TypeOf<StateSchema>,
-  StateDiff = any,
 > {
   _kind_: StateObject['kind']
 
@@ -17,7 +15,7 @@ export interface ICRD<
 
   StateSchema: StateSchema
 
-  /* ---------------------------------- $plan ---------------------------------- */
+  /* ---------------------------------- $getPreviewPlan ---------------------------------- */
 
   $getPreviewPlan: (parser: IRCDParser<ICRD>) => Promise<
     {
