@@ -10,4 +10,6 @@ export interface IRCDParser<CRD extends ICRD> {
 
   parseFileToStateObject: (file: string) => z.TypeOf<CRD['StateSchema']>
   parseStateObjectToFile: (state: z.TypeOf<CRD['StateSchema']>) => string
+
+  isValidFile(file: string): boolean
 }

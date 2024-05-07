@@ -25,13 +25,13 @@ type StateObject = z.TypeOf<thisModule['StateSchema']>
 
 /* --------------------------------- _kind_ --------------------------------- */
 
-export const _kind_: thisModule['_kind_'] = 'FunctionPrivilegess'
+export const _kind_: thisModule['_kind_'] = 'FunctionPrivileges'
 
 /* ------------------------------- StateSchema ------------------------------ */
 
 export const StateSchema = z
   .object({
-    kind: z.literal('FunctionPrivilegess'),
+    kind: z.literal('FunctionPrivileges'),
     metadata: z.object({
       name: z.string(),
     }),
@@ -41,7 +41,7 @@ export const StateSchema = z
       grants: z.array(
         z.object({
           role: z.string(),
-          privileges: z.array(z.union([z.literal('USAGE'), z.literal('CREATE')])),
+          privileges: z.array(z.literal('EXECUTE')),
         }),
       ),
     }),
@@ -152,7 +152,7 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (parser)
 
     const state = parser.parseFileToStateObject(fs.readFileSync(file, 'utf8'))
 
-    if (state.kind !== 'FunctionPrivilegess') {
+    if (state.kind !== 'FunctionPrivileges') {
       continue
     }
     validFiles.push(state)
@@ -192,7 +192,7 @@ WHERE has_schema_privilege(r.oid, n.oid, p.perm)
     // If not found, create a new state object
     if (!stateObj) {
       stateObj = StateSchema.parse({
-        kind: 'FunctionPrivilegess',
+        kind: 'FunctionPrivileges',
         metadata: {name: row.schema},
         spec: {database: row.database, schema: row.schema, grants: []},
       })

@@ -17,7 +17,9 @@ export interface ICRD<
 
   /* ---------------------------------- $getPreviewPlan ---------------------------------- */
 
-  $getPreviewPlan: (parser: IRCDParser<ICRD>) => Promise<
+  $getPreviewPlan: <T extends IRCDParser<ICRD<StateSchema, StateObject>>>(
+    parser: T,
+  ) => Promise<
     {
       _kind_: 'PlanInfo'
       localState: 'Present' | 'Absent'
@@ -31,13 +33,20 @@ export interface ICRD<
     }[]
   >
 
-  /* ---------------------------- $fetchLocalStates ---------------------------- */
-
-  $fetchLocalStates(parser: IRCDParser<ICRD>): Promise<StateObject[]>
-
   /* --------------------------- $fetchRemoteStates --------------------------- */
 
   $fetchRemoteStates(): Promise<StateObject[]>
+
+  /* ------------------------ diffStateObjects ------------------------ */
+
+  diffStateObjects(
+    a: StateObject[],
+    b: StateObject[],
+  ): {
+    uniqueToA: StateObject[]
+    uniqueToB: StateObject[]
+    common: StateObject[]
+  }
 }
 
 export type MigrationFile = string

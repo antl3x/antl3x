@@ -6,6 +6,7 @@ import {satisfies} from 'utils/@utils.js'
 import {getRootStore} from '@RootStore.js'
 import * as glob from 'glob'
 import fs from 'node:fs'
+import {$fetchLocalStates} from './@utils.js'
 
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
@@ -132,36 +133,6 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   return res
 }
 
-/* ---------------------------- $fetchLocalStates --------------------------- */
-
-export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (parser) => {
-  // Fetch all .yaml files in the directory
-  // Then check if the file is a valid SchemaPrivilege file
-  // If not, log and skip
-  // If valid, parse and return
-  const rootStore = await getRootStore()
-  const globPath = rootStore.userConfig.useFlatFolder
-    ? `${rootStore.systemVariables.PUBLIC_DATABASE_PATH}/**/*.${parser.FILE_EXTENSION}`
-    : rootStore.systemVariables.PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(`*/*.${parser.FILE_EXTENSION}`)
-  const files = glob.sync(globPath)
-  const validFiles: StateObject[] = []
-
-  for (const file of files) {
-    if (!file.endsWith(parser.FILE_EXTENSION)) {
-      continue
-    }
-
-    const state = parser.parseFileToStateObject(fs.readFileSync(file, 'utf8'))
-
-    if (state.kind !== 'SchemaPrivileges') {
-      continue
-    }
-    validFiles.push(state)
-  }
-
-  return validFiles
-}
-
 /* --------------------------- $fetchRemoteStates --------------------------- */
 export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => {
   const rootStore = await getRootStore()
@@ -212,4 +183,44 @@ WHERE has_schema_privilege(r.oid, n.oid, p.perm)
   }
 
   return stateObjects
+}
+
+/* ------------------------ diffStateObjects ------------------------ */
+
+export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB) => {
+  const res = {
+    uniqueToA: [],
+    uniqueToB: [],
+    common: [],
+  } as ReturnType<thisModule['diffStateObjects']>
+
+  for (const objA of stateA) {
+    const objB = stateB.find(
+      (obj) =>
+        obj.kind === objA.kind &&
+        obj.metadata.schema === objA.metadata.schema &&
+        obj.metadata.database === objA.metadata.database,
+    )
+
+    if (!objB) {
+      res.uniqueToA.push(objA)
+    } else {
+      res.common.push(objA)
+    }
+  }
+
+  for (const objB of stateB) {
+    const objA = stateA.find(
+      (obj) =>
+        obj.kind === objB.kind &&
+        obj.metadata.schema === objB.metadata.schema &&
+        obj.metadata.database === objB.metadata.database,
+    )
+
+    if (!objA) {
+      res.uniqueToB.push(objB)
+    }
+  }
+
+  return res
 }

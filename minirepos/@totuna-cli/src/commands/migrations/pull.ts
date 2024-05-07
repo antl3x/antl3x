@@ -36,7 +36,7 @@ export default class Command extends BaseCommand<typeof Command> {
 
       if (!Array.isArray(res)) return []
 
-      if (res.length == 0 && !this.flags.json) {
+      if (res.length == 0 && !silenceLogs) {
         spinner.info(`\x1b[90m No migrations found to pull.\x1b[0m`)
       }
 
@@ -45,7 +45,7 @@ export default class Command extends BaseCommand<typeof Command> {
         const filePath = path.join(this.rootStore.systemVariables.PUBLIC_MIGRATIONS_PATH, fileName)
         fs.mkdirSync(this.rootStore.systemVariables.PUBLIC_MIGRATIONS_PATH, {recursive: true})
         fs.writeFileSync(filePath, migration.content)
-        if (!this.flags.json) {
+        if (!silenceLogs) {
           this.log(`Migration file pulled: ${fileName} saved to ${filePath}`)
         }
       }

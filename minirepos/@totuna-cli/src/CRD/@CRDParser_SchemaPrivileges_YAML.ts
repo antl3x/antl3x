@@ -38,3 +38,13 @@ export const buildFilePath: thisModule['buildFilePath'] = (state, rootStore) => 
 
   return `${rootStore.systemVariables.PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(state.metadata.schema)}/${buildFileName(state)}`
 }
+
+export const isValidFile: thisModule['isValidFile'] = (file) => {
+  try {
+    const stateObject = parseFileToStateObject(file)
+
+    return !!stateObject
+  } catch (error) {
+    return false
+  }
+}
