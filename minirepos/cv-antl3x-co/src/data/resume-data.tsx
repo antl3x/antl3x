@@ -10,7 +10,7 @@ export const RESUME_DATA = {
     "Seasoned Software Engineer and hands-on Tech Leader with over 14 years of experience in software development.",
   summary:
     "I'm a Software Engineer who has founded companies and led engineering teams. I love building products that serve people. Open source is one of my passions – I believe collaborative development is the key to driving great innovations and powerful solutions.",
-  avatarUrl: "/me-light.png",
+  avatarUrl: "/me-light.jpg",
   personalWebsiteUrl: "https://antl3x.co",
   contact: {
     email: "antonio@antl3x.co",
@@ -70,7 +70,7 @@ export const RESUME_DATA = {
       company: "Drafteam",
       link: "https://drafteam.com",
       badges: ["B2C"],
-      title: "Founder / CTO",
+      title: "Head of Engineering & Co-Founder",
       start: "2016",
       end: "2018",
       description: [
@@ -84,8 +84,8 @@ export const RESUME_DATA = {
       company: "Blu365",
       link: "https://blue365.com.br/",
       badges: ["B2B", "B2C"],
-      title: "Technical Lead @ Analytics",
-      start: "2015",
+      title: "Senior Software Engineer",
+      start: "2014",
       end: "2016",
       description: [
         "Pioneered the use of AWS Lambda and Step Functions, reducing infrastructure costs by 30% and enabling seamless scalability",
