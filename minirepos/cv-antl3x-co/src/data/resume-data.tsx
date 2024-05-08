@@ -7,9 +7,9 @@ export const RESUME_DATA = {
   location: "Salt Lake City, UT, United States",
   locationLink: "https://www.google.com/maps/place/Salt+Lake+City,+UT",
   about:
-    "Seasoned Software Engineer, Hands-on CTO, and Quant Trading Enthusiast with over 10 years in the tech industry.",
+    "Seasoned Software Engineer and hands-on Tech Leader with over 14 years of experience in software development.",
   summary:
-    "As a Software Engineer with experience as a founder and Head of Engineering, I specialize in developing and improving SaaS products for B2B and B2C markets. Passionate about open source software, I advocate for collaborative development to drive innovation and effective solutions.",
+    "I'm a Software Engineer who has founded companies and led engineering teams. I love building products that serve people. Open source is one of my passions – I believe collaborative development is the key to driving great innovations and powerful solutions.",
   avatarUrl: "/me-light.png",
   personalWebsiteUrl: "https://antl3x.co",
   contact: {
@@ -60,9 +60,10 @@ export const RESUME_DATA = {
       start: "2018",
       end: "Current",
       description: [
-        "Led engineering for a top legaltech in LatAm, servicing clients like Accenture, Renault, Siemens.",
-        "Orchestrated AWS to Google Cloud transition, adopting Kubernetes + monorepo for improved efficiency.",
-        "Developed a monorepo workflow and enhanced hiring practices for SOC-2 compliance readiness.",
+        "Led engineering team to deliver Document Automation & Digital Signing platform to Fortune 500 clients.",
+        "Slashed infra costs by driving AWS → Google Cloud Platform move and boosted team efficiency with Kubernetes adoption.",
+        "Architected & led delivery of GraphQL/TypeScript/PostgreSQL backend, slashing API latency by 40%.",
+        "Pioneered TypeScript migration, dramatically reducing runtime errors & enhancing DX.",
       ],
     },
     {
@@ -73,9 +74,10 @@ export const RESUME_DATA = {
       start: "2016",
       end: "2018",
       description: [
-        "Co-founded a successful multi-sport fantasy game startup incubated by Google Campus Residency, ranking third in the US and second in Brazil.",
-        "Managed engineering team to design and implement robust cloud infrastructure on Google Cloud Platform.",
-        "Achieved 3.8 million daily entries, leveraging TypeScript, React, NodeJS, and BigQuery.",
+        "Developed a highly scalable event-driven serverless architecture using NodeJS/Typescript and Kubernetes.",
+        "Delivered a feature-rich mobile app using React Native and Cloud Firestore, achieving a 4.8-star rating and 100K+ downloads.",
+        "Implemented a GitOps workflow with Cloud Build and Github Actions, enabling CICD and reducing release cycles by 50%.",
+        "Optimized data pipelines with Cloud Pub/Sub and Cloud Functions, reducing processing times by 60%.",
       ],
     },
     {
@@ -86,8 +88,9 @@ export const RESUME_DATA = {
       start: "2015",
       end: "2016",
       description: [
-        "Led the Growth & Analytics, designing real-time services integrating AWS RedShift, DynamoDB, Aurora.",
+        "Pioneered the use of AWS Lambda and Step Functions, reducing infrastructure costs by 30% and enabling seamless scalability",
         "Spearheaded API integration with Banco Itáu, boosting debt collection deals by 20%, significantly increasing revenue.",
+        "Implemented a serverless event-driven architecture using SNS and SQS, reducing latency by 40% and enhancing fault-tolerance.",
       ],
     },
   ],

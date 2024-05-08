@@ -16,29 +16,28 @@
 
 Welcome to my GitHub!
 
-#### About Me
+### About Me
 
 - **Born:** in Brazil 🇧🇷
 
 - **Living:** in **Salt Lake City, US 🇺🇸**
- 
-- **Who:** I'm a seasoned **Software Engineer** with strong technical skills  and a **hands-on CTO** with over 10 years in the tech industry. My journey includes being an **founder** where I've accumulated a wealth of experience in building and scaling B2B and B2C products.
 
-- **What:** I'm deeply passionate about **coding**, **data in general (from dataviz to ml models)**, and **quantitative trading**.
+- **Who:** I'm a **Software Engineer** who has founded companies and **led engineering teams**. I love **building products** that serve people. Open source is one of my passions.
+
+- **What:**I spend most of my time coding, developing **full-stack applications**, designing **robust software architectures**, and **building tools** that enhance developer experiences (**DX**).
 
 - **Education**: I have an Masters degree in Executive Finance and an Bachelor's on Software Engineering / IT Management.
 
-- **Creator of**: [codeplot](https://github.com/antl3x/codeplot), [super-ts](https://github.com/antl3x/super-ts) 
-
 ---
 
-
 ### How I Work
+
 - I'm obsessed with building software that works well and isn't overcomplicated.
 
 - I don't just lead; I also code. Contributing to the codebase and working as a software engineer alongside my team is essential.
 
 **Extra Bits:**
+
 - I like getting my hands dirty in coding and shipping features that count.
 - Big fan of [Basecamp's Shape Up](https://basecamp.com/shapeup)
 - Enthusiast of the [Linear method](https://linear.app/method).
@@ -47,6 +46,7 @@ Welcome to my GitHub!
 ---
 
 ### Collaborations and Contributions
+
 - **Open Source:** I'm a strong advocate for open-source software and actively contribute to various projects. I believe in the power of community-driven development.
 
 - **Consulting:** Leveraging my extensive experience, I'm open to collaborating on **special closed-source projects** and providing consultancy in my areas of expertise.
@@ -55,19 +55,20 @@ Welcome to my GitHub!
 
 ---
 
-### My Projects
+### Personal Projects
 
 - [codeplot](https://github.com/codeplot-co/codeplot) is an innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.
-
+- [learnpolars.co](https://learnpolars.co) is a platform and knowledge base for learning and mastering the Polars data manipulation library.
 - [super-ts](https://github.com/antl3x/super-ts) is a Typescript functional programming library inspired by [Haskell](https://www.haskell.org/) and [PureScript](http://www.purescript.org/) providing both runtime type checking and functional algebraic data types.
+- [func](https://github.com/antl3x/antl3x/tree/master/minirepos/func) is a lightweight micro-library that simplifies function creation with run-time argument validation and parsing using the powerful `zod` library.
 
 ---
 
 ### Let's Connect!
+
 - **[Email](mailto:antonio@antl3x.co):** Feel free to reach out to me. I'm always open to interesting conversations and opportunities.
 - **[Blog](https://antl3x.co/posts):** Check out my writings where I share my thoughts on technology, data, and financial markets.
 - **[LinkedIn](https://linkedin.com/in/antl3x):** Connect with me professionally.
 - [𝕏](https://x.com/antl3x): Follow me.
 
 Looking forward to collaborating and sharing knowledge with the community!
-
