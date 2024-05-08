@@ -64,7 +64,9 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
 
   for (const localSchema of localStateObjects) {
     const remoteSchema = remoteStateObjects.find(
-      (remoteSchema) => remoteSchema.metadata.schema === localSchema.metadata.schema,
+      (remoteSchema) =>
+        remoteSchema.metadata.schema === localSchema.metadata.schema &&
+        remoteSchema.metadata.function === localSchema.metadata.function,
     )
 
     if (remoteSchema) {
@@ -98,7 +100,9 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   /* ----------------- Find absent privileges in remote state ----------------- */
   for (const remoteSchema of remoteStateObjects) {
     const localSchema = localStateObjects.find(
-      (localSchema) => localSchema.metadata.schema === remoteSchema.metadata.schema,
+      (localSchema) =>
+        localSchema.metadata.schema === remoteSchema.metadata.schema &&
+        localSchema.metadata.function === remoteSchema.metadata.function,
     )
 
     if (localSchema) {
@@ -143,25 +147,38 @@ export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => 
     privilege: 'EXECUTE'
     function: string
   }>(`
-  SELECT 
-    r.rolname AS grantee,
-    current_database() AS database,
-    f.pronamespace::regnamespace::name AS schema,
-    split_part(f.oid::regprocedure::text, '.', 2) AS function,
-    'EXECUTE' AS privilege,
-    has_function_privilege(r.oid, f.oid, 'EXECUTE') = true
-    FROM pg_catalog.pg_proc f
-    CROSS JOIN pg_catalog.pg_roles AS r
-    WHERE f.pronamespace::regnamespace::name <> 'information_schema'
-    AND f.pronamespace::regnamespace::name NOT LIKE 'pg_%'
-    AND r.rolname NOT LIKE 'pg_%'
-    and has_function_privilege(r.oid, f.oid, 'EXECUTE') = true;`)
+  SELECT
+  n.nspname AS schema,
+  p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' AS function,
+  current_database() AS database,
+  CASE
+      WHEN r.rolname IS NULL THEN 'public'
+      ELSE r.rolname
+  END AS grantee,
+  CASE
+      WHEN a.privilege_type = 'EXECUTE' THEN 'EXECUTE'
+  END AS privilege
+FROM
+  pg_proc p
+  JOIN pg_namespace n ON p.pronamespace = n.oid
+  LEFT JOIN aclexplode(p.proacl) a ON TRUE
+  LEFT JOIN pg_roles r ON a.grantee = r.oid
+WHERE
+  (n.nspname NOT IN ('pg_catalog', 'information_schema') OR n.nspname = 'public')
+  AND (r.rolname NOT LIKE 'pg\_%' OR r.rolname IS NULL)
+ORDER BY
+  n.nspname,
+  p.proname,
+  grantee;
+`)
 
   const stateObjects: StateObject[] = []
 
   for (const row of rows) {
     // Find the state object for the schema
-    let stateObj = stateObjects.find((state) => state.metadata.schema === row.schema)
+    let stateObj = stateObjects.find(
+      (state) => state.metadata.schema === row.schema && state.metadata.function === row.function,
+    )
 
     // If not found, create a new state object
     if (!stateObj) {

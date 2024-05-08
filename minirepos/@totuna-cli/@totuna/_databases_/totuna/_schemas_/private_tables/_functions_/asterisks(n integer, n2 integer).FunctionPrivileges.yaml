@@ -1,0 +1,9 @@
+kind: FunctionPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+  function: asterisks(n integer, n2 integer)
+spec:
+  - role: postgres
+    privileges:
+      - EXECUTE

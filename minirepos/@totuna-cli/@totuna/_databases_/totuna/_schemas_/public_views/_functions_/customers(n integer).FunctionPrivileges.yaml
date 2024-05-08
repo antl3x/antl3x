@@ -1,0 +1,12 @@
+kind: FunctionPrivileges
+metadata:
+  database: totuna
+  schema: public_views
+  function: customers(n integer)
+spec:
+  - role: postgres
+    privileges:
+      - EXECUTE
+  - role: public
+    privileges:
+      - EXECUTE
