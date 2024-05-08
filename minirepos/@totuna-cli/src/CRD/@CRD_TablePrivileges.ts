@@ -10,11 +10,11 @@ import {$fetchLocalStates} from './@utils.js'
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface ICRD_FunctionPrivileges extends ICRD<typeof StateSchema> {}
+export interface ICRD_TablePrivileges extends ICRD<typeof StateSchema> {}
 
-satisfies<ICRD_FunctionPrivileges, typeof import('./@CRD_FunctionPrivileges.js')>()
+satisfies<ICRD_TablePrivileges, typeof import('./@CRD_TablePrivileges.js')>()
 
-type thisModule = ICRD_FunctionPrivileges
+type thisModule = ICRD_TablePrivileges
 
 type StateObject = z.TypeOf<thisModule['StateSchema']>
 
@@ -24,26 +24,37 @@ type StateObject = z.TypeOf<thisModule['StateSchema']>
 
 /* --------------------------------- _kind_ --------------------------------- */
 
-export const _kind_: thisModule['_kind_'] = 'FunctionPrivileges'
+export const _kind_: thisModule['_kind_'] = 'TablePrivileges'
 
 /* ------------------------------- StateSchema ------------------------------ */
 
 export const StateSchema = z
   .object({
-    kind: z.literal('FunctionPrivileges'),
+    kind: z.literal('TablePrivileges'),
     metadata: z.object({
       database: z.string(),
       schema: z.string(),
-      function: z.string(),
+      table: z.string(),
     }),
     spec: z.array(
       z.object({
         role: z.string(),
-        privileges: z.array(z.literal('EXECUTE')),
+        privileges: z.array(
+          z.union([
+            z.literal('SELECT'),
+            z.literal('INSERT'),
+            z.literal('UPDATE'),
+            z.literal('DELETE'),
+            z.literal('TRUNCATE'),
+            z.literal('REFERENCES'),
+            z.literal('TRIGGER'),
+            z.literal('ALL'),
+          ]),
+        ),
       }),
     ),
   })
-  .brand('CRD_FunctionPrivileges_StateSchema')
+  .brand('CRD_TablePrivileges_StateSchema')
 
 export const StateDiff = z.object({
   name: z.string(),
@@ -65,8 +76,9 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   for (const localSchema of localStateObjects) {
     const remoteSchema = remoteStateObjects.find(
       (remoteSchema) =>
+        remoteSchema.metadata.database === localSchema.metadata.database &&
         remoteSchema.metadata.schema === localSchema.metadata.schema &&
-        remoteSchema.metadata.function === localSchema.metadata.function,
+        remoteSchema.metadata.table === localSchema.metadata.table,
     )
 
     if (remoteSchema) {
@@ -85,11 +97,11 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               localState: 'Absent',
               remoteState: 'Present',
               plan: `Revoke`,
-              objectType: 'Function Privilege',
-              objectPath: `${localSchema.metadata.schema}.${localSchema.metadata.function}`,
+              objectType: 'Table Privilege',
+              objectPath: `${localSchema.metadata.schema}.${localSchema.metadata.table}`,
               oldState: `Granted ${privilege} TO ${remoteGrant.role}`,
               newState: `Revoked ${privilege} FROM ${remoteGrant.role}`,
-              sqlQuery: `REVOKE ${privilege} ON FUNCTION ${localSchema.metadata.schema}.${localSchema.metadata.function} FROM "${remoteGrant.role}";`,
+              sqlQuery: `REVOKE ${privilege} ON TABLE ${localSchema.metadata.schema}."${localSchema.metadata.table}" FROM "${remoteGrant.role}";`,
             })
           }
         }
@@ -101,8 +113,9 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   for (const remoteSchema of remoteStateObjects) {
     const localSchema = localStateObjects.find(
       (localSchema) =>
+        localSchema.metadata.database === remoteSchema.metadata.database &&
         localSchema.metadata.schema === remoteSchema.metadata.schema &&
-        localSchema.metadata.function === remoteSchema.metadata.function,
+        localSchema.metadata.table === remoteSchema.metadata.table,
     )
 
     if (localSchema) {
@@ -121,11 +134,11 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               localState: 'Present',
               remoteState: 'Absent',
               plan: `Grant`,
-              objectType: 'Function Privilege',
-              objectPath: `${remoteSchema.metadata.schema}.${remoteSchema.metadata.function}`,
+              objectType: 'Table Privilege',
+              objectPath: `${remoteSchema.metadata.schema}.${remoteSchema.metadata.table}`,
               oldState: `No ${privilege} TO ${localGrant.role}`,
               newState: `Granted ${privilege} TO ${localGrant.role}`,
-              sqlQuery: `GRANT ${privilege} ON FUNCTION ${localSchema.metadata.schema}.${localSchema.metadata.function} TO "${localGrant.role}";`,
+              sqlQuery: `GRANT ${privilege} ON TABLE ${localSchema.metadata.schema}."${localSchema.metadata.table}" TO "${localGrant.role}";`,
             })
           }
         }
@@ -144,32 +157,30 @@ export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => 
     database: string
     schema: string
     grantee: string
-    privilege: 'EXECUTE'
-    function: string
+    privilege: 'SELECT' | 'INSERT' | 'UPDATE' | 'DELETE' | 'TRUNCATE' | 'REFERENCES' | 'TRIGGER'
+    table: string
   }>(`
   SELECT
   n.nspname AS schema,
-  p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' AS function,
+  c.relname AS table,
   current_database() AS database,
-  CASE
-      WHEN r.rolname IS NULL THEN 'PUBLIC'
-      ELSE r.rolname
-  END AS grantee,
-  CASE
-      WHEN a.privilege_type = 'EXECUTE' THEN 'EXECUTE'
-  END AS privilege
+  COALESCE(r.rolname, 'PUBLIC') AS grantee,
+  a.privilege_type AS privilege
 FROM
-  pg_proc p
-  JOIN pg_namespace n ON p.pronamespace = n.oid
-  LEFT JOIN aclexplode(p.proacl) a ON TRUE
-  LEFT JOIN pg_roles r ON a.grantee = r.oid
+  pg_class c
+JOIN
+  pg_namespace n ON c.relnamespace = n.oid
+LEFT JOIN
+  aclexplode(c.relacl) a ON TRUE
+LEFT JOIN
+  pg_roles r ON a.grantee = r.oid
 WHERE
-  (n.nspname NOT IN ('pg_catalog', 'information_schema'))
-  AND (r.rolname NOT LIKE 'pg\_%' OR r.rolname IS NULL)
+  c.relkind = 'r' -- 'r' stands for regular tables
+  AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+  AND (r.rolname IS NULL OR r.rolname NOT LIKE 'pg\_%')
+  and a.privilege_type is not null
 ORDER BY
-  n.nspname,
-  p.proname,
-  grantee;
+  n.nspname, c.relname, grantee;
 `)
 
   const stateObjects: StateObject[] = []
@@ -178,14 +189,16 @@ ORDER BY
     // Find the state object for the schema
     let stateObj = stateObjects.find(
       (state) =>
-         state.metadata.schema === row.schema && state.metadata.function === row.function,
+        state.metadata.database === row.database &&
+        state.metadata.schema === row.schema &&
+        state.metadata.table === row.table,
     )
 
     // If not found, create a new state object
     if (!stateObj) {
       stateObj = StateSchema.parse({
-        kind: 'FunctionPrivileges',
-        metadata: {database: row.database, schema: row.schema, function: row.function},
+        kind: 'TablePrivileges',
+        metadata: {database: row.database, schema: row.schema, table: row.table},
         spec: [],
       })
       stateObjects.push(stateObj)
@@ -220,7 +233,7 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
         obj.kind === objA.kind &&
         obj.metadata.schema === objA.metadata.schema &&
         obj.metadata.database === objA.metadata.database &&
-        obj.metadata.function === objA.metadata.function,
+        obj.metadata.table === objA.metadata.table,
     )
 
     if (!objB) {
@@ -236,7 +249,7 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
         obj.kind === objB.kind &&
         obj.metadata.schema === objB.metadata.schema &&
         obj.metadata.database === objB.metadata.database &&
-        obj.metadata.function === objB.metadata.function,
+        obj.metadata.table === objB.metadata.table,
     )
 
     if (!objA) {

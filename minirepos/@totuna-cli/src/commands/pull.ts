@@ -45,6 +45,7 @@ export default class Command extends BaseCommand<typeof Command> {
         // IMPORTANT: The orders of the state objects are important
         // @ts-expect-error
         const diffObjects = crd.diffStateObjects(remoteStateObjects, localStateObjects)
+        debugger
 
         for (const stateObject of diffObjects.uniqueToA) {
           const stateFile = parser.parseStateObjectToFile(stateObject)

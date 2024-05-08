@@ -10,11 +10,11 @@ import {$fetchLocalStates} from './@utils.js'
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface ICRD_FunctionPrivileges extends ICRD<typeof StateSchema> {}
+export interface ICRD_DatabasePrivileges extends ICRD<typeof StateSchema> {}
 
-satisfies<ICRD_FunctionPrivileges, typeof import('./@CRD_FunctionPrivileges.js')>()
+satisfies<ICRD_DatabasePrivileges, typeof import('./@CRD_DatabasePrivileges.js')>()
 
-type thisModule = ICRD_FunctionPrivileges
+type thisModule = ICRD_DatabasePrivileges
 
 type StateObject = z.TypeOf<thisModule['StateSchema']>
 
@@ -24,26 +24,24 @@ type StateObject = z.TypeOf<thisModule['StateSchema']>
 
 /* --------------------------------- _kind_ --------------------------------- */
 
-export const _kind_: thisModule['_kind_'] = 'FunctionPrivileges'
+export const _kind_: thisModule['_kind_'] = 'DatabasePrivileges'
 
 /* ------------------------------- StateSchema ------------------------------ */
 
 export const StateSchema = z
   .object({
-    kind: z.literal('FunctionPrivileges'),
+    kind: z.literal('DatabasePrivileges'),
     metadata: z.object({
       database: z.string(),
-      schema: z.string(),
-      function: z.string(),
     }),
     spec: z.array(
       z.object({
         role: z.string(),
-        privileges: z.array(z.literal('EXECUTE')),
+        privileges: z.array(z.union([z.literal('CREATE'), z.literal('CONNECT'), z.literal('TEMPORARY')])),
       }),
     ),
   })
-  .brand('CRD_FunctionPrivileges_StateSchema')
+  .brand('CRD_DatabasePrivileges_StateSchema')
 
 export const StateDiff = z.object({
   name: z.string(),
@@ -64,9 +62,7 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
 
   for (const localSchema of localStateObjects) {
     const remoteSchema = remoteStateObjects.find(
-      (remoteSchema) =>
-        remoteSchema.metadata.schema === localSchema.metadata.schema &&
-        remoteSchema.metadata.function === localSchema.metadata.function,
+      (remoteSchema) => remoteSchema.metadata.database === localSchema.metadata.database,
     )
 
     if (remoteSchema) {
@@ -76,7 +72,6 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
         for (const privilege of remoteGrant.privileges) {
           if (!localGrant?.privileges.includes(privilege)) {
             absentPrivilegesInLocalState.push({
-              schema: localSchema.metadata.schema,
               role: remoteGrant.role,
               privilege,
             })
@@ -85,11 +80,11 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               localState: 'Absent',
               remoteState: 'Present',
               plan: `Revoke`,
-              objectType: 'Function Privilege',
-              objectPath: `${localSchema.metadata.schema}.${localSchema.metadata.function}`,
+              objectType: 'Database Privilege',
+              objectPath: `${localSchema.metadata.database}`,
               oldState: `Granted ${privilege} TO ${remoteGrant.role}`,
               newState: `Revoked ${privilege} FROM ${remoteGrant.role}`,
-              sqlQuery: `REVOKE ${privilege} ON FUNCTION ${localSchema.metadata.schema}.${localSchema.metadata.function} FROM "${remoteGrant.role}";`,
+              sqlQuery: `REVOKE ${privilege} ON DATABASE ${localSchema.metadata.database} FROM "${remoteGrant.role}";`,
             })
           }
         }
@@ -100,9 +95,7 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   /* ----------------- Find absent privileges in remote state ----------------- */
   for (const remoteSchema of remoteStateObjects) {
     const localSchema = localStateObjects.find(
-      (localSchema) =>
-        localSchema.metadata.schema === remoteSchema.metadata.schema &&
-        localSchema.metadata.function === remoteSchema.metadata.function,
+      (localSchema) => localSchema.metadata.database === remoteSchema.metadata.database,
     )
 
     if (localSchema) {
@@ -112,7 +105,6 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
         for (const privilege of localGrant.privileges) {
           if (!remoteGrant?.privileges.includes(privilege)) {
             absentPrivilegesInRemoteState.push({
-              schema: remoteSchema.metadata.schema,
               role: localGrant.role,
               privilege,
             })
@@ -121,11 +113,11 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               localState: 'Present',
               remoteState: 'Absent',
               plan: `Grant`,
-              objectType: 'Function Privilege',
-              objectPath: `${remoteSchema.metadata.schema}.${remoteSchema.metadata.function}`,
+              objectType: 'Database Privilege',
+              objectPath: `${remoteSchema.metadata.database}`,
               oldState: `No ${privilege} TO ${localGrant.role}`,
               newState: `Granted ${privilege} TO ${localGrant.role}`,
-              sqlQuery: `GRANT ${privilege} ON FUNCTION ${localSchema.metadata.schema}.${localSchema.metadata.function} TO "${localGrant.role}";`,
+              sqlQuery: `GRANT ${privilege} ON DATABASE ${localSchema.metadata.database} TO "${localGrant.role}";`,
             })
           }
         }
@@ -142,50 +134,44 @@ export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => 
 
   const {rows} = await rootStore.pgClient.query<{
     database: string
-    schema: string
     grantee: string
-    privilege: 'EXECUTE'
-    function: string
+    privilege: 'CREATE' | 'CONNECT' | 'TEMPORARY'
   }>(`
   SELECT
-  n.nspname AS schema,
-  p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' AS function,
-  current_database() AS database,
-  CASE
-      WHEN r.rolname IS NULL THEN 'PUBLIC'
-      ELSE r.rolname
-  END AS grantee,
-  CASE
-      WHEN a.privilege_type = 'EXECUTE' THEN 'EXECUTE'
-  END AS privilege
+    d.datname AS database,
+    CASE
+        WHEN r.rolname IS NULL THEN 'public'
+        ELSE r.rolname
+    END AS grantee,
+    CASE
+        WHEN a.privilege_type = 'CREATE' THEN 'CREATE'
+        WHEN a.privilege_type = 'CONNECT' THEN 'CONNECT'
+        WHEN a.privilege_type = 'TEMPORARY' THEN 'TEMPORARY'
+        WHEN a.privilege_type = 'TEMP' THEN 'TEMPORARY'
+    END AS privilege
 FROM
-  pg_proc p
-  JOIN pg_namespace n ON p.pronamespace = n.oid
-  LEFT JOIN aclexplode(p.proacl) a ON TRUE
-  LEFT JOIN pg_roles r ON a.grantee = r.oid
+    pg_database d
+    LEFT JOIN aclexplode(d.datacl) a ON TRUE
+    LEFT JOIN pg_roles r ON a.grantee = r.oid
 WHERE
-  (n.nspname NOT IN ('pg_catalog', 'information_schema'))
-  AND (r.rolname NOT LIKE 'pg\_%' OR r.rolname IS NULL)
+    (r.rolname NOT LIKE 'pg\_%') and 
+    d.datistemplate = false 
 ORDER BY
-  n.nspname,
-  p.proname,
-  grantee;
+    database,
+    grantee;
 `)
 
   const stateObjects: StateObject[] = []
 
   for (const row of rows) {
     // Find the state object for the schema
-    let stateObj = stateObjects.find(
-      (state) =>
-         state.metadata.schema === row.schema && state.metadata.function === row.function,
-    )
+    let stateObj = stateObjects.find((state) => state.metadata.database === row.database)
 
     // If not found, create a new state object
     if (!stateObj) {
       stateObj = StateSchema.parse({
-        kind: 'FunctionPrivileges',
-        metadata: {database: row.database, schema: row.schema, function: row.function},
+        kind: 'DatabasePrivileges',
+        metadata: {database: row.database},
         spec: [],
       })
       stateObjects.push(stateObj)
@@ -215,13 +201,7 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
   } as ReturnType<thisModule['diffStateObjects']>
 
   for (const objA of stateA) {
-    const objB = stateB.find(
-      (obj) =>
-        obj.kind === objA.kind &&
-        obj.metadata.schema === objA.metadata.schema &&
-        obj.metadata.database === objA.metadata.database &&
-        obj.metadata.function === objA.metadata.function,
-    )
+    const objB = stateB.find((obj) => obj.kind === objA.kind && obj.metadata.database === objA.metadata.database)
 
     if (!objB) {
       res.uniqueToA.push(objA)
@@ -231,13 +211,7 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
   }
 
   for (const objB of stateB) {
-    const objA = stateA.find(
-      (obj) =>
-        obj.kind === objB.kind &&
-        obj.metadata.schema === objB.metadata.schema &&
-        obj.metadata.database === objB.metadata.database &&
-        obj.metadata.function === objB.metadata.function,
-    )
+    const objA = stateA.find((obj) => obj.kind === objB.kind && obj.metadata.database === objB.metadata.database)
 
     if (!objA) {
       res.uniqueToB.push(objB)

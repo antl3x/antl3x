@@ -36,6 +36,11 @@ interface SystemVariables {
 
   PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(schemaName: string): string
   PUBLIC_CRD_FUNCTION_PRIVILEGES_PATH(schemaName: string): string
+  PUBLIC_CRD_SEQUENCE_PRIVILEGES_PATH(schemaName: string): string
+  PUBLIC_CRD_TABLE_PRIVILEGES_PATH(schemaName: string, tableName: string): string
+  PUBLIC_CRD_VIEW_PRIVILEGES_PATH(schemaName: string, viewName: string): string
+  PUBLIC_CRD_TABLECOLUMNS_PRIVILEGES_PATH(schemaName: string, tableName: string): string
+  PUBLIC_CRD_DATABASE_PRIVILEGES_PATH(): string
 }
 
 /* -------------------------------------------------------------------------- */
@@ -114,5 +119,25 @@ const _systemVariables = (userConfig: Config): RootStore__Ready['systemVariables
 
     PUBLIC_CRD_FUNCTION_PRIVILEGES_PATH(schemaName: string) {
       return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}`
+    },
+
+    PUBLIC_CRD_SEQUENCE_PRIVILEGES_PATH(schemaName: string) {
+      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}`
+    },
+
+    PUBLIC_CRD_TABLE_PRIVILEGES_PATH(schemaName: string, tableName: string) {
+      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}/_tables_/${tableName}`
+    },
+
+    PUBLIC_CRD_VIEW_PRIVILEGES_PATH(schemaName: string, viewName: string) {
+      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}/_views_/${viewName}`
+    },
+
+    PUBLIC_CRD_TABLECOLUMNS_PRIVILEGES_PATH(schemaName: string, tableName: string) {
+      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}/_tables_/${tableName}`
+    },
+
+    PUBLIC_CRD_DATABASE_PRIVILEGES_PATH() {
+      return `${this.PUBLIC_DATABASE_PATH}`
     },
   })

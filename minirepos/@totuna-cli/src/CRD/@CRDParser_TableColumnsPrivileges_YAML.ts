@@ -1,6 +1,6 @@
 import {satisfies} from 'utils/@utils.js'
 import {IRCDParser} from './ICRDParser.js'
-import {ICRD_FunctionPrivileges, StateSchema} from './@CRD_FunctionPrivileges.js'
+import {ICRD_TableColumnsPrivileges, StateSchema} from './@CRD_TableColumnsPrivileges.js'
 import {parse, stringify} from 'yaml'
 import {dump} from 'js-yaml'
 
@@ -8,11 +8,11 @@ import {dump} from 'js-yaml'
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface ICRDParser_FunctionPrivilegeYAML extends IRCDParser<ICRD_FunctionPrivileges> {}
+export interface ICRDParser_TableColumnsPrivilegeYAML extends IRCDParser<ICRD_TableColumnsPrivileges> {}
 
-satisfies<ICRDParser_FunctionPrivilegeYAML, typeof import('./@CRDParser_FunctionPrivileges_YAML.js')>()
+satisfies<ICRDParser_TableColumnsPrivilegeYAML, typeof import('./@CRDParser_TableColumnsPrivileges_YAML.js')>()
 
-type thisModule = ICRDParser_FunctionPrivilegeYAML
+type thisModule = ICRDParser_TableColumnsPrivilegeYAML
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */
@@ -31,21 +31,22 @@ export const parseFileToStateObject: thisModule['parseFileToStateObject'] = (fil
 export const parseStateObjectToFile: thisModule['parseStateObjectToFile'] = (state) => {
   const content = dump(state, {
     indent: 2,
-    flowLevel: 3,
+    flowLevel: 5,
     condenseFlow: false,
   })
-
-  return content.replace(/]\n(\s+- role:)/gim, ']\n\n$1')
+  // break line on '- role:' but keep identation
+  // also break line on - column: and keep identation
+  return content.replace(/(\s+- column:)/g, '\n$1').replace(/]\n(\s+- role:)/gim, ']\n\n$1')
 }
 
 /* ------------------------------ buildFileName ----------------------------- */
 
 export const buildFileName: thisModule['buildFileName'] = (state, rootStore) => {
   if (rootStore.userConfig.useFlatFolder) {
-    return `${state.metadata.schema}.${state.metadata.function}.${state.kind}.${FILE_EXTENSION}`
+    return `${state.metadata.schema}.${state.metadata.table}.${state.kind}.${FILE_EXTENSION}`
   }
 
-  return `${state.metadata.function}.${state.kind}.${FILE_EXTENSION}`
+  return `${state.kind}.${FILE_EXTENSION}`
 }
 
 /* ------------------------------ buildFilePath ----------------------------- */
@@ -55,7 +56,8 @@ export const buildFilePath: thisModule['buildFilePath'] = (state, rootStore) => 
     return `${rootStore.systemVariables.PUBLIC_DATABASE_PATH}/${buildFileName(state, rootStore)}`
   }
 
-  return `${rootStore.systemVariables.PUBLIC_CRD_FUNCTION_PRIVILEGES_PATH(
+  return `${rootStore.systemVariables.PUBLIC_CRD_TABLECOLUMNS_PRIVILEGES_PATH(
     state.metadata.schema,
-  )}/_functions_/${buildFileName(state, rootStore)}`
+    state.metadata.table,
+  )}/${buildFileName(state, rootStore)}`
 }

@@ -1,6 +1,6 @@
 import {satisfies} from 'utils/@utils.js'
 import {IRCDParser} from './ICRDParser.js'
-import {ICRD_FunctionPrivileges, StateSchema} from './@CRD_FunctionPrivileges.js'
+import {ICRD_SequencePrivileges, StateSchema} from './@CRD_SequencePrivileges.js'
 import {parse, stringify} from 'yaml'
 import {dump} from 'js-yaml'
 
@@ -8,11 +8,11 @@ import {dump} from 'js-yaml'
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
 
-export interface ICRDParser_FunctionPrivilegeYAML extends IRCDParser<ICRD_FunctionPrivileges> {}
+export interface ICRDParser_SequencePrivilegeYAML extends IRCDParser<ICRD_SequencePrivileges> {}
 
-satisfies<ICRDParser_FunctionPrivilegeYAML, typeof import('./@CRDParser_FunctionPrivileges_YAML.js')>()
+satisfies<ICRDParser_SequencePrivilegeYAML, typeof import('./@CRDParser_SequencePrivileges_YAML.js')>()
 
-type thisModule = ICRDParser_FunctionPrivilegeYAML
+type thisModule = ICRDParser_SequencePrivilegeYAML
 
 /* -------------------------------------------------------------------------- */
 /*                               Implementation                               */
@@ -42,10 +42,10 @@ export const parseStateObjectToFile: thisModule['parseStateObjectToFile'] = (sta
 
 export const buildFileName: thisModule['buildFileName'] = (state, rootStore) => {
   if (rootStore.userConfig.useFlatFolder) {
-    return `${state.metadata.schema}.${state.metadata.function}.${state.kind}.${FILE_EXTENSION}`
+    return `${state.metadata.schema}.${state.metadata.sequence}.${state.kind}.${FILE_EXTENSION}`
   }
 
-  return `${state.metadata.function}.${state.kind}.${FILE_EXTENSION}`
+  return `${state.metadata.sequence}.${state.kind}.${FILE_EXTENSION}`
 }
 
 /* ------------------------------ buildFilePath ----------------------------- */
@@ -55,7 +55,7 @@ export const buildFilePath: thisModule['buildFilePath'] = (state, rootStore) => 
     return `${rootStore.systemVariables.PUBLIC_DATABASE_PATH}/${buildFileName(state, rootStore)}`
   }
 
-  return `${rootStore.systemVariables.PUBLIC_CRD_FUNCTION_PRIVILEGES_PATH(
+  return `${rootStore.systemVariables.PUBLIC_CRD_SEQUENCE_PRIVILEGES_PATH(
     state.metadata.schema,
-  )}/_functions_/${buildFileName(state, rootStore)}`
+  )}/_sequences_/${buildFileName(state, rootStore)}`
 }

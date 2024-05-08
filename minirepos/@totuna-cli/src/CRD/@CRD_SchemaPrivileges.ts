@@ -141,17 +141,28 @@ export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => 
     grantee: string
     privilege: 'USAGE' | 'CREATE'
   }>(`
-  SELECT current_database() AS database, r.rolname AS grantee,
-  n.nspname AS schema,
-  p.perm AS privilege
-FROM pg_catalog.pg_namespace AS n
-CROSS JOIN pg_catalog.pg_roles AS r
-CROSS JOIN (VALUES ('USAGE'), ('CREATE')) AS p(perm)
-WHERE has_schema_privilege(r.oid, n.oid, p.perm)
- AND n.nspname <> 'information_schema'
- AND n.nspname not LIKE 'pg_%'
- AND r.rolname not LIKE 'pg_%'
---      AND NOT r.rolsuper`)
+ SELECT
+ n.nspname AS schema,
+ current_database() AS database,
+ COALESCE(r.rolname, 'PUBLIC') AS grantee,
+ CASE
+   WHEN a.privilege_type LIKE 'CREATE' THEN 'CREATE'
+   WHEN a.privilege_type LIKE 'USAGE' THEN 'USAGE'
+   ELSE NULL
+ END AS privilege
+FROM
+ pg_namespace n
+LEFT JOIN
+ aclexplode(n.nspacl) a ON TRUE
+LEFT JOIN
+ pg_roles r ON a.grantee = r.oid
+WHERE
+ n.nspname NOT IN ('pg_catalog', 'information_schema')
+ AND (r.rolname IS NULL OR r.rolname NOT LIKE 'pg\_%')
+ and a.privilege_type is not null
+ 
+ORDER BY
+ n.nspname, grantee;`)
 
   const stateObjects: StateObject[] = []
 
