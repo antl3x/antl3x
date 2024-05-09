@@ -1,5 +1,5 @@
-import * as CRDYAMLParsers from 'CRD/@crdParsers.js'
-import * as CRDs from 'CRD/@crds.js'
+import * as CRDYAMLParsers from 'CRDs/@crdParsers.js'
+import * as CRDs from 'CRDs/@crds.js'
 import {Table} from 'console-table-printer'
 import ora from 'ora'
 import {BaseCommand} from './BaseCommand.js'
@@ -20,6 +20,9 @@ export default class Command extends BaseCommand<typeof Command> {
   /* ----------------------------------- run ---------------------------------- */
 
   public async run() {
+    const CRDParsers = this.rootStore.userConfig.CRDs!.parsers
+    const CRDs = this.rootStore.userConfig.CRDs!.crds
+
     const spinner = ora()
     this.log(`\x1b[90m❯ Pulling the latest state from the remote database..\x1b[0m`)
     await this.config.runCommand('pull', ['--silence'])
@@ -28,8 +31,9 @@ export default class Command extends BaseCommand<typeof Command> {
 
     try {
       for (const crd of Object.values(CRDs)) {
-        const parser = CRDYAMLParsers[`CRDParser_${crd._kind_}_YAML`]
-        const diffs = await crd.$getPreviewPlan(parser)
+        const parser = CRDParsers[crd._kind_]
+        // @ts-expect-error
+        const diffs = (await crd.$getPreviewPlan(parser)) as Awaited<ReturnType<typeof crd.$getPreviewPlan>>
         jsonRes.push(diffs)
 
         // Add Rows

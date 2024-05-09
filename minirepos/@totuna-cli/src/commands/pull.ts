@@ -1,9 +1,9 @@
-import * as CRDYAMLParsers from 'CRD/@crdParsers.js'
-import * as CRDs from 'CRD/@crds.js'
+import * as CRDYAMLParsers from 'CRDs/@crdParsers.js'
+import * as CRDs from 'CRDs/@crds.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import {BaseCommand} from './BaseCommand.js'
-import {$fetchLocalStates} from 'CRD/@utils.js'
+import {$fetchLocalStates} from 'CRDs/@utils.js'
 /* -------------------------------------------------------------------------- */
 /*                               Command                               */
 /* -------------------------------------------------------------------------- */
@@ -29,8 +29,11 @@ export default class Command extends BaseCommand<typeof Command> {
     let jsonRes = []
 
     try {
+      const CRDParsers = this.rootStore.userConfig.CRDs!.parsers
+      const CRDs = this.rootStore.userConfig.CRDs!.crds
+
       for (const crd of Object.values(CRDs)) {
-        const parser = CRDYAMLParsers[`CRDParser_${crd._kind_}_YAML`]
+        const parser = CRDParsers[crd._kind_]
 
         if (!parser) {
           throw new Error(`Parser not found for ${crd._kind_}`)

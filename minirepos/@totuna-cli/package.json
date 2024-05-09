@@ -11,8 +11,19 @@
   "license": "AGPL-3.0-only",
   "author": "Antonio Moura (@antl3x)",
   "type": "module",
-  "exports": "./dist/index.js",
-  "types": "dist/index.d.ts",
+  "exports": {
+    "./@config": {
+      "default": "./dist/@config.js",
+      "import": "./dist/@config.js",
+      "require": "./dist/@config.js",
+      "types": "./dist/@config.d.ts"
+    },
+    "./@CRDs/*": {
+      "import": "./dist/CRDs/*",
+      "require": "./dist/CRDs/*",
+      "types": "./dist/CRDs/*"
+    }
+  },
   "bin": {
     "totuna": "./bin/run.js"
   },

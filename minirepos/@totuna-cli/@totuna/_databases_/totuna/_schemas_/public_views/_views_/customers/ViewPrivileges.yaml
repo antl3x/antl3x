@@ -1,8 +1,0 @@
-kind: ViewPrivileges
-metadata:
-  database: totuna
-  schema: public_views
-  view: customers
-spec:
-  - role: postgres
-    privileges: [INSERT, SELECT, UPDATE, DELETE, TRUNCATE, REFERENCES, TRIGGER]

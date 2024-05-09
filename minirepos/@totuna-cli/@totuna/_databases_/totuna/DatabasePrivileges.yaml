@@ -1,6 +1,0 @@
-kind: DatabasePrivileges
-metadata:
-  database: totuna
-spec:
-  - role: postgres
-    privileges: [CREATE, TEMPORARY, CONNECT]

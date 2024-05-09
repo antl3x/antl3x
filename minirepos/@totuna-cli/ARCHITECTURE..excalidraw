@@ -576,11 +576,11 @@
       "locked": false,
       "fontSize": 20,
       "fontFamily": 3,
-      "text": "parseFileToStateObject(file): State_Object",
+      "text": "$parseFileToStateObject(file): State_Object",
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "originalText": "parseFileToStateObject(file): State_Object",
+      "originalText": "$parseFileToStateObject(file): State_Object",
       "lineHeight": 1.2,
       "baseline": 19
     },
