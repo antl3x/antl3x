@@ -2,6 +2,7 @@ import {satisfies} from 'utils/@utils.js'
 import {IRCDParser} from './ICRDParser.js'
 import {ICRD_SchemaPrivilege, StateSchema} from './@CRD_SchemaPrivileges.js'
 import {parse, stringify} from 'yaml'
+import {dump} from 'js-yaml'
 
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
@@ -28,14 +29,20 @@ export const parseFileToStateObject: thisModule['parseFileToStateObject'] = (fil
 /* ------------------------- parseStateObjectToFile ------------------------- */
 
 export const parseStateObjectToFile: thisModule['parseStateObjectToFile'] = (state) => {
-  return stringify(state)
+  const content = dump(state, {
+    indent: 2,
+    flowLevel: 3,
+    condenseFlow: false,
+  })
+
+  return content.replace(/]\n(\s+- role:)/gim, ']\n\n$1')
 }
 
 /* ------------------------------ buildFileName ----------------------------- */
 
 export const buildFileName: thisModule['buildFileName'] = (state, rootStore) => {
   if (rootStore.userConfig.useFlatFolder) {
-    return `${state.metadata.schema}.${state.kind}.${FILE_EXTENSION}`
+    return `${state.kind}.${state.metadata.schema}.${FILE_EXTENSION}`
   }
 
   return `${state.kind}.${FILE_EXTENSION}`

@@ -1,0 +1,81 @@
+kind: TableColumnsPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+  table: Employee
+spec:
+
+  - column: Address
+    privileges:
+      - role: postgres
+        privileges: [SELECT, REFERENCES, INSERT, UPDATE]
+
+  - column: BirthDate
+    privileges:
+      - role: postgres
+        privileges: [SELECT, UPDATE, INSERT, REFERENCES]
+
+  - column: City
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, INSERT, REFERENCES, SELECT]
+
+  - column: Country
+    privileges:
+      - role: postgres
+        privileges: [INSERT, UPDATE, REFERENCES, SELECT]
+
+  - column: Email
+    privileges:
+      - role: postgres
+        privileges: [REFERENCES, INSERT, UPDATE, SELECT]
+
+  - column: EmployeeId
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, SELECT, INSERT, REFERENCES]
+
+  - column: Fax
+    privileges:
+      - role: postgres
+        privileges: [REFERENCES, UPDATE, SELECT, INSERT]
+
+  - column: FirstName
+    privileges:
+      - role: postgres
+        privileges: [SELECT, UPDATE, REFERENCES, INSERT]
+
+  - column: HireDate
+    privileges:
+      - role: postgres
+        privileges: [REFERENCES, UPDATE, SELECT, INSERT]
+
+  - column: LastName
+    privileges:
+      - role: postgres
+        privileges: [REFERENCES, UPDATE, SELECT, INSERT]
+
+  - column: Phone
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, SELECT, INSERT, REFERENCES]
+
+  - column: PostalCode
+    privileges:
+      - role: postgres
+        privileges: [SELECT, REFERENCES, UPDATE, INSERT]
+
+  - column: ReportsTo
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, SELECT, REFERENCES, INSERT]
+
+  - column: State
+    privileges:
+      - role: postgres
+        privileges: [REFERENCES, SELECT, UPDATE, INSERT]
+
+  - column: Title
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, INSERT, REFERENCES, SELECT]

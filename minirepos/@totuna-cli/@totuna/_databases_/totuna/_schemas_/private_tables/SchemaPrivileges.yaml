@@ -1,0 +1,13 @@
+kind: SchemaPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+spec:
+  - role: PUBLIC
+    privileges: [USAGE, CREATE]
+
+  - role: customer:xyz
+    privileges: [USAGE]
+
+  - role: postgres
+    privileges: [CREATE, USAGE]

@@ -67,94 +67,87 @@ export const StateDiff = z.object({
 })
 
 /* --------------------------------- getPreviewPlan -------------------------------- */
+
 export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => {
   const res: Awaited<ReturnType<thisModule['$getPreviewPlan']>> = []
   const localStateObjects = await $fetchLocalStates(parser)
   const remoteStateObjects = await $fetchRemoteStates()
 
-  // Improved loop by leveraging maps for quicker access
-  const remoteStatesMap = new Map<string, StateObject>()
-  for (const state of remoteStateObjects) {
-    const key = `${state.metadata.database}.${state.metadata.schema}.${state.metadata.table}`
-    remoteStatesMap.set(key, state)
-  }
+  for (const localSchema of localStateObjects) {
+    const remoteSchema = remoteStateObjects.find(
+      (remote) =>
+        remote.metadata.database === localSchema.metadata.database &&
+        remote.metadata.schema === localSchema.metadata.schema &&
+        remote.metadata.table === localSchema.metadata.table,
+    )
 
-  for (const localState of localStateObjects) {
-    const key = `${localState.metadata.database}.${localState.metadata.schema}.${localState.metadata.table}`
-    const remoteState = remoteStatesMap.get(key)
+    if (remoteSchema) {
+      for (const localColumn of localSchema.spec) {
+        const remoteColumn = remoteSchema.spec.find((rc) => rc.column === localColumn.column)
 
-    if (remoteState) {
-      const remoteSpecMap = new Map<string, (typeof remoteState.spec)[number]>()
-      remoteState.spec.forEach((col) => remoteSpecMap.set(col.column, col))
-
-      localState.spec.forEach((localColumn) => {
-        const remoteColumn = remoteSpecMap.get(localColumn.column)
         if (remoteColumn) {
-          const localPrivilegesSet = new Set(
-            localColumn.privileges.map((p) => `${p.role}:${p.privileges.sort().join(',')}`),
-          )
-          const remotePrivilegesSet = new Set(
-            remoteColumn.privileges.map((p) => `${p.role}:${p.privileges.sort().join(',')}`),
-          )
-
-          localColumn.privileges.forEach((localGrant) => {
-            const remoteGrant = remoteColumn.privileges.find((rg) => rg.role === localGrant.role)
-            if (remoteGrant) {
-              localGrant.privileges.forEach((privilege) => {
-                if (!remoteGrant.privileges.includes(privilege)) {
-                  res.push(_createPlanInfo('Grant', localState, localColumn, localGrant, privilege))
-                }
-              })
-              remoteGrant.privileges.forEach((privilege) => {
-                if (!localGrant.privileges.includes(privilege)) {
-                  res.push(_createPlanInfo('Revoke', localState, localColumn, localGrant, privilege))
-                }
+          // Handle existing roles in local state
+          localColumn.privileges.forEach((localRole) => {
+            const remoteRole = remoteColumn.privileges.find((rr) => rr.role === localRole.role)
+            if (!remoteRole) {
+              // Role is absent in remote state, add all local privileges to grant
+              localRole.privileges.forEach((privilege) => {
+                res.push(createPlan('Grant', localSchema, localColumn, localRole, privilege))
               })
             } else {
-              // If no corresponding remote grants, suggest adding all
-              localGrant.privileges.forEach((privilege) => {
-                res.push(_createPlanInfo('Grant', localState, localColumn, localGrant, privilege))
+              // Compare privileges between local and remote for existing roles
+              localRole.privileges.forEach((privilege) => {
+                if (!remoteRole.privileges.includes(privilege)) {
+                  res.push(createPlan('Grant', localSchema, localColumn, localRole, privilege))
+                }
+              })
+              remoteRole.privileges.forEach((privilege) => {
+                if (!localRole.privileges.includes(privilege)) {
+                  res.push(createPlan('Revoke', remoteSchema, remoteColumn, remoteRole, privilege))
+                }
+              })
+            }
+          })
+
+          // Handle roles present in remote but absent in local
+          remoteColumn.privileges.forEach((remoteRole) => {
+            if (!localColumn.privileges.some((lr) => lr.role === remoteRole.role)) {
+              // Role is absent in local state, revoke all remote privileges
+              remoteRole.privileges.forEach((privilege) => {
+                res.push(createPlan('Revoke', remoteSchema, remoteColumn, remoteRole, privilege))
               })
             }
           })
         }
-      })
-    } else {
-      // If no corresponding remote state, suggest adding all
-      localState.spec.forEach((localColumn) => {
-        localColumn.privileges.forEach((localGrant) => {
-          localGrant.privileges.forEach((privilege) => {
-            res.push(_createPlanInfo('Grant', localState, localColumn, localGrant, privilege))
-          })
-        })
-      })
+      }
     }
   }
 
   return res
 }
 
-function _createPlanInfo(
+function createPlan(
   action: 'Grant' | 'Revoke',
-  state: StateObject,
-  column: (typeof state.spec)[number],
-  grant: (typeof column.privileges)[number],
+  schema: StateObject,
+  column: StateObject['spec'][0],
+  role: StateObject['spec'][0]['privileges'][0],
   privilege: string,
 ) {
   return {
     _kind_: 'PlanInfo' as const,
-    localState: action === 'Grant' ? 'Present' : 'Absent',
-    remoteState: action === 'Grant' ? 'Absent' : 'Present',
+    localState: action === 'Grant' ? ('Present' as const) : ('Absent' as const),
+    remoteState: action === 'Grant' ? ('Absent' as const) : ('Present' as const),
     plan: action,
-    objectType: 'TableColumn Privilege',
-    objectPath: `${state.metadata.schema}.${state.metadata.table}.${column.column}`,
-    oldState: action === 'Grant' ? `Revoked ${privilege}` : `Granted ${privilege}`,
-    newState: action === 'Grant' ? `Granted ${privilege}` : `Revoked ${privilege}`,
-    sqlQuery: `${action.toUpperCase()} ${privilege} ON ${state.metadata.schema}."${state.metadata.table}" TO "${
-      grant.role
-    }";`,
+    objectType: 'Table Privilege',
+    objectPath: `${schema.metadata.schema}.${schema.metadata.table}.${column.column}`,
+    oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role.role}`,
+    newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role.role}`,
+    sqlQuery: `${action} ${privilege} ON TABLE ${schema.metadata.schema}."${schema.metadata.table}" TO "${role.role}";`,
   }
 }
+
+/* --------------------------- $fetchRemoteStates --------------------------- */
+
 export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => {
   const rootStore = await getRootStore()
 

@@ -42,7 +42,7 @@ export const parseStateObjectToFile: thisModule['parseStateObjectToFile'] = (sta
 
 export const buildFileName: thisModule['buildFileName'] = (state, rootStore) => {
   if (rootStore.userConfig.useFlatFolder) {
-    return `${state.metadata.schema}.${state.metadata.table}.${state.kind}.${FILE_EXTENSION}`
+    return `${state.kind}.${state.metadata.schema}.${state.metadata.table}.${FILE_EXTENSION}`
   }
 
   return `${state.kind}.${FILE_EXTENSION}`

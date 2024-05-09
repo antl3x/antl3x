@@ -1,0 +1,24 @@
+kind: TableColumnsPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+  table: Album
+spec:
+
+  - column: AlbumId
+    privileges:
+      - role: authenticated
+        privileges: [SELECT]
+
+      - role: postgres
+        privileges: [INSERT, UPDATE, REFERENCES, SELECT]
+
+  - column: ArtistId
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, SELECT, REFERENCES, INSERT]
+
+  - column: Title
+    privileges:
+      - role: postgres
+        privileges: [INSERT, UPDATE, SELECT, REFERENCES]

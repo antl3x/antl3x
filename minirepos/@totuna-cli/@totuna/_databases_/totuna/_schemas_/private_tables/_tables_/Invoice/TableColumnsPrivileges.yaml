@@ -1,0 +1,51 @@
+kind: TableColumnsPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+  table: Invoice
+spec:
+
+  - column: BillingAddress
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, SELECT, INSERT, REFERENCES]
+
+  - column: BillingCity
+    privileges:
+      - role: postgres
+        privileges: [INSERT, UPDATE, REFERENCES, SELECT]
+
+  - column: BillingCountry
+    privileges:
+      - role: postgres
+        privileges: [REFERENCES, INSERT, SELECT, UPDATE]
+
+  - column: BillingPostalCode
+    privileges:
+      - role: postgres
+        privileges: [SELECT, INSERT, UPDATE, REFERENCES]
+
+  - column: BillingState
+    privileges:
+      - role: postgres
+        privileges: [INSERT, REFERENCES, UPDATE, SELECT]
+
+  - column: CustomerId
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, REFERENCES, SELECT, INSERT]
+
+  - column: InvoiceDate
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, SELECT, INSERT, REFERENCES]
+
+  - column: InvoiceId
+    privileges:
+      - role: postgres
+        privileges: [REFERENCES, UPDATE, SELECT, INSERT]
+
+  - column: Total
+    privileges:
+      - role: postgres
+        privileges: [INSERT, REFERENCES, SELECT, UPDATE]

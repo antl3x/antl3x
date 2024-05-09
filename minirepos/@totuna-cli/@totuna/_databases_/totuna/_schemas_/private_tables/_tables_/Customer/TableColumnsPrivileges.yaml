@@ -1,0 +1,110 @@
+kind: TableColumnsPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+  table: Customer
+spec:
+
+  - column: Address
+    privileges:
+      - role: PUBLIC
+        privileges: [SELECT, UPDATE, REFERENCES, INSERT]
+
+      - role: postgres
+        privileges: [REFERENCES, INSERT, UPDATE, SELECT]
+
+  - column: City
+    privileges:
+      - role: PUBLIC
+        privileges: [SELECT, REFERENCES, INSERT, UPDATE]
+
+      - role: postgres
+        privileges: [SELECT, REFERENCES, UPDATE, INSERT]
+
+  - column: Company
+    privileges:
+      - role: PUBLIC
+        privileges: [INSERT, SELECT, UPDATE, REFERENCES]
+
+      - role: postgres
+        privileges: [UPDATE, SELECT, REFERENCES, INSERT]
+
+  - column: Country
+    privileges:
+      - role: PUBLIC
+        privileges: [INSERT, SELECT, UPDATE, REFERENCES]
+
+      - role: postgres
+        privileges: [SELECT, INSERT, REFERENCES, UPDATE]
+
+  - column: CustomerId
+    privileges:
+      - role: PUBLIC
+        privileges: [UPDATE, SELECT, INSERT, REFERENCES]
+
+      - role: postgres
+        privileges: [INSERT, UPDATE, REFERENCES, SELECT]
+
+  - column: Email
+    privileges:
+      - role: PUBLIC
+        privileges: [UPDATE, SELECT, REFERENCES, INSERT]
+
+      - role: postgres
+        privileges: [INSERT, REFERENCES, SELECT, UPDATE]
+
+  - column: Fax
+    privileges:
+      - role: PUBLIC
+        privileges: [INSERT, SELECT, REFERENCES, UPDATE]
+
+      - role: postgres
+        privileges: [REFERENCES, INSERT, SELECT, UPDATE]
+
+  - column: FirstName
+    privileges:
+      - role: PUBLIC
+        privileges: [REFERENCES, UPDATE, INSERT, SELECT]
+
+      - role: postgres
+        privileges: [REFERENCES, SELECT, INSERT, UPDATE]
+
+  - column: LastName
+    privileges:
+      - role: PUBLIC
+        privileges: [REFERENCES, SELECT, UPDATE, INSERT]
+
+      - role: postgres
+        privileges: [INSERT, REFERENCES, UPDATE, SELECT]
+
+  - column: Phone
+    privileges:
+      - role: PUBLIC
+        privileges: [UPDATE, INSERT, SELECT, REFERENCES]
+
+      - role: postgres
+        privileges: [INSERT, SELECT, REFERENCES, UPDATE]
+
+  - column: PostalCode
+    privileges:
+      - role: PUBLIC
+        privileges: [REFERENCES, SELECT, INSERT, UPDATE]
+
+      - role: postgres
+        privileges: [INSERT, REFERENCES, SELECT, UPDATE]
+
+  - column: State
+    privileges:
+      - role: PUBLIC
+        privileges: [UPDATE, SELECT, REFERENCES, INSERT]
+
+      - role: postgres
+        privileges: [UPDATE, SELECT, REFERENCES, INSERT]
+
+  - column: SupportRepId
+    privileges:
+      - role: PUBLIC
+        privileges: [REFERENCES, SELECT, INSERT, UPDATE]
+
+      - role: postgres
+        privileges: [INSERT, REFERENCES, UPDATE, SELECT]

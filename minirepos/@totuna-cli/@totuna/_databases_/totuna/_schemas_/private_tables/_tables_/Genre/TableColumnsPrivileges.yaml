@@ -1,0 +1,16 @@
+kind: TableColumnsPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+  table: Genre
+spec:
+
+  - column: GenreId
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, INSERT, SELECT, REFERENCES]
+
+  - column: Name
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, SELECT, REFERENCES, INSERT]

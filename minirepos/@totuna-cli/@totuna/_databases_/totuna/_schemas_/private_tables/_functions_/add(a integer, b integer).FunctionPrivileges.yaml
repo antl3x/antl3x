@@ -1,0 +1,11 @@
+kind: FunctionPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+  function: add(a integer, b integer)
+spec:
+  - role: authenticated
+    privileges: [EXECUTE]
+
+  - role: postgres
+    privileges: [EXECUTE]

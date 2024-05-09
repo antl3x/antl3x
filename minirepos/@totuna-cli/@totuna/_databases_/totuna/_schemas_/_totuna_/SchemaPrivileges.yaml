@@ -1,0 +1,10 @@
+kind: SchemaPrivileges
+metadata:
+  database: totuna
+  schema: _totuna_
+spec:
+  - role: PUBLIC
+    privileges: [CREATE, USAGE]
+
+  - role: postgres
+    privileges: [USAGE, CREATE]

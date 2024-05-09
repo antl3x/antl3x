@@ -1,0 +1,16 @@
+kind: TableColumnsPrivileges
+metadata:
+  database: totuna
+  schema: private_tables
+  table: Playlist
+spec:
+
+  - column: Name
+    privileges:
+      - role: postgres
+        privileges: [UPDATE, REFERENCES, SELECT, INSERT]
+
+  - column: PlaylistId
+    privileges:
+      - role: postgres
+        privileges: [REFERENCES, SELECT, UPDATE, INSERT]
