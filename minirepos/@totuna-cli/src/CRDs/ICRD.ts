@@ -5,10 +5,10 @@ import {BRAND, z} from 'zod'
 /* -------------------------------------------------------------------------- */
 
 type CommonSchema = z.ZodSchema<{
-  kind: any
+  kind: unknown
   metadata: {
     name: string
-  } & any
+  } & unknown
   spec: any
 }>
 

@@ -29,19 +29,12 @@ export interface RootStore__Ready {
 }
 
 interface SystemVariables {
-  PUBLIC_DATABASE_PATH: string
-  PUBLIC_SCHEMAS_PATH: string
+  PUBLIC_PATH: string
   PUBLIC_MIGRATIONS_PATH: string
   PUBLIC_MIGRATIONS_PLAN_PATH: string
-  PUBLIC_PRIVILEGES_FLAT_PATH: string
-
-  PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(schemaName: string): string
-  PUBLIC_CRD_FUNCTION_PRIVILEGES_PATH(schemaName: string): string
-  PUBLIC_CRD_SEQUENCE_PRIVILEGES_PATH(schemaName: string): string
-  PUBLIC_CRD_TABLE_PRIVILEGES_PATH(schemaName: string, tableName: string): string
-  PUBLIC_CRD_VIEW_PRIVILEGES_PATH(schemaName: string, viewName: string): string
-  PUBLIC_CRD_TABLECOLUMNS_PRIVILEGES_PATH(schemaName: string, tableName: string): string
-  PUBLIC_CRD_DATABASE_PRIVILEGES_PATH(): string
+  CRD_FOLDER_STRATEGY__TOTAL_FLAT__FOLDER_PATH: string
+  CRD_FOLDER_STRATEGY__FLAT_BY_TYPE__FOLDER_PATH(type: '_privileges_' | '_policies_'): string
+  CRD_FOLDER_STRATEGY__NESTED_BY_OBJECT_PATH__FOLDER_PATH(objectPath: string): string
 }
 
 /* -------------------------------------------------------------------------- */
@@ -99,50 +92,22 @@ const _systemVariables = (userConfig: Config): RootStore__Ready['systemVariables
   observable({
     PUBLIC_PATH: '@totuna',
 
-    get PUBLIC_DATABASE_PATH() {
-      return `${this.PUBLIC_PATH}/_databases_/${userConfig.pgConfig.database}`
+    get CRD_FOLDER_STRATEGY__TOTAL_FLAT__FOLDER_PATH() {
+      return `${this.PUBLIC_PATH}`
     },
 
-    get PUBLIC_PRIVILEGES_FLAT_PATH() {
-      return `${this.PUBLIC_DATABASE_PATH}/_privileges_`
+    CRD_FOLDER_STRATEGY__FLAT_BY_TYPE__FOLDER_PATH(type) {
+      return `${this.PUBLIC_PATH}/${type}`
     },
 
-    get PUBLIC_SCHEMAS_PATH() {
-      return `${this.PUBLIC_DATABASE_PATH}/_schemas_`
+    CRD_FOLDER_STRATEGY__NESTED_BY_OBJECT_PATH__FOLDER_PATH(objectPath) {
+      return `${this.PUBLIC_PATH}/${objectPath}`
     },
 
     get PUBLIC_MIGRATIONS_PATH() {
-      return `${this.PUBLIC_DATABASE_PATH}/_migrations_`
+      return `${this.PUBLIC_PATH}/_migrations_`
     },
     get PUBLIC_MIGRATIONS_PLAN_PATH() {
-      return `${this.PUBLIC_DATABASE_PATH}/_migrations_/_plan_`
-    },
-
-    PUBLIC_CRD_SCHEMA_PRIVILEGES_PATH(schemaName: string) {
-      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}`
-    },
-
-    PUBLIC_CRD_FUNCTION_PRIVILEGES_PATH(schemaName: string) {
-      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}`
-    },
-
-    PUBLIC_CRD_SEQUENCE_PRIVILEGES_PATH(schemaName: string) {
-      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}`
-    },
-
-    PUBLIC_CRD_TABLE_PRIVILEGES_PATH(schemaName: string, tableName: string) {
-      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}/_tables_/${tableName}`
-    },
-
-    PUBLIC_CRD_VIEW_PRIVILEGES_PATH(schemaName: string, viewName: string) {
-      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}/_views_/${viewName}`
-    },
-
-    PUBLIC_CRD_TABLECOLUMNS_PRIVILEGES_PATH(schemaName: string, tableName: string) {
-      return `${this.PUBLIC_SCHEMAS_PATH}/${schemaName}/_tables_/${tableName}`
-    },
-
-    PUBLIC_CRD_DATABASE_PRIVILEGES_PATH() {
-      return `${this.PUBLIC_DATABASE_PATH}`
+      return `${this.PUBLIC_PATH}/_migrations_/_plan_`
     },
   })

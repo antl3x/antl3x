@@ -43,21 +43,45 @@ export const parseStateObjectToFile: thisModule['parseStateObjectToFile'] = (sta
 
 /* ------------------------------ buildFileName ----------------------------- */
 
-export const buildFileName: thisModule['buildFileName'] = (state) => {
-  return `${state.metadata.name}--${state.kind}.${FILE_EXTENSION}`
+export const buildFileName: thisModule['buildFileName'] = (state, rootStore) => {
+  switch (rootStore.userConfig.crdFolderStrategy) {
+    case 'totalFlat':
+      return `${state.metadata.name}--${state.kind}.${FILE_EXTENSION}`
+
+    case 'flatByType':
+      return `${state.metadata.name}--${state.kind}.${FILE_EXTENSION}`
+
+    case 'nestedByObjectPath':
+      return `${state.kind}.${FILE_EXTENSION}`
+  }
 }
 
 /* ------------------------------ buildFilePath ----------------------------- */
 
 export const buildFilePath: thisModule['buildFilePath'] = (state, rootStore) => {
-  if (rootStore.userConfig.useFlatFolder) {
-    return `${rootStore.systemVariables.PUBLIC_PRIVILEGES_FLAT_PATH}/${buildFileName(state, rootStore)}`
-  }
+  const stateKind = state.kind as string
+  switch (rootStore.userConfig.crdFolderStrategy) {
+    case 'totalFlat':
+      return `${rootStore.systemVariables.PUBLIC_PATH}/${buildFileName(state, rootStore)}`
 
-  return `${rootStore.systemVariables.PUBLIC_PRIVILEGES_FLAT_PATH}/${state.metadata.name}/${buildFileName(
-    state,
-    rootStore,
-  )}`
+    case 'flatByType':
+      switch (true) {
+        case stateKind.includes('Privileges'):
+          return `${rootStore.systemVariables.CRD_FOLDER_STRATEGY__FLAT_BY_TYPE__FOLDER_PATH(
+            '_privileges_',
+          )}/${buildFileName(state, rootStore)}`
+
+        case stateKind.includes('Policies'):
+          return `${rootStore.systemVariables.CRD_FOLDER_STRATEGY__FLAT_BY_TYPE__FOLDER_PATH(
+            '_policies_',
+          )}/${buildFileName(state, rootStore)}`
+      }
+
+    case 'nestedByObjectPath':
+      return `${rootStore.systemVariables.CRD_FOLDER_STRATEGY__NESTED_BY_OBJECT_PATH__FOLDER_PATH(
+        _buildNestedByObjectPath(state),
+      )}/${buildFileName(state, rootStore)}`
+  }
 }
 
 /* ---------------------------- $fetchLocalStates --------------------------- */
@@ -69,7 +93,7 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
   // If valid, parse and return
   const rootStore = await getRootStore()
 
-  const globPath = `${rootStore.systemVariables.PUBLIC_DATABASE_PATH}/**/*.${FILE_EXTENSION}`
+  const globPath = `${rootStore.systemVariables.PUBLIC_PATH}/**/*.${FILE_EXTENSION}`
 
   const filesPaths = globSync(globPath)
   const validFiles: Awaited<ReturnType<typeof $parseFileToStateObject>>[] = []
@@ -84,4 +108,19 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
   }
 
   return validFiles
+}
+
+/* ------------------------ _buildNestedByObjectPath ------------------------ */
+function _buildNestedByObjectPath(state: any) {
+  const propertyArray = ['database', 'schema', 'function', 'table', 'sequence']
+
+  let path = ''
+
+  propertyArray.forEach((property) => {
+    if (state.spec[property]) {
+      path += `/${state.spec[property]}`
+    }
+  })
+
+  return path.replace('/', '')
 }

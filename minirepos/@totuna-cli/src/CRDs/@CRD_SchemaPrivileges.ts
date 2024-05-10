@@ -171,7 +171,7 @@ ORDER BY
       stateObj = StateSchema.parse({
         kind: 'SchemaPrivileges',
         metadata: {
-          name: `${row.schema}`,
+          name: `${row.database}.${row.schema}`,
         },
         spec: {
           database: row.database,

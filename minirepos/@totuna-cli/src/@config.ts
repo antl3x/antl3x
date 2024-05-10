@@ -14,6 +14,9 @@ export const Config = z.object({
   pgConfig: z.union([z.custom<PoolConfig>(), z.custom<ClientConfig>()]),
   useFlatFolder: z.optional(z.boolean().default(false)),
   crdParser: z.optional(z.union([z.literal('yaml'), z.literal('typescript')])).default('typescript'),
+  crdFolderStrategy: z
+    .union([z.literal('totalFlat'), z.literal('flatByType'), z.literal('nestedByObjectPath')])
+    .default('totalFlat'),
   tsOptions: z.optional(z.custom()),
 })
 
@@ -24,7 +27,7 @@ export type Config = z.infer<typeof Config> & {
   }
 }
 
-type ConfigParams = Optional<Omit<Config, '_kind_' | '[BRAND]'>, 'tsOptions'>
+type ConfigParams = Optional<Omit<Config, '_kind_' | '[BRAND]'>, 'tsOptions' | 'crdFolderStrategy'>
 
 export const defineConfig = (config: ConfigParams): Config => {
   if (!config.pgConfig) {
