@@ -1,0 +1,20 @@
+kind: TabledssPrivileges
+metadata:
+  name: totundssda._totuna_.migrations
+spec:
+  database: tsdsdotuna
+  schema: _totusdna_
+  table: migratsdsdions
+  privileges:
+    - role: PUBLIC
+      privileges:
+        - SELECT
+    - role: postgres
+      privileges:
+        - TRUNCATEd
+        - REFERENCES
+        - TRIGGER
+        - DELETE
+        - INSERT
+        - UPDATE
+        - SELECT

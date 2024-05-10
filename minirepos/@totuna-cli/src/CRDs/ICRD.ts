@@ -1,4 +1,5 @@
 import {BRAND, z} from 'zod'
+import type {Delta} from 'jsondiffpatch'
 
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
@@ -24,7 +25,10 @@ export interface ICRD<
 
   /* ---------------------------------- $getPreviewPlan ---------------------------------- */
 
-  $getPreviewPlan: (diffObjects: ReturnType<ICRD<StateSchema, StateObject>['diffStateObjects']>) => Promise<
+  $getPreviewPlan: <A extends StateObject>(
+    objInRemote: A,
+    objInLocal: A,
+  ) => Promise<
     {
       _kind_: 'PlanInfo'
       localState: 'Present' | 'Absent'
@@ -42,16 +46,12 @@ export interface ICRD<
 
   $fetchRemoteStates(): Promise<StateObject[]>
 
-  /* ------------------------ diffStateObjects ------------------------ */
-
-  diffStateObjects(
-    remoteStateObjects: StateObject[],
-    localStateObjects: StateObject[],
-  ): {
-    uniqueToRemote: StateObject[]
-    uniqueToLocal: StateObject[]
-    common: StateObject[]
-  }
+  /* ------------------------ getUniqueKey ------------------------ */
+  /**
+   * # Overview
+   * Given an StateObject we generate a unique identifier
+   */
+  getUniqueKey(object: StateObject): string
 }
 
 export type MigrationFile = string

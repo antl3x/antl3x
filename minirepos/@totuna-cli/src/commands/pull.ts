@@ -3,6 +3,7 @@ import * as CRDs from 'CRDs/@crds.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import {BaseCommand} from './BaseCommand.js'
+import {diffStateObjects} from 'CRDs/@utils.js'
 /* -------------------------------------------------------------------------- */
 /*                               Command                               */
 /* -------------------------------------------------------------------------- */
@@ -43,7 +44,7 @@ export default class Command extends BaseCommand<typeof Command> {
         // We filter out the state objects that are unique to the local state
         // so that we only export the state objects that are unique to the remote state
         // IMPORTANT: The orders of the state objects are important
-        const diffObjects = crd.diffStateObjects(remoteStateObjects, localStateObjects)
+        const diffObjects = diffStateObjects(remoteStateObjects, localStateObjects, crd.getUniqueKey)
 
         for (const stateObject of diffObjects.uniqueToRemote) {
           const stateFile = parser.parseStateObjectToFile(stateObject)
@@ -55,14 +56,7 @@ export default class Command extends BaseCommand<typeof Command> {
           fs.writeFileSync(filePath, stateFile)
           this.log(`Saved ${filePath}`)
         }
-
-        if (!this.flags.silence && diffObjects.common.length > 0) {
-          this.log(
-            `\x1b[90mSkipped ${diffObjects.common.length} ${diffObjects.common[0].kind} state objects that already exist as local files.\x1b[0m`,
-          )
-        }
       }
-      return jsonRes
     } catch (error) {
       throw new Error(`Failed to export: ${error}`, {cause: error})
     }

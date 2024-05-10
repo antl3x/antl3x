@@ -96,10 +96,18 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
 
   for (const filePath of filesPaths) {
     try {
+      const fileParsed = parse(fs.readFileSync(filePath, 'utf8'))
+      // Check if file is a valid file for the current CRD being parsed
+      const isValid = crd._kind_ === fileParsed.kind
+
+      if (!isValid) {
+        continue
+      }
+
       const parsedfile = await $parseFileToStateObject(filePath, crd)
       validFiles.push(parsedfile)
-    } catch {
-      continue
+    } catch (err) {
+      throw new Error(`Error when parsing file ${filePath}` + err, {cause: err})
     }
   }
 

@@ -1,0 +1,20 @@
+kind: TablePrivileges
+metadata:
+  name: totuna._totuna_.migrations
+spec:
+  database: totuna
+  schema: _totuna_
+  table: migrations
+  privileges:
+    - role: PUBLIC
+      privileges:
+        - SELECT
+    - role: postgres
+      privileges:
+        - TRUNCATE
+        - REFERENCES
+        - TRIGGER
+        - DELETE
+        - INSERT
+        - UPDATE
+        - SELECT

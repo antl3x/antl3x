@@ -3,6 +3,7 @@ import * as CRDs from 'CRDs/@crds.js'
 import {Table} from 'console-table-printer'
 import ora from 'ora'
 import {BaseCommand} from './BaseCommand.js'
+import {diffStateObjects} from 'CRDs/@utils.js'
 
 /* -------------------------------------------------------------------------- */
 /*                               Command                               */
@@ -38,29 +39,33 @@ export default class Command extends BaseCommand<typeof Command> {
         // We filter out the state objects that are unique to the local state
         // so that we only export the state objects that are unique to the remote state
         // IMPORTANT: The orders of the state objects are important
-        const diffObjects = crd.diffStateObjects(remoteStateObjects, localStateObjects)
-        if (crd._kind_ === 'TablePrivileges') {
-          console.log(diffObjects)
-        }
-        const diffs = await crd.$getPreviewPlan(diffObjects)
-        jsonRes.push(diffs)
+        const diffObjects = diffStateObjects(remoteStateObjects, localStateObjects, crd.getUniqueKey)
 
-        // Add Rows
-        for (const diff of diffs) {
-          table.addRow(
-            {
-              'Local State': diff.localState,
-              'Remote State': diff.remoteState,
-              'Object Type': diff.objectType,
-              'Object Path': diff.objectPath,
-              Plan: diff.plan,
-              'New State': diff.newState,
-              'Old State': diff.oldState,
-            },
-            {
-              color: diff.localState === 'Absent' ? 'red' : diff.remoteState === 'Absent' ? 'green' : 'yellow',
-            },
-          )
+        for (const common of diffObjects.commonInRemote) {
+          const objInRemote = common
+          const objInLocal = diffObjects.commonInLocal.find(
+            (obj) => crd.getUniqueKey(obj) === crd.getUniqueKey(objInRemote),
+          )!
+          const diffs = await crd.$getPreviewPlan(objInRemote, objInLocal)
+
+          jsonRes.push(...diffs)
+
+          for (const diff of diffs) {
+            table.addRow(
+              {
+                'Local State': diff.localState,
+                'Remote State': diff.remoteState,
+                'Object Type': diff.objectType,
+                'Object Path': diff.objectPath,
+                Plan: diff.plan,
+                'New State': diff.newState,
+                'Old State': diff.oldState,
+              },
+              {
+                color: diff.localState === 'Absent' ? 'red' : diff.remoteState === 'Absent' ? 'green' : 'yellow',
+              },
+            )
+          }
         }
       }
 
