@@ -16,7 +16,7 @@ export const Config = z.object({
   crdParser: z.optional(z.union([z.literal('yaml'), z.literal('typescript')])).default('typescript'),
   crdFolderStrategy: z
     .union([z.literal('totalFlat'), z.literal('flatByType'), z.literal('nestedByObjectPath')])
-    .default('totalFlat'),
+    .default('nestedByObjectPath'),
   tsOptions: z.optional(z.custom()),
 })
 

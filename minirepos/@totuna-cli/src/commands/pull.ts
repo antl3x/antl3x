@@ -44,9 +44,8 @@ export default class Command extends BaseCommand<typeof Command> {
         // so that we only export the state objects that are unique to the remote state
         // IMPORTANT: The orders of the state objects are important
         const diffObjects = crd.diffStateObjects(remoteStateObjects, localStateObjects)
-        debugger
 
-        for (const stateObject of diffObjects.uniqueToA) {
+        for (const stateObject of diffObjects.uniqueToRemote) {
           const stateFile = parser.parseStateObjectToFile(stateObject)
 
           const filePath = parser.buildFilePath(stateObject, this.rootStore)

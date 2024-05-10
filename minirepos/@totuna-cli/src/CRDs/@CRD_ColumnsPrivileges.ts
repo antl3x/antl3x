@@ -69,55 +69,24 @@ export const StateDiff = z.object({
 
 /* --------------------------------- getPreviewPlan -------------------------------- */
 
-export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (localStateObjects) => {
+export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async ({uniqueToLocal, uniqueToRemote}) => {
   const res: Awaited<ReturnType<thisModule['$getPreviewPlan']>> = []
-  const remoteStateObjects = await $fetchRemoteStates()
 
-  for (const localSchema of localStateObjects) {
-    const remoteSchema = remoteStateObjects.find(
-      (remote) =>
-        remote.spec.database === localSchema.spec.database &&
-        remote.spec.schema === localSchema.spec.schema &&
-        remote.spec.table === localSchema.spec.table,
-    )
+  for (const unqLocal of uniqueToLocal) {
+    for (const column of unqLocal.spec.privileges) {
+      for (const role of column.privileges) {
+        for (const privilege of role.privileges) {
+          res.push(_createPlan('Grant', unqLocal, column, role, privilege))
+        }
+      }
+    }
+  }
 
-    if (remoteSchema) {
-      for (const localColumn of localSchema.spec.privileges) {
-        const remoteColumn = remoteSchema.spec.privileges.find((rc) => rc.column === localColumn.column)
-
-        if (remoteColumn) {
-          // Handle existing roles in local state
-          localColumn.privileges.forEach((localRole) => {
-            const remoteRole = remoteColumn.privileges.find((rr) => rr.role === localRole.role)
-            if (!remoteRole) {
-              // Role is absent in remote state, add all local privileges to grant
-              localRole.privileges.forEach((privilege) => {
-                res.push(createPlan('Grant', localSchema, localColumn, localRole, privilege))
-              })
-            } else {
-              // Compare privileges between local and remote for existing roles
-              localRole.privileges.forEach((privilege) => {
-                if (!remoteRole.privileges.includes(privilege)) {
-                  res.push(createPlan('Grant', localSchema, localColumn, localRole, privilege))
-                }
-              })
-              remoteRole.privileges.forEach((privilege) => {
-                if (!localRole.privileges.includes(privilege)) {
-                  res.push(createPlan('Revoke', remoteSchema, remoteColumn, remoteRole, privilege))
-                }
-              })
-            }
-          })
-
-          // Handle roles present in remote but absent in local
-          remoteColumn.privileges.forEach((remoteRole) => {
-            if (!localColumn.privileges.some((lr) => lr.role === remoteRole.role)) {
-              // Role is absent in local state, revoke all remote privileges
-              remoteRole.privileges.forEach((privilege) => {
-                res.push(createPlan('Revoke', remoteSchema, remoteColumn, remoteRole, privilege))
-              })
-            }
-          })
+  for (const unqRemote of uniqueToRemote) {
+    for (const column of unqRemote.spec.privileges) {
+      for (const role of column.privileges) {
+        for (const privilege of role.privileges) {
+          res.push(_createPlan('Revoke', unqRemote, column, role, privilege))
         }
       }
     }
@@ -126,7 +95,9 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (localStateO
   return res
 }
 
-function createPlan(
+/* ------------------------------- _createPlan ------------------------------ */
+
+function _createPlan(
   action: 'Grant' | 'Revoke',
   schema: StateObject,
   column: StateObject['spec']['privileges'][0],
@@ -142,7 +113,7 @@ function createPlan(
     objectPath: `${schema.spec.schema}.${schema.spec.table}.${column.column}`,
     oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role.role}`,
     newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role.role}`,
-    sqlQuery: `${action} ${privilege} ON TABLE ${schema.spec.schema}."${schema.spec.table}" TO "${role.role}";`,
+    sqlQuery: `${action} ${privilege} ("${column.column}") ON TABLE "${schema.spec.schema}"."${schema.spec.table}" TO "${role.role}";`,
   }
 }
 
@@ -229,15 +200,15 @@ ORDER BY
 
 /* ------------------------ diffStateObjects ------------------------ */
 
-export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB) => {
-  const res = {
-    uniqueToA: [],
-    uniqueToB: [],
+export const diffStateObjects: thisModule['diffStateObjects'] = (remote, local) => {
+  const res: ReturnType<thisModule['diffStateObjects']> = {
     common: [],
-  } as ReturnType<thisModule['diffStateObjects']>
+    uniqueToLocal: [],
+    uniqueToRemote: [],
+  }
 
-  for (const objA of stateA) {
-    const objB = stateB.find(
+  for (const objA of remote) {
+    const objB = local.find(
       (obj) =>
         obj.kind === objA.kind &&
         obj.spec.schema === objA.spec.schema &&
@@ -246,14 +217,14 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
     )
 
     if (!objB) {
-      res.uniqueToA.push(objA)
+      res.uniqueToRemote.push(objA)
     } else {
       res.common.push(objA)
     }
   }
 
-  for (const objB of stateB) {
-    const objA = stateA.find(
+  for (const objB of local) {
+    const objA = remote.find(
       (obj) =>
         obj.kind === objB.kind &&
         obj.spec.schema === objB.spec.schema &&
@@ -262,7 +233,7 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
     )
 
     if (!objA) {
-      res.uniqueToB.push(objB)
+      res.uniqueToLocal.push(objB)
     }
   }
 

@@ -32,13 +32,9 @@ export const $parseFileToStateObject: thisModule['$parseFileToStateObject'] = as
 /* ------------------------- parseStateObjectToFile ------------------------- */
 
 export const parseStateObjectToFile: thisModule['parseStateObjectToFile'] = (state) => {
-  const content = dump(state, {
-    indent: 2,
-    flowLevel: 3,
-    condenseFlow: false,
-  })
+  const content = dump(state)
 
-  return content.replace(/]\n(\s+- role:)/gim, ']\n\n$1')
+  return content
 }
 
 /* ------------------------------ buildFileName ----------------------------- */

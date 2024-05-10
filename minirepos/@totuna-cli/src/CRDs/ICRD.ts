@@ -24,7 +24,7 @@ export interface ICRD<
 
   /* ---------------------------------- $getPreviewPlan ---------------------------------- */
 
-  $getPreviewPlan: <A>(localStateObjects: A[] extends StateObject[] ? A[] : never) => Promise<
+  $getPreviewPlan: (diffObjects: ReturnType<ICRD<StateSchema, StateObject>['diffStateObjects']>) => Promise<
     {
       _kind_: 'PlanInfo'
       localState: 'Present' | 'Absent'
@@ -44,13 +44,13 @@ export interface ICRD<
 
   /* ------------------------ diffStateObjects ------------------------ */
 
-  diffStateObjects<A>(
-    a: A extends StateObject ? A[] : never,
-    b: A extends StateObject ? A[] : never,
+  diffStateObjects(
+    remoteStateObjects: StateObject[],
+    localStateObjects: StateObject[],
   ): {
-    uniqueToA: A[]
-    uniqueToB: A[]
-    common: A[]
+    uniqueToRemote: StateObject[]
+    uniqueToLocal: StateObject[]
+    common: StateObject[]
   }
 }
 

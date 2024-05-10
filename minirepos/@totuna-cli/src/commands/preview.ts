@@ -31,8 +31,18 @@ export default class Command extends BaseCommand<typeof Command> {
 
     try {
       for (const crd of Object.values(CRDs)) {
+        // Fetch the remote and local states
+        const remoteStateObjects = await crd.$fetchRemoteStates()
         const localStateObjects = await parser.$fetchLocalStates(crd)
-        const diffs = await crd.$getPreviewPlan(localStateObjects)
+
+        // We filter out the state objects that are unique to the local state
+        // so that we only export the state objects that are unique to the remote state
+        // IMPORTANT: The orders of the state objects are important
+        const diffObjects = crd.diffStateObjects(remoteStateObjects, localStateObjects)
+        if (crd._kind_ === 'TablePrivileges') {
+          console.log(diffObjects)
+        }
+        const diffs = await crd.$getPreviewPlan(diffObjects)
         jsonRes.push(diffs)
 
         // Add Rows

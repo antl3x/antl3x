@@ -53,87 +53,49 @@ export const StateDiff = z.object({
 
 /* --------------------------------- getPreviewPlan -------------------------------- */
 
-export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (localStateObjects) => {
+export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async ({uniqueToLocal, uniqueToRemote}) => {
   const res: Awaited<ReturnType<thisModule['$getPreviewPlan']>> = []
-  const remoteStateObjects = await $fetchRemoteStates()
 
-  const absentPrivilegesInLocalState = []
-  const absentPrivilegesInRemoteState = []
-
-  /* ------------------ Find absent privileges in local state ----------------- */
-
-  for (const localSchema of localStateObjects) {
-    const remoteSchema = remoteStateObjects.find(
-      (remoteSchema) =>
-        remoteSchema.spec.schema === localSchema.spec.schema &&
-        remoteSchema.spec.function === localSchema.spec.function,
-    )
-
-    if (remoteSchema) {
-      for (const remoteGrant of remoteSchema.spec.privileges) {
-        const localGrant = localSchema.spec.privileges.find((localGrant) => localGrant.role === remoteGrant.role)
-
-        for (const privilege of remoteGrant.privileges) {
-          if (!localGrant?.privileges.includes(privilege)) {
-            absentPrivilegesInLocalState.push({
-              schema: localSchema.spec.schema,
-              role: remoteGrant.role,
-              privilege,
-            })
-            res.push({
-              _kind_: 'PlanInfo',
-              localState: 'Absent',
-              remoteState: 'Present',
-              plan: `Revoke`,
-              objectType: 'Function Privilege',
-              objectPath: `${localSchema.spec.schema}.${localSchema.spec.function}`,
-              oldState: `Granted ${privilege} TO ${remoteGrant.role}`,
-              newState: `Revoked ${privilege} FROM ${remoteGrant.role}`,
-              sqlQuery: `REVOKE ${privilege} ON FUNCTION ${localSchema.spec.schema}.${localSchema.spec.function} FROM "${remoteGrant.role}";`,
-            })
-          }
-        }
+  for (const state of uniqueToLocal) {
+    for (const role of state.spec.privileges) {
+      for (const privilege of role.privileges) {
+        res.push(_createPlan('Grant', state, role, privilege))
       }
     }
   }
 
-  /* ----------------- Find absent privileges in remote state ----------------- */
-  for (const remoteSchema of remoteStateObjects) {
-    const localSchema = localStateObjects.find(
-      (localSchema) =>
-        localSchema.spec.schema === remoteSchema.spec.schema &&
-        localSchema.spec.function === remoteSchema.spec.function,
-    )
-
-    if (localSchema) {
-      for (const localGrant of localSchema.spec.privileges) {
-        const remoteGrant = remoteSchema.spec.privileges.find((remoteGrant) => remoteGrant.role === localGrant.role)
-
-        for (const privilege of localGrant.privileges) {
-          if (!remoteGrant?.privileges.includes(privilege)) {
-            absentPrivilegesInRemoteState.push({
-              schema: remoteSchema.spec.schema,
-              role: localGrant.role,
-              privilege,
-            })
-            res.push({
-              _kind_: 'PlanInfo',
-              localState: 'Present',
-              remoteState: 'Absent',
-              plan: `Grant`,
-              objectType: 'Function Privilege',
-              objectPath: `${remoteSchema.spec.schema}.${remoteSchema.spec.function}`,
-              oldState: `No ${privilege} TO ${localGrant.role}`,
-              newState: `Granted ${privilege} TO ${localGrant.role}`,
-              sqlQuery: `GRANT ${privilege} ON FUNCTION ${localSchema.spec.schema}.${localSchema.spec.function} TO "${localGrant.role}";`,
-            })
-          }
-        }
+  for (const state of uniqueToRemote) {
+    for (const role of state.spec.privileges) {
+      for (const privilege of role.privileges) {
+        res.push(_createPlan('Revoke', state, role, privilege))
       }
     }
   }
 
   return res
+}
+
+/* ------------------------------- _createPlan ------------------------------ */
+
+function _createPlan(
+  action: 'Grant' | 'Revoke',
+  state: StateObject,
+  role: StateObject['spec']['privileges'][0],
+  privilege: string,
+) {
+  return {
+    _kind_: 'PlanInfo' as const,
+    localState: action === 'Grant' ? ('Present' as const) : ('Absent' as const),
+    remoteState: action === 'Grant' ? ('Absent' as const) : ('Present' as const),
+    plan: action,
+    objectType: 'Function Privilege',
+    objectPath: `${state.spec.schema}.${state.spec.function}`,
+    oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role.role}`,
+    newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role.role}`,
+    sqlQuery: `${action.toUpperCase()} ${privilege} ON FUNCTION "${state.spec.schema}"."${state.spec.function}" TO "${
+      role.role
+    }";`,
+  }
 }
 
 /* --------------------------- $fetchRemoteStates --------------------------- */
@@ -213,15 +175,15 @@ ORDER BY
 
 /* ------------------------ diffStateObjects ------------------------ */
 
-export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB) => {
+export const diffStateObjects: thisModule['diffStateObjects'] = (remote, local) => {
   const res = {
-    uniqueToA: [],
-    uniqueToB: [],
+    uniqueToRemote: [],
+    uniqueToLocal: [],
     common: [],
   } as ReturnType<thisModule['diffStateObjects']>
 
-  for (const objA of stateA) {
-    const objB = stateB.find(
+  for (const objA of remote) {
+    const objB = local.find(
       (obj) =>
         obj.kind === objA.kind &&
         obj.spec.schema === objA.spec.schema &&
@@ -230,14 +192,14 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
     )
 
     if (!objB) {
-      res.uniqueToA.push(objA)
+      res.uniqueToRemote.push(objA)
     } else {
       res.common.push(objA)
     }
   }
 
-  for (const objB of stateB) {
-    const objA = stateA.find(
+  for (const objB of local) {
+    const objA = remote.find(
       (obj) =>
         obj.kind === objB.kind &&
         obj.spec.schema === objB.spec.schema &&
@@ -246,7 +208,7 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
     )
 
     if (!objA) {
-      res.uniqueToB.push(objB)
+      res.uniqueToLocal.push(objB)
     }
   }
 
