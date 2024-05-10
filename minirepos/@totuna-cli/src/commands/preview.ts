@@ -20,7 +20,7 @@ export default class Command extends BaseCommand<typeof Command> {
   /* ----------------------------------- run ---------------------------------- */
 
   public async run() {
-    const CRDParsers = this.rootStore.userConfig.CRDs!.parsers
+    const parser = this.rootStore.userConfig.CRDs!.parser!
     const CRDs = this.rootStore.userConfig.CRDs!.crds
 
     const spinner = ora()
@@ -31,9 +31,8 @@ export default class Command extends BaseCommand<typeof Command> {
 
     try {
       for (const crd of Object.values(CRDs)) {
-        const parser = CRDParsers[crd._kind_]
-        // @ts-expect-error
-        const diffs = (await crd.$getPreviewPlan(parser)) as Awaited<ReturnType<typeof crd.$getPreviewPlan>>
+        const localStateObjects = await parser.$fetchLocalStates(crd)
+        const diffs = await crd.$getPreviewPlan(localStateObjects)
         jsonRes.push(diffs)
 
         // Add Rows

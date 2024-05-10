@@ -3,7 +3,6 @@ import * as CRDs from 'CRDs/@crds.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import {BaseCommand} from './BaseCommand.js'
-import {$fetchLocalStates} from 'CRDs/@utils.js'
 /* -------------------------------------------------------------------------- */
 /*                               Command                               */
 /* -------------------------------------------------------------------------- */
@@ -29,11 +28,10 @@ export default class Command extends BaseCommand<typeof Command> {
     let jsonRes = []
 
     try {
-      const CRDParsers = this.rootStore.userConfig.CRDs!.parsers
       const CRDs = this.rootStore.userConfig.CRDs!.crds
 
       for (const crd of Object.values(CRDs)) {
-        const parser = CRDParsers[crd._kind_]
+        const parser = this.rootStore.userConfig.CRDs!.parser
 
         if (!parser) {
           throw new Error(`Parser not found for ${crd._kind_}`)
@@ -41,12 +39,11 @@ export default class Command extends BaseCommand<typeof Command> {
 
         // Fetch the remote and local states
         const remoteStateObjects = await crd.$fetchRemoteStates()
-        const localStateObjects = await $fetchLocalStates(parser)
+        const localStateObjects = await parser.$fetchLocalStates(crd)
 
         // We filter out the state objects that are unique to the local state
         // so that we only export the state objects that are unique to the remote state
         // IMPORTANT: The orders of the state objects are important
-        // @ts-expect-error
         const diffObjects = crd.diffStateObjects(remoteStateObjects, localStateObjects)
         debugger
 

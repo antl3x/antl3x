@@ -4,7 +4,6 @@ import type {ICRD} from './ICRD.js'
 
 import {getRootStore} from '@RootStore.js'
 import {satisfies} from 'utils/@utils.js'
-import {$fetchLocalStates} from './@utils.js'
 
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
@@ -29,15 +28,16 @@ export const _kind_: thisModule['_kind_'] = 'ColumnsPrivileges'
 
 /* ------------------------------- StateSchema ------------------------------ */
 
-export const StateSchema = z
-  .object({
-    kind: z.literal('ColumnsPrivileges'),
-    metadata: z.object({
-      database: z.string(),
-      schema: z.string(),
-      table: z.string(),
-    }),
-    spec: z.array(
+export const StateSchema = z.object({
+  kind: z.literal('ColumnsPrivileges'),
+  metadata: z.object({
+    name: z.string(),
+  }),
+  spec: z.object({
+    database: z.string(),
+    schema: z.string(),
+    table: z.string(),
+    privileges: z.array(
       z.object({
         column: z.string(),
         privileges: z.array(
@@ -59,8 +59,8 @@ export const StateSchema = z
         ),
       }),
     ),
-  })
-  .brand('CRD_ColumnsPrivileges_StateSchema')
+  }),
+})
 
 export const StateDiff = z.object({
   name: z.string(),
@@ -69,22 +69,21 @@ export const StateDiff = z.object({
 
 /* --------------------------------- getPreviewPlan -------------------------------- */
 
-export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => {
+export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (localStateObjects) => {
   const res: Awaited<ReturnType<thisModule['$getPreviewPlan']>> = []
-  const localStateObjects = await $fetchLocalStates(parser)
   const remoteStateObjects = await $fetchRemoteStates()
 
   for (const localSchema of localStateObjects) {
     const remoteSchema = remoteStateObjects.find(
       (remote) =>
-        remote.metadata.database === localSchema.metadata.database &&
-        remote.metadata.schema === localSchema.metadata.schema &&
-        remote.metadata.table === localSchema.metadata.table,
+        remote.spec.database === localSchema.spec.database &&
+        remote.spec.schema === localSchema.spec.schema &&
+        remote.spec.table === localSchema.spec.table,
     )
 
     if (remoteSchema) {
-      for (const localColumn of localSchema.spec) {
-        const remoteColumn = remoteSchema.spec.find((rc) => rc.column === localColumn.column)
+      for (const localColumn of localSchema.spec.privileges) {
+        const remoteColumn = remoteSchema.spec.privileges.find((rc) => rc.column === localColumn.column)
 
         if (remoteColumn) {
           // Handle existing roles in local state
@@ -130,8 +129,8 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
 function createPlan(
   action: 'Grant' | 'Revoke',
   schema: StateObject,
-  column: StateObject['spec'][0],
-  role: StateObject['spec'][0]['privileges'][0],
+  column: StateObject['spec']['privileges'][0],
+  role: StateObject['spec']['privileges'][0]['privileges'][0],
   privilege: string,
 ) {
   return {
@@ -140,10 +139,10 @@ function createPlan(
     remoteState: action === 'Grant' ? ('Absent' as const) : ('Present' as const),
     plan: action,
     objectType: 'Table Privilege',
-    objectPath: `${schema.metadata.schema}.${schema.metadata.table}.${column.column}`,
+    objectPath: `${schema.spec.schema}.${schema.spec.table}.${column.column}`,
     oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role.role}`,
     newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role.role}`,
-    sqlQuery: `${action} ${privilege} ON TABLE ${schema.metadata.schema}."${schema.metadata.table}" TO "${role.role}";`,
+    sqlQuery: `${action} ${privilege} ON TABLE ${schema.spec.schema}."${schema.spec.table}" TO "${role.role}";`,
   }
 }
 
@@ -183,28 +182,33 @@ ORDER BY
     // Find the state object for the schema
     let stateObj = stateObjects.find(
       (state) =>
-        state.metadata.database === row.database &&
-        state.metadata.schema === row.schema &&
-        state.metadata.table === row.table,
+        state.spec.database === row.database && state.spec.schema === row.schema && state.spec.table === row.table,
     )
 
     // If not found, create a new state object
     if (!stateObj) {
       stateObj = StateSchema.parse({
         kind: 'ColumnsPrivileges',
-        metadata: {database: row.database, schema: row.schema, table: row.table},
-        spec: [],
-      })
+        metadata: {
+          name: `${row.database}.${row.schema}.${row.table}`,
+        },
+        spec: {
+          database: row.database,
+          schema: row.schema,
+          table: row.table,
+          privileges: [],
+        },
+      } as ColumnsPrivileges)
       stateObjects.push(stateObj)
     }
 
     // Find the column object in the spec array
-    let columnObj = stateObj.spec.find((column) => column.column === row.column)
+    let columnObj = stateObj.spec.privileges.find((column) => column.column === row.column)
 
     // If not found, create a new column object
     if (!columnObj) {
       columnObj = {column: row.column, privileges: []}
-      stateObj.spec.push(columnObj)
+      stateObj.spec.privileges.push(columnObj)
     }
 
     // Find the role grant object in the privileges array
@@ -236,9 +240,9 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
     const objB = stateB.find(
       (obj) =>
         obj.kind === objA.kind &&
-        obj.metadata.schema === objA.metadata.schema &&
-        obj.metadata.database === objA.metadata.database &&
-        obj.metadata.table === objA.metadata.table,
+        obj.spec.schema === objA.spec.schema &&
+        obj.spec.database === objA.spec.database &&
+        obj.spec.table === objA.spec.table,
     )
 
     if (!objB) {
@@ -252,9 +256,9 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
     const objA = stateA.find(
       (obj) =>
         obj.kind === objB.kind &&
-        obj.metadata.schema === objB.metadata.schema &&
-        obj.metadata.database === objB.metadata.database &&
-        obj.metadata.table === objB.metadata.table,
+        obj.spec.schema === objB.spec.schema &&
+        obj.spec.database === objB.spec.database &&
+        obj.spec.table === objB.spec.table,
     )
 
     if (!objA) {

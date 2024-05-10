@@ -4,7 +4,6 @@ import type {ICRD} from './ICRD.js'
 
 import {getRootStore} from '@RootStore.js'
 import {satisfies} from 'utils/@utils.js'
-import {$fetchLocalStates} from './@utils.js'
 
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
@@ -29,15 +28,16 @@ export const _kind_: thisModule['_kind_'] = 'ViewPrivileges'
 
 /* ------------------------------- StateSchema ------------------------------ */
 
-export const StateSchema = z
-  .object({
-    kind: z.literal('ViewPrivileges'),
-    metadata: z.object({
-      database: z.string(),
-      schema: z.string(),
-      view: z.string(),
-    }),
-    spec: z.array(
+export const StateSchema = z.object({
+  kind: z.literal('ViewPrivileges'),
+  metadata: z.object({
+    name: z.string(),
+  }),
+  spec: z.object({
+    database: z.string(),
+    schema: z.string(),
+    view: z.string(),
+    privileges: z.array(
       z.object({
         role: z.string(),
         privileges: z.array(
@@ -54,8 +54,8 @@ export const StateSchema = z
         ),
       }),
     ),
-  })
-  .brand('CRD_ViewPrivileges_StateSchema')
+  }),
+})
 
 export const StateDiff = z.object({
   name: z.string(),
@@ -63,12 +63,9 @@ export const StateDiff = z.object({
 })
 
 /* --------------------------------- getPreviewPlan -------------------------------- */
-
-export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => {
+export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (localStateObjects) => {
   const res: Awaited<ReturnType<thisModule['$getPreviewPlan']>> = []
-  const localStateObjects = await $fetchLocalStates(parser)
   const remoteStateObjects = await $fetchRemoteStates()
-
   const absentPrivilegesInLocalState = []
   const absentPrivilegesInRemoteState = []
 
@@ -77,19 +74,19 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   for (const localSchema of localStateObjects) {
     const remoteSchema = remoteStateObjects.find(
       (remoteSchema) =>
-        remoteSchema.metadata.database === localSchema.metadata.database &&
-        remoteSchema.metadata.schema === localSchema.metadata.schema &&
-        remoteSchema.metadata.view === localSchema.metadata.view,
+        remoteSchema.spec.database === localSchema.spec.database &&
+        remoteSchema.spec.schema === localSchema.spec.schema &&
+        remoteSchema.spec.view === localSchema.spec.view,
     )
 
     if (remoteSchema) {
-      for (const remoteGrant of remoteSchema.spec) {
-        const localGrant = localSchema.spec.find((localGrant) => localGrant.role === remoteGrant.role)
+      for (const remoteGrant of remoteSchema.spec.privileges) {
+        const localGrant = localSchema.spec.privileges.find((localGrant) => localGrant.role === remoteGrant.role)
 
         for (const privilege of remoteGrant.privileges) {
           if (!localGrant?.privileges.includes(privilege)) {
             absentPrivilegesInLocalState.push({
-              schema: localSchema.metadata.schema,
+              schema: localSchema.spec.schema,
               role: remoteGrant.role,
               privilege,
             })
@@ -99,10 +96,10 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               remoteState: 'Present',
               plan: `Revoke`,
               objectType: 'View Privilege',
-              objectPath: `${localSchema.metadata.schema}.${localSchema.metadata.view}`,
+              objectPath: `${localSchema.spec.schema}.${localSchema.spec.view}`,
               oldState: `Granted ${privilege} TO ${remoteGrant.role}`,
               newState: `Revoked ${privilege} FROM ${remoteGrant.role}`,
-              sqlQuery: `REVOKE ${privilege} ON TABLE ${localSchema.metadata.schema}."${localSchema.metadata.view}" FROM "${remoteGrant.role}";`,
+              sqlQuery: `REVOKE ${privilege} ON TABLE ${localSchema.spec.schema}."${localSchema.spec.view}" FROM "${remoteGrant.role}";`,
             })
           }
         }
@@ -114,19 +111,19 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
   for (const remoteSchema of remoteStateObjects) {
     const localSchema = localStateObjects.find(
       (localSchema) =>
-        localSchema.metadata.database === remoteSchema.metadata.database &&
-        localSchema.metadata.schema === remoteSchema.metadata.schema &&
-        localSchema.metadata.view === remoteSchema.metadata.view,
+        localSchema.spec.database === remoteSchema.spec.database &&
+        localSchema.spec.schema === remoteSchema.spec.schema &&
+        localSchema.spec.view === remoteSchema.spec.view,
     )
 
     if (localSchema) {
-      for (const localGrant of localSchema.spec) {
-        const remoteGrant = remoteSchema.spec.find((remoteGrant) => remoteGrant.role === localGrant.role)
+      for (const localGrant of localSchema.spec.privileges) {
+        const remoteGrant = remoteSchema.spec.privileges.find((remoteGrant) => remoteGrant.role === localGrant.role)
 
         for (const privilege of localGrant.privileges) {
           if (!remoteGrant?.privileges.includes(privilege)) {
             absentPrivilegesInRemoteState.push({
-              schema: remoteSchema.metadata.schema,
+              schema: remoteSchema.spec.schema,
               role: localGrant.role,
               privilege,
             })
@@ -136,10 +133,10 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (parser) => 
               remoteState: 'Absent',
               plan: `Grant`,
               objectType: 'View Privilege',
-              objectPath: `${remoteSchema.metadata.schema}.${remoteSchema.metadata.view}`,
+              objectPath: `${remoteSchema.spec.schema}.${remoteSchema.spec.view}`,
               oldState: `No ${privilege} TO ${localGrant.role}`,
               newState: `Granted ${privilege} TO ${localGrant.role}`,
-              sqlQuery: `GRANT ${privilege} ON TABLE ${localSchema.metadata.schema}."${localSchema.metadata.view}" TO "${localGrant.role}";`,
+              sqlQuery: `GRANT ${privilege} ON TABLE ${localSchema.spec.schema}."${localSchema.spec.view}" TO "${localGrant.role}";`,
             })
           }
         }
@@ -199,27 +196,32 @@ ORDER BY
     // Find the state object for the schema
     let stateObj = stateObjects.find(
       (state) =>
-        state.metadata.database === row.database &&
-        state.metadata.schema === row.schema &&
-        state.metadata.view === row.view,
+        state.spec.database === row.database && state.spec.schema === row.schema && state.spec.view === row.view,
     )
 
     // If not found, create a new state object
     if (!stateObj) {
       stateObj = StateSchema.parse({
         kind: 'ViewPrivileges',
-        metadata: {database: row.database, schema: row.schema, view: row.view},
-        spec: [],
-      })
+        metadata: {
+          name: `${row.database}.${row.schema}.${row.view}`,
+        },
+        spec: {
+          database: row.database,
+          schema: row.schema,
+          view: row.view,
+          privileges: [],
+        },
+      } as ViewPrivileges)
       stateObjects.push(stateObj)
     }
 
     // Find the role grants for the role
-    const roleGrants = stateObj.spec.find((grant) => grant.role === row.grantee)
+    const roleGrants = stateObj.spec.privileges.find((grant) => grant.role === row.grantee)
 
     // If not found, create a new role grant
     if (!roleGrants) {
-      stateObj.spec.push({role: row.grantee, privileges: [row.privilege]})
+      stateObj.spec.privileges.push({role: row.grantee, privileges: [row.privilege]})
     } else {
       roleGrants.privileges.push(row.privilege)
     }
@@ -241,9 +243,9 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
     const objB = stateB.find(
       (obj) =>
         obj.kind === objA.kind &&
-        obj.metadata.schema === objA.metadata.schema &&
-        obj.metadata.database === objA.metadata.database &&
-        obj.metadata.view === objA.metadata.view,
+        obj.spec.schema === objA.spec.schema &&
+        obj.spec.database === objA.spec.database &&
+        obj.spec.view === objA.spec.view,
     )
 
     if (!objB) {
@@ -257,9 +259,9 @@ export const diffStateObjects: thisModule['diffStateObjects'] = (stateA, stateB)
     const objA = stateA.find(
       (obj) =>
         obj.kind === objB.kind &&
-        obj.metadata.schema === objB.metadata.schema &&
-        obj.metadata.database === objB.metadata.database &&
-        obj.metadata.view === objB.metadata.view,
+        obj.spec.schema === objB.spec.schema &&
+        obj.spec.database === objB.spec.database &&
+        obj.spec.view === objB.spec.view,
     )
 
     if (!objA) {

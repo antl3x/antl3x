@@ -1,11 +1,19 @@
-import type {IRCDParser} from './ICRDParser.js'
-import {z} from 'zod'
+import {BRAND, z} from 'zod'
 
 /* -------------------------------------------------------------------------- */
 /*                                 Definition                                 */
 /* -------------------------------------------------------------------------- */
+
+type CommonSchema = z.ZodSchema<{
+  kind: any
+  metadata: {
+    name: string
+  } & any
+  spec: any
+}>
+
 export interface ICRD<
-  StateSchema extends z.Schema<unknown & {kind: string; metadata: unknown; spec: unknown}> = z.Schema,
+  StateSchema extends CommonSchema = CommonSchema,
   StateObject extends z.TypeOf<StateSchema> = z.TypeOf<StateSchema>,
 > {
   _kind_: StateObject['kind']
@@ -16,9 +24,7 @@ export interface ICRD<
 
   /* ---------------------------------- $getPreviewPlan ---------------------------------- */
 
-  $getPreviewPlan: <A extends StateSchema, B extends StateObject>(
-    parser: IRCDParser<ICRD<A, B>>,
-  ) => Promise<
+  $getPreviewPlan: <A>(localStateObjects: A[] extends StateObject[] ? A[] : never) => Promise<
     {
       _kind_: 'PlanInfo'
       localState: 'Present' | 'Absent'
@@ -38,13 +44,13 @@ export interface ICRD<
 
   /* ------------------------ diffStateObjects ------------------------ */
 
-  diffStateObjects<A extends StateObject[], B extends StateObject[]>(
-    a: A,
-    b: B,
+  diffStateObjects<A>(
+    a: A extends StateObject ? A[] : never,
+    b: A extends StateObject ? A[] : never,
   ): {
-    uniqueToA: StateObject[]
-    uniqueToB: StateObject[]
-    common: StateObject[]
+    uniqueToA: A[]
+    uniqueToB: A[]
+    common: A[]
   }
 }
 
