@@ -28,11 +28,10 @@ export default class Command extends BaseCommand<typeof Command> {
     let jsonRes = []
 
     try {
-      const CRDs = this.rootStore.userConfig.CRDs!.crds
+      const parser = this.rootStore.userConfig.tsOptions.parser
+      const CRDs = this.rootStore.userConfig.tsOptions.crds
 
       for (const crd of Object.values(CRDs)) {
-        const parser = this.rootStore.userConfig.CRDs!.parser
-
         if (!parser) {
           throw new Error(`Parser not found for ${crd._kind_}`)
         }

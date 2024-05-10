@@ -24,8 +24,8 @@ export default class Command extends BaseCommand<typeof Command> {
     const spinner = ora()
 
     try {
-      const parser = this.rootStore.userConfig.CRDs!.parser!
-      const CRDs = this.rootStore.userConfig.CRDs!.crds
+      const parser = this.rootStore.userConfig.tsOptions.parser
+      const CRDs = this.rootStore.userConfig.tsOptions.crds
 
       await this.config.runCommand('pull', ['--silence'])
       for (const crd of Object.values(CRDs)) {

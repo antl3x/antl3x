@@ -10,5 +10,4 @@ import { SchemaConverter } from "pg-tables-to-jsonschema";
   await initRootStore(config);
 
   // api.pullAllPrivileges(false);
-  console.log(await api.checkDiff());
 })();

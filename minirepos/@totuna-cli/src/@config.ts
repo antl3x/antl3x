@@ -1,55 +1,32 @@
 import {PoolConfig, ClientConfig} from 'pg'
-import * as crds from 'CRDs/@crds.js'
+import {Optional} from 'utility-types'
+import * as defaultCRDs from 'CRDs/@crds.js'
 import * as crdParsers from 'CRDs/@crdParsers.js'
 import {z} from 'zod'
 import {IRCDParser} from 'CRDs/ICRDParser.js'
+import {ICRD} from 'CRDs/ICRD.js'
 
 /* -------------------------------------------------------------------------- */
 /*                                   Config                                   */
 /* -------------------------------------------------------------------------- */
+export const Config = z.object({
+  _kind_: z.literal('_Config_'),
+  pgConfig: z.union([z.custom<PoolConfig>(), z.custom<ClientConfig>()]),
+  useFlatFolder: z.optional(z.boolean().default(false)),
+  crdParser: z.optional(z.union([z.literal('yaml'), z.literal('typescript')])).default('typescript'),
+  tsOptions: z.optional(z.custom()),
+})
 
-export const Config = z
-  .object({
-    _kind_: z.literal('_Config_'),
-    pgConfig: z.union([z.custom<PoolConfig>(), z.custom<ClientConfig>()]),
-    useFlatFolder: z.optional(z.boolean().default(false)),
-    CRDs: z
-      .object({
-        crds: z.record(z.custom()),
-        parser: z.union([z.literal('typescript'), z.literal('yaml'), z.custom<IRCDParser>()]).default('typescript'),
-      })
-      .optional(),
-    cli: z.object({
-      useTTY: z.boolean(),
-    }),
-  })
-  .transform((data) => {
-    return {
-      ...data,
-      CRDs: {
-        parser:
-          typeof data.CRDs?.parser === 'string'
-            ? crdParsers[data.CRDs.parser.toUpperCase() as keyof typeof crdParsers]
-            : data.CRDs?.parser,
-        crds: {
-          TablePrivileges: crds.CRD_TablePrivilege,
-          ViewPrivileges: crds.CRD_ViewPrivilege,
-          ColumnsPrivileges: crds.CRD_ColumnsPrivilege,
-          SchemaPrivileges: crds.CRD_SchemaPrivilege,
-          FunctionPrivileges: crds.CRD_FunctionPrivilege,
-          SequencePrivileges: crds.CRD_SequencePrivilege,
-          DatabasePrivileges: crds.CRD_DatabasePrivilege,
-          ...data.CRDs?.crds,
-        },
-      },
-    }
-  })
-
-export type Config = Omit<z.infer<typeof Config>, 'CRDs'> & {
-  CRDs?: z.infer<typeof Config>['CRDs']
+export type Config = z.infer<typeof Config> & {
+  tsOptions: {
+    parser: IRCDParser
+    crds: Record<string, ICRD>
+  }
 }
 
-export const defineConfig = (config: Omit<Config, '_kind_' | '[BRAND]'>): Config => {
+type ConfigParams = Optional<Omit<Config, '_kind_' | '[BRAND]'>, 'tsOptions'>
+
+export const defineConfig = (config: ConfigParams): Config => {
   if (!config.pgConfig) {
     throw new Error('Check your config file. Property "pgConfig" is required.')
   }
@@ -57,5 +34,13 @@ export const defineConfig = (config: Omit<Config, '_kind_' | '[BRAND]'>): Config
   return Config.parse({
     _kind_: '_Config_',
     ...config,
-  })
+    tsOptions: {
+      ...config.tsOptions,
+      parser: config?.crdParser === 'typescript' ? crdParsers.TYPESCRIPT : crdParsers.YAML,
+      crds: {
+        ...defaultCRDs,
+        ...config.tsOptions?.crds,
+      },
+    },
+  }) as Config
 }

@@ -1,0 +1,10 @@
+kind: ColumnsPrivileges
+metadata:
+  name: totuna.private_tables.documents
+spec:
+  database: totuna
+  schema: private_tables
+  table: documents
+  privileges:
+    - {column: data, privileges: [{role: postgres, privileges: [SELECT, REFERENCES, UPDATE, INSERT]}]}
+    - {column: id, privileges: [{role: postgres, privileges: [UPDATE, INSERT, REFERENCES, SELECT]}]}

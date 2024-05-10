@@ -109,8 +109,6 @@ export abstract class BaseCommand<T extends typeof Command> extends Command {
           throw new Error(`Unsupported config file extension: ${path.extname(configFilePath)}`)
       }
 
-      config = Config.parse(config)
-
       return await initRootStore(config)
     } catch (error) {
       throw new Error(`Something went wrong on initialization: ${error}`, {cause: error})

@@ -20,8 +20,8 @@ export default class Command extends BaseCommand<typeof Command> {
   /* ----------------------------------- run ---------------------------------- */
 
   public async run() {
-    const parser = this.rootStore.userConfig.CRDs!.parser!
-    const CRDs = this.rootStore.userConfig.CRDs!.crds
+    const parser = this.rootStore.userConfig.tsOptions.parser
+    const CRDs = this.rootStore.userConfig.tsOptions.crds
 
     const spinner = ora()
     this.log(`\x1b[90m❯ Pulling the latest state from the remote database..\x1b[0m`)
