@@ -1,4 +1,5 @@
 import {z} from 'zod'
+import * as jdp from 'jsondiffpatch'
 
 import type {ICRD} from './ICRD.js'
 
@@ -51,22 +52,27 @@ export const StateDiff = z.object({
 
 /* --------------------------------- getPreviewPlan -------------------------------- */
 
-export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async ({uniqueToLocal, uniqueToRemote}) => {
+export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (objInRemote, objInLocal) => {
   const res: Awaited<ReturnType<thisModule['$getPreviewPlan']>> = []
 
-  for (const state of uniqueToLocal) {
-    for (const role of state.spec.privileges) {
-      for (const privilege of role.privileges) {
-        res.push(_createPlan('Grant', state, role, privilege))
-      }
-    }
-  }
+  const onRemote = _normalizeSpec(objInRemote)
+  const onLocal = _normalizeSpec(objInLocal)
+  const diffs = jdp.diff(onRemote, onLocal)
 
-  for (const state of uniqueToRemote) {
-    for (const role of state.spec.privileges) {
-      for (const privilege of role.privileges) {
-        res.push(_createPlan('Revoke', state, role, privilege))
-      }
+  for (const diffKey in diffs) {
+    const [, role, privilege] = diffKey.split('.')
+
+    // @ts-expect-error
+    const action = diffs[diffKey] as any[]
+
+    // IF ADDITION
+    if (action.length === 1) {
+      res.push(_createPlan('Grant', objInLocal, role, privilege))
+    }
+
+    // IF REMOVAL
+    if (action.length === 3) {
+      res.push(_createPlan('Revoke', objInLocal, role, privilege))
     }
   }
 
@@ -75,12 +81,9 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async ({uniqueToLo
 
 /* ------------------------------- _createPlan ------------------------------ */
 
-function _createPlan(
-  action: 'Grant' | 'Revoke',
-  state: StateObject,
-  role: StateObject['spec']['privileges'][0],
-  privilege: string,
-) {
+function _createPlan(action: 'Grant' | 'Revoke', state: StateObject, role: string, privilege: string) {
+  const fromOrTo = action === 'Grant' ? 'TO' : 'FROM'
+  const scapedRole = role.toLowerCase() === 'public' ? `PUBLIC` : `"${role}"`
   return {
     _kind_: 'PlanInfo' as const,
     localState: action === 'Grant' ? ('Present' as const) : ('Absent' as const),
@@ -88,9 +91,9 @@ function _createPlan(
     plan: action,
     objectType: 'Database Privilege',
     objectPath: `${state.spec.database}`,
-    oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role.role}`,
-    newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role.role}`,
-    sqlQuery: `${action.toUpperCase()} ${privilege} ON DATABASE ${state.spec.database} TO "${role.role}";`,
+    oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role}`,
+    newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role}`,
+    sqlQuery: `${action.toUpperCase()} ${privilege} ON DATABASE "${state.spec.database}" ${fromOrTo} ${scapedRole};`,
   }
 }
 
@@ -104,27 +107,23 @@ export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => 
     privilege: 'CREATE' | 'CONNECT' | 'TEMPORARY'
   }>(`
   SELECT
-    d.datname AS database,
-    CASE
-        WHEN r.rolname IS NULL THEN 'public'
-        ELSE r.rolname
-    END AS grantee,
-    CASE
-        WHEN a.privilege_type = 'CREATE' THEN 'CREATE'
-        WHEN a.privilege_type = 'CONNECT' THEN 'CONNECT'
-        WHEN a.privilege_type = 'TEMPORARY' THEN 'TEMPORARY'
-        WHEN a.privilege_type = 'TEMP' THEN 'TEMPORARY'
-    END AS privilege
+  d.datname AS database,
+  CASE
+    WHEN r.rolname IS NULL THEN 'PUBLIC'
+    WHEN r.rolname = 'PUBLIC' THEN 'PUBLIC'  -- Explicitly handling the 'PUBLIC' role
+    ELSE r.rolname
+  END AS grantee,
+  COALESCE(a.privilege_type, '__NO_PRIVILEGES__') AS privilege
 FROM
-    pg_database d
-    LEFT JOIN aclexplode(d.datacl) a ON TRUE
-    LEFT JOIN pg_roles r ON a.grantee = r.oid
+  pg_database d
+  LEFT JOIN aclexplode(d.datacl) a ON TRUE
+  LEFT JOIN pg_roles r ON a.grantee = r.oid
 WHERE
-    (r.rolname NOT LIKE 'pg\_%') and 
-    d.datistemplate = false 
+  d.datistemplate = false  -- Ensures templates are not included
 ORDER BY
-    database,
-    grantee;
+  database,
+  grantee;
+
 `)
 
   const stateObjects: StateObject[] = []
@@ -153,7 +152,10 @@ ORDER BY
 
     // If not found, create a new role grant
     if (!roleGrants) {
-      stateObj.spec.privileges.push({role: row.grantee, privileges: [row.privilege]})
+      stateObj.spec.privileges.push({
+        role: row.grantee,
+        privileges: (row.privilege as string) !== '__NO_PRIVILEGES__' ? [row.privilege] : [],
+      })
     } else {
       roleGrants.privileges.push(row.privilege)
     }
@@ -162,32 +164,24 @@ ORDER BY
   return stateObjects
 }
 
-/* ------------------------ diffStateObjects ------------------------ */
+/* ------------------------ getUniqueKey ------------------------ */
+export const getUniqueKey: thisModule['getUniqueKey'] = (obj) => {
+  return `${obj.kind}-${obj.spec.database}`
+}
 
-export const diffStateObjects: thisModule['diffStateObjects'] = (remote, local) => {
-  const res = {
-    uniqueToRemote: [],
-    uniqueToLocal: [],
-    common: [],
-  } as ReturnType<thisModule['diffStateObjects']>
+/* ----------------------------- _normalizeSpec ----------------------------- */
 
-  for (const objA of remote) {
-    const objB = local.find((obj) => obj.kind === objA.kind && obj.spec.database === objA.spec.database)
+function _normalizeSpec(obj: StateObject) {
+  const normalized = {} as Record<string, boolean>
 
-    if (!objB) {
-      res.uniqueToRemote.push(objA)
-    } else {
-      res.common.push(objA)
+  const baseKey = getUniqueKey(obj)
+
+  for (const priv of obj.spec.privileges) {
+    for (const privilege of priv.privileges) {
+      const key = `${baseKey}.${priv.role}.${privilege}`
+      normalized[key] = true
     }
   }
 
-  for (const objB of local) {
-    const objA = remote.find((obj) => obj.kind === objB.kind && obj.spec.database === objB.spec.database)
-
-    if (!objA) {
-      res.uniqueToLocal.push(objB)
-    }
-  }
-
-  return res
+  return normalized
 }

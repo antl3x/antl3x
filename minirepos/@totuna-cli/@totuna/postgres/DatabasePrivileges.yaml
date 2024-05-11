@@ -1,0 +1,8 @@
+kind: DatabasePrivileges
+metadata:
+  name: postgres
+spec:
+  database: postgres
+  privileges:
+    - role: PUBLIC
+      privileges: []

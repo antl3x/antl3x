@@ -56,6 +56,7 @@ export const buildFileName: thisModule['buildFileName'] = (state, rootStore) => 
 
 export const buildFilePath: thisModule['buildFilePath'] = (state, rootStore) => {
   const stateKind = state.kind as string
+  if (stateKind === 'ViewPrivileges') debugger
   switch (rootStore.userConfig.crdFolderStrategy) {
     case 'totalFlat':
       return `${rootStore.systemVariables.PUBLIC_PATH}/${buildFileName(state, rootStore)}`
@@ -119,7 +120,7 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
 
 /* ------------------------ _buildNestedByObjectPath ------------------------ */
 function _buildNestedByObjectPath(state: any) {
-  const propertyArray = ['database', 'schema', 'function', 'table', 'sequence']
+  const propertyArray = ['database', 'schema', 'table', 'view', 'sequence', 'function']
 
   let path = ''
 

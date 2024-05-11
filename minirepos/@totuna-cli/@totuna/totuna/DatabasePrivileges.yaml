@@ -1,0 +1,8 @@
+kind: DatabasePrivileges
+metadata:
+  name: totuna
+spec:
+  database: totuna
+  privileges:
+    - role: PUBLIC
+      privileges: []

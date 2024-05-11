@@ -99,9 +99,9 @@ export default class Command extends BaseCommand<typeof Command> {
             }
           }
         }
-
-        return jsonRes
       }
+
+      return jsonRes
     } catch (error) {
       throw new Error(`Failed to export: ${error}`, {cause: error})
     }

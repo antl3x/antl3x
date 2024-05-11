@@ -1,4 +1,5 @@
 import {z} from 'zod'
+import * as jdp from 'jsondiffpatch'
 
 import type {ICRD} from './ICRD.js'
 
@@ -69,26 +70,27 @@ export const StateDiff = z.object({
 
 /* --------------------------------- getPreviewPlan -------------------------------- */
 
-export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async ({uniqueToLocal, uniqueToRemote}) => {
+export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (objInRemote, objInLocal) => {
   const res: Awaited<ReturnType<thisModule['$getPreviewPlan']>> = []
 
-  for (const unqLocal of uniqueToLocal) {
-    for (const column of unqLocal.spec.privileges) {
-      for (const role of column.privileges) {
-        for (const privilege of role.privileges) {
-          res.push(_createPlan('Grant', unqLocal, column, role, privilege))
-        }
-      }
-    }
-  }
+  const onRemote = _normalizeSpec(objInRemote)
+  const onLocal = _normalizeSpec(objInLocal)
+  const diffs = jdp.diff(onRemote, onLocal)
 
-  for (const unqRemote of uniqueToRemote) {
-    for (const column of unqRemote.spec.privileges) {
-      for (const role of column.privileges) {
-        for (const privilege of role.privileges) {
-          res.push(_createPlan('Revoke', unqRemote, column, role, privilege))
-        }
-      }
+  for (const diffKey in diffs) {
+    const [, column, role, privilege] = diffKey.split('.')
+
+    // @ts-expect-error
+    const action = diffs[diffKey] as any[]
+
+    // IF ADDITION
+    if (action.length === 1) {
+      res.push(_createPlan('Grant', objInLocal, column, role, privilege))
+    }
+
+    // IF REMOVAL
+    if (action.length === 3) {
+      res.push(_createPlan('Revoke', objInLocal, column, role, privilege))
     }
   }
 
@@ -97,23 +99,21 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async ({uniqueToLo
 
 /* ------------------------------- _createPlan ------------------------------ */
 
-function _createPlan(
-  action: 'Grant' | 'Revoke',
-  schema: StateObject,
-  column: StateObject['spec']['privileges'][0],
-  role: StateObject['spec']['privileges'][0]['privileges'][0],
-  privilege: string,
-) {
+function _createPlan(action: 'Grant' | 'Revoke', state: StateObject, column: string, role: string, privilege: string) {
+  const fromOrTo = action === 'Grant' ? 'TO' : 'FROM'
+  const scapedRole = role.toLowerCase() === 'public' ? `PUBLIC` : `"${role}"`
   return {
     _kind_: 'PlanInfo' as const,
     localState: action === 'Grant' ? ('Present' as const) : ('Absent' as const),
     remoteState: action === 'Grant' ? ('Absent' as const) : ('Present' as const),
     plan: action,
-    objectType: 'Table Privilege',
-    objectPath: `${schema.spec.schema}.${schema.spec.table}.${column.column}`,
-    oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role.role}`,
-    newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role.role}`,
-    sqlQuery: `${action} ${privilege} ("${column.column}") ON TABLE "${schema.spec.schema}"."${schema.spec.table}" TO "${role.role}";`,
+    objectType: 'Column Privilege',
+    objectPath: `${state.spec.schema}.${state.spec.table}`,
+    oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role}`,
+    newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role}`,
+    sqlQuery: `${action.toUpperCase()} ${privilege}("${column}") ON TABLE "${state.spec.schema}".${
+      state.spec.table
+    } ${fromOrTo} ${scapedRole};`,
   }
 }
 
@@ -198,44 +198,24 @@ ORDER BY
   return stateObjects
 }
 
-/* ------------------------ diffStateObjects ------------------------ */
+/* ------------------------ getUniqueKey ------------------------ */
+export const getUniqueKey: thisModule['getUniqueKey'] = (obj) => {
+  return `${obj.kind}-${obj.spec.database}.${obj.spec.schema}.${obj.spec.table}`
+}
 
-export const diffStateObjects: thisModule['diffStateObjects'] = (remote, local) => {
-  const res: ReturnType<thisModule['diffStateObjects']> = {
-    common: [],
-    uniqueToLocal: [],
-    uniqueToRemote: [],
-  }
+/* ----------------------------- _normalizeSpec ----------------------------- */
 
-  for (const objA of remote) {
-    const objB = local.find(
-      (obj) =>
-        obj.kind === objA.kind &&
-        obj.spec.schema === objA.spec.schema &&
-        obj.spec.database === objA.spec.database &&
-        obj.spec.table === objA.spec.table,
-    )
+function _normalizeSpec(obj: StateObject) {
+  const normalized = {} as Record<string, boolean>
 
-    if (!objB) {
-      res.uniqueToRemote.push(objA)
-    } else {
-      res.common.push(objA)
+  const baseKey = getUniqueKey(obj)
+
+  for (const priv of obj.spec.privileges) {
+    for (const privilege of priv.privileges) {
+      const key = `${baseKey}.${priv.column}.${privilege.role}.${privilege.privileges}`
+      normalized[key] = true
     }
   }
 
-  for (const objB of local) {
-    const objA = remote.find(
-      (obj) =>
-        obj.kind === objB.kind &&
-        obj.spec.schema === objB.spec.schema &&
-        obj.spec.database === objB.spec.database &&
-        obj.spec.table === objB.spec.table,
-    )
-
-    if (!objA) {
-      res.uniqueToLocal.push(objB)
-    }
-  }
-
-  return res
+  return normalized
 }

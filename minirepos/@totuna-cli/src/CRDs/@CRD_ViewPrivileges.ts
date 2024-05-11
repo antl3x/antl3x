@@ -130,15 +130,7 @@ export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => 
         WHEN r.rolname IS NULL THEN 'PUBLIC'
         ELSE r.rolname
     END AS grantee,
-    CASE
-        WHEN a.privilege_type = 'SELECT' THEN 'SELECT'
-        WHEN a.privilege_type = 'INSERT' THEN 'INSERT'
-        WHEN a.privilege_type = 'UPDATE' THEN 'UPDATE'
-        WHEN a.privilege_type = 'DELETE' THEN 'DELETE'
-        WHEN a.privilege_type = 'TRUNCATE' THEN 'TRUNCATE'
-        WHEN a.privilege_type = 'REFERENCES' THEN 'REFERENCES'
-        WHEN a.privilege_type = 'TRIGGER' THEN 'TRIGGER'
-    END AS privilege
+    COALESCE(a.privilege_type, '__NO_PRIVILEGES__') AS privilege
 FROM
     pg_class c
     JOIN pg_namespace n ON c.relnamespace = n.oid
@@ -185,7 +177,10 @@ ORDER BY
 
     // If not found, create a new role grant
     if (!roleGrants) {
-      stateObj.spec.privileges.push({role: row.grantee, privileges: [row.privilege]})
+      stateObj.spec.privileges.push({
+        role: row.grantee,
+        privileges: (row.privilege as string) !== '__NO_PRIVILEGES__' ? [row.privilege] : [],
+      })
     } else {
       roleGrants.privileges.push(row.privilege)
     }

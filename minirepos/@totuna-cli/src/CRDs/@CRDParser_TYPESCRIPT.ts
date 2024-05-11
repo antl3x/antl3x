@@ -119,7 +119,7 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
 /* ------------------------ _buildNestedByObjectPath ------------------------ */
 
 function _buildNestedByObjectPath(state: any) {
-  const propertyArray = ['database', 'schema', 'function', 'table', 'sequence']
+  const propertyArray = ['database', 'schema', 'table', 'view', 'sequence', 'function']
 
   let path = ''
 
