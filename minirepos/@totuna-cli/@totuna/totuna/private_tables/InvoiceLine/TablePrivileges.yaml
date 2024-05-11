@@ -8,9 +8,9 @@ spec:
   privileges:
     - role: postgres
       privileges:
+        - UPDATE
         - INSERT
         - SELECT
-        - UPDATE
         - DELETE
         - TRUNCATE
         - REFERENCES

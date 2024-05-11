@@ -14,5 +14,5 @@ spec:
         - USAGE
     - role: postgres
       privileges:
-        - CREATE
         - USAGE
+        - CREATE

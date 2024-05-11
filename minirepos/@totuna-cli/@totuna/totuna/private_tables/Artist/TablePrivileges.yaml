@@ -8,8 +8,8 @@ spec:
   privileges:
     - role: postgres
       privileges:
+        - SELECT
+        - INSERT
+        - TRIGGER
         - REFERENCES
         - TRUNCATE
-        - INSERT
-        - SELECT
-        - TRIGGER

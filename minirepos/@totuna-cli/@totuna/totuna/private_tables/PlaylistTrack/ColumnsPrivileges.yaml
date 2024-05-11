@@ -1,0 +1,8 @@
+kind: ColumnsPrivileges
+metadata:
+  name: totuna.private_tables.PlaylistTrack
+spec:
+  database: totuna
+  schema: private_tables
+  table: PlaylistTrack
+  privileges: []

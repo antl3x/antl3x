@@ -8,19 +8,19 @@ spec:
   privileges:
     - role: PUBLIC
       privileges:
-        - UPDATE
-        - SELECT
         - INSERT
-        - TRIGGER
-        - REFERENCES
-        - TRUNCATE
         - DELETE
+        - TRUNCATE
+        - SELECT
+        - REFERENCES
+        - TRIGGER
+        - UPDATE
     - role: postgres
       privileges:
-        - UPDATE
-        - INSERT
-        - SELECT
-        - TRIGGER
         - REFERENCES
         - TRUNCATE
         - DELETE
+        - UPDATE
+        - SELECT
+        - INSERT
+        - TRIGGER

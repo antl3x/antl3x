@@ -1,0 +1,18 @@
+kind: ColumnsPrivileges
+metadata:
+  name: totuna._totuna_.migrations
+spec:
+  database: totuna
+  schema: _totuna_
+  table: migrations
+  privileges:
+    - column: id
+      privileges:
+        - role: testes
+          privileges:
+            - SELECT
+    - column: name
+      privileges:
+        - role: testes
+          privileges:
+            - SELECT

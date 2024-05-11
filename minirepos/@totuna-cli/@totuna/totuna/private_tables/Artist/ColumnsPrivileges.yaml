@@ -1,8 +1,8 @@
-kind: TablePrivileges
+kind: ColumnsPrivileges
 metadata:
-  name: totuna.private_tables.Album
+  name: totuna.private_tables.Artist
 spec:
   database: totuna
   schema: private_tables
-  table: Album
+  table: Artist
   privileges: []

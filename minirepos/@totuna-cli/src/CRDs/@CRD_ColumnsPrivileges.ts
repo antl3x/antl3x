@@ -53,7 +53,6 @@ export const StateSchema = z.object({
                 z.literal('TRUNCATE'),
                 z.literal('REFERENCES'),
                 z.literal('TRIGGER'),
-                z.literal('ALL'),
               ]),
             ),
           }),
@@ -78,7 +77,7 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (objInRemote
   const diffs = jdp.diff(onRemote, onLocal)
 
   for (const diffKey in diffs) {
-    const [, column, role, privilege] = diffKey.split('.')
+    const [, , , column, role, privilege] = diffKey.split('.')
 
     // @ts-expect-error
     const action = diffs[diffKey] as any[]
@@ -102,18 +101,19 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (objInRemote
 function _createPlan(action: 'Grant' | 'Revoke', state: StateObject, column: string, role: string, privilege: string) {
   const fromOrTo = action === 'Grant' ? 'TO' : 'FROM'
   const scapedRole = role.toLowerCase() === 'public' ? `PUBLIC` : `"${role}"`
+  const privOrAll = privilege || 'ALL'
   return {
     _kind_: 'PlanInfo' as const,
     localState: action === 'Grant' ? ('Present' as const) : ('Absent' as const),
     remoteState: action === 'Grant' ? ('Absent' as const) : ('Present' as const),
     plan: action,
     objectType: 'Column Privilege',
-    objectPath: `${state.spec.schema}.${state.spec.table}`,
+    objectPath: `${state.spec.schema}.${state.spec.table}.${column}`,
     oldState: `${action === 'Grant' ? 'No' : 'Granted'} ${privilege} TO ${role}`,
     newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role}`,
-    sqlQuery: `${action.toUpperCase()} ${privilege}("${column}") ON TABLE "${state.spec.schema}".${
+    sqlQuery: `${action.toUpperCase()} ${privOrAll} ("${column}") ON TABLE "${state.spec.schema}"."${
       state.spec.table
-    } ${fromOrTo} ${scapedRole};`,
+    }" ${fromOrTo} ${scapedRole};`,
   }
 }
 
@@ -131,20 +131,31 @@ export const $fetchRemoteStates: thisModule['$fetchRemoteStates'] = async () => 
     column: string
   }>(`
   SELECT
-  cp.table_schema AS schema,
-  cp.table_name AS table,
-  cp.column_name as column,
+  n.nspname AS schema,
+  c.relname AS "table",
+  a.attname AS "column",
   current_database() AS database,
-  COALESCE(cp.grantee, 'PUBLIC') AS grantee,
-  cp.privilege_type AS privilege
+  COALESCE(r.rolname, 'PUBLIC') AS grantee,
+  COALESCE(x.privilege_type, '__NO_PRIVILEGES__') AS privilege
 FROM
-  information_schema.column_privileges cp
+  pg_class c
+JOIN
+  pg_namespace n ON n.oid = c.relnamespace
+JOIN
+  pg_attribute a ON a.attrelid = c.oid
+LEFT JOIN
+  aclexplode(a.attacl) AS x ON true
+LEFT JOIN
+  pg_roles r ON x.grantee = r.oid
 WHERE
-  cp.table_schema NOT IN ('pg_catalog', 'information_schema')
-  AND (cp.grantee = 'PUBLIC' OR cp.grantee NOT LIKE 'pg\_%')
+  a.attnum > 0 AND a.attisdropped = false
+  AND c.relkind IN ('r', 'v')  -- Including regular tables and views
+  AND n.nspname NOT IN ('pg_catalog', 'information_schema') -- Excluding system schemas
 ORDER BY
-  cp.table_schema, cp.table_name, cp.column_name, cp.grantee;
-
+  schema,
+  "table",
+  "column",
+  grantee;
 `)
 
   const stateObjects: StateObject[] = []
@@ -176,6 +187,8 @@ ORDER BY
     // Find the column object in the spec array
     let columnObj = stateObj.spec.privileges.find((column) => column.column === row.column)
 
+    if ((row.privilege as string) === '__NO_PRIVILEGES__') continue
+
     // If not found, create a new column object
     if (!columnObj) {
       columnObj = {column: row.column, privileges: []}
@@ -192,6 +205,7 @@ ORDER BY
     }
 
     // Add the privilege to the role grant object
+
     roleGrantObj.privileges.push(row.privilege)
   }
 

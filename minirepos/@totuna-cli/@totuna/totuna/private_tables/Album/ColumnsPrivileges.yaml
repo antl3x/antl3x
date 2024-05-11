@@ -1,4 +1,4 @@
-kind: TablePrivileges
+kind: ColumnsPrivileges
 metadata:
   name: totuna.private_tables.Album
 spec:

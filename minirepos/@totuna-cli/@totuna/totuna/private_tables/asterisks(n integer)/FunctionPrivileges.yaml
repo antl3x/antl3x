@@ -5,4 +5,6 @@ spec:
   database: totuna
   schema: private_tables
   function: asterisks(n integer)
-  privileges: []
+  privileges:
+    - role: PUBLIC
+      privileges: []

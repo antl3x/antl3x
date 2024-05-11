@@ -6,5 +6,6 @@ spec:
   schema: private_tables
   table: Employee
   privileges:
-    - role: PUBLIC
-      privileges: []
+    - role: outra
+      privileges:
+        - SELECT

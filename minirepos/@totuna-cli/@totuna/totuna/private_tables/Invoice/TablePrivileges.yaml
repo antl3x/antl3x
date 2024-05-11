@@ -8,10 +8,10 @@ spec:
   privileges:
     - role: postgres
       privileges:
-        - REFERENCES
-        - TRUNCATE
         - DELETE
         - UPDATE
         - SELECT
         - INSERT
+        - REFERENCES
         - TRIGGER
+        - TRUNCATE

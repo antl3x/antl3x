@@ -1,0 +1,8 @@
+kind: ColumnsPrivileges
+metadata:
+  name: totuna.private_tables.documents
+spec:
+  database: totuna
+  schema: private_tables
+  table: documents
+  privileges: []
