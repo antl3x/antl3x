@@ -92,7 +92,7 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
   const globPath = `${rootStore.systemVariables.PUBLIC_PATH}/**/*.${FILE_EXTENSION}`
 
   const filesPaths = globSync(globPath)
-  const validFiles: Awaited<ReturnType<typeof $parseFileToStateObject>>[] = []
+  const validFiles: Awaited<ReturnType<typeof $fetchLocalStates>> = []
 
   for (const filePath of filesPaths) {
     try {
@@ -105,7 +105,10 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
       }
 
       const parsedfile = await $parseFileToStateObject(filePath, crd)
-      validFiles.push(parsedfile)
+      validFiles.push({
+        filePath,
+        object: parsedfile,
+      })
     } catch (err) {
       throw new Error(`Error when parsing file ${filePath}` + err, {cause: err})
     }

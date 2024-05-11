@@ -6,8 +6,10 @@ spec:
   schema: private_tables
   table: Artist
   privileges:
-    - role: customer:xyz
-      privileges:
-        - SELECT
     - role: postgres
-      privileges: []
+      privileges:
+        - REFERENCES
+        - TRUNCATE
+        - INSERT
+        - SELECT
+        - TRIGGER

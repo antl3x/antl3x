@@ -34,7 +34,8 @@ export default class Command extends BaseCommand<typeof Command> {
       for (const crd of Object.values(CRDs)) {
         // Fetch the remote and local states
         const remoteStateObjects = await crd.$fetchRemoteStates()
-        const localStateObjects = await parser.$fetchLocalStates(crd)
+        const localState = await parser.$fetchLocalStates(crd)
+        const localStateObjects = localState.map((i) => i.object)
 
         // We filter out the state objects that are unique to the local state
         // so that we only export the state objects that are unique to the remote state

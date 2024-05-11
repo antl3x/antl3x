@@ -50,7 +50,6 @@ export const StateSchema = z.object({
             z.literal('TRUNCATE'),
             z.literal('REFERENCES'),
             z.literal('TRIGGER'),
-            z.literal('ALL'),
           ]),
         ),
       }),
@@ -95,6 +94,8 @@ export const $getPreviewPlan: thisModule['$getPreviewPlan'] = async (objInRemote
 /* ------------------------------- _createPlan ------------------------------ */
 
 function _createPlan(action: 'Grant' | 'Revoke', state: StateObject, role: string, privilege: string) {
+  const fromOrTo = action === 'Grant' ? 'TO' : 'FROM'
+  const scapedRole = role.toLowerCase() === 'public' ? `PUBLIC` : `"${role}"`
   return {
     _kind_: 'PlanInfo' as const,
     localState: action === 'Grant' ? ('Present' as const) : ('Absent' as const),
@@ -106,7 +107,7 @@ function _createPlan(action: 'Grant' | 'Revoke', state: StateObject, role: strin
     newState: `${action === 'Grant' ? 'Granted' : 'Revoked'} ${privilege} TO ${role}`,
     sqlQuery: `${action.toUpperCase()} ${privilege} ON TABLE "${state.spec.schema}"."${
       state.spec.table
-    }" TO "${role}";`,
+    }" ${fromOrTo} ${scapedRole};`,
   }
 }
 

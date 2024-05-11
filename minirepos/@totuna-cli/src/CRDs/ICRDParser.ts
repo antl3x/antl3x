@@ -11,5 +11,12 @@ export interface IRCDParser {
   $parseFileToStateObject: (file: string, crd: ICRD) => Promise<z.TypeOf<ICRD['StateSchema']>>
   parseStateObjectToFile: <A extends z.TypeOf<ICRD['StateSchema']>>(state: A) => string
 
-  $fetchLocalStates: <B extends z.ZodType, T extends ICRD<B>>(crd: T) => Promise<z.TypeOf<ICRD['StateSchema']>[]>
+  $fetchLocalStates: <B extends z.ZodType, T extends ICRD<B>>(
+    crd: T,
+  ) => Promise<
+    {
+      filePath: string
+      object: z.TypeOf<ICRD['StateSchema']>
+    }[]
+  >
 }
