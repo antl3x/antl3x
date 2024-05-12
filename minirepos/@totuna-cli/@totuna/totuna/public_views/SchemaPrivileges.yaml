@@ -1,9 +1,0 @@
-kind: SchemaPrivileges
-metadata:
-  name: totuna.public_views
-spec:
-  database: totuna
-  schema: public_views
-  privileges:
-    - role: PUBLIC
-      privileges: []

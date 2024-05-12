@@ -1,4 +1,5 @@
 import * as CRDYAMLParsers from 'CRDs/@crdParsers.js'
+import {Flags} from '@oclif/core'
 import * as CRDs from 'CRDs/@crds.js'
 import {Table} from 'console-table-printer'
 import ora from 'ora'
@@ -13,6 +14,11 @@ export default class Command extends BaseCommand<typeof Command> {
   public static enableJsonFlag = true
   static override description = 'Show the differences between the local files and the remote database.'
   static override examples = ['<%= config.bin %> <%= command.id %>']
+
+  static flags = {
+    // can pass either --force or -f
+    sql: Flags.boolean({char: 's', description: 'Outputs the SQL commands to be executed.'}),
+  }
 
   public async init(): Promise<void> {
     await super.init()
@@ -52,15 +58,26 @@ export default class Command extends BaseCommand<typeof Command> {
           jsonRes.push(...diffs)
 
           for (const diff of diffs) {
+            if (this.flags.sql) {
+              table.addRow(
+                {
+                  SQL: diff.sqlQuery,
+                },
+                {
+                  color: diff.localState === 'Absent' ? 'red' : diff.remoteState === 'Absent' ? 'green' : 'yellow',
+                },
+              )
+              continue
+            }
             table.addRow(
               {
-                'Local State': diff.localState,
-                'Remote State': diff.remoteState,
+                // 'Local State': diff.localState,
+                // 'Remote State': diff.remoteState,
+                Plan: diff.plan,
+                'Old State': diff.oldState,
+                'New State': diff.newState,
                 'Object Type': diff.objectType,
                 'Object Path': diff.objectPath,
-                Plan: diff.plan,
-                'New State': diff.newState,
-                'Old State': diff.oldState,
               },
               {
                 color: diff.localState === 'Absent' ? 'red' : diff.remoteState === 'Absent' ? 'green' : 'yellow',

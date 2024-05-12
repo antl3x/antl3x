@@ -1,8 +1,0 @@
-kind: ColumnsPrivileges
-metadata:
-  name: totuna.public_views.customers
-spec:
-  database: totuna
-  schema: public_views
-  table: customers
-  privileges: []

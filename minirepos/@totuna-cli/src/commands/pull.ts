@@ -18,7 +18,7 @@ export default class Command extends BaseCommand<typeof Command> {
 
   static flags = {
     // can pass either --force or -f
-    force: Flags.boolean({char: 'f'}),
+    force: Flags.boolean({char: 'f', description: 'Forcefully override local changes.'}),
   }
 
   public async init(): Promise<void> {

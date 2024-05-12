@@ -29,9 +29,14 @@ export const $parseFileToStateObject: thisModule['$parseFileToStateObject'] = as
 /* ------------------------- parseStateObjectToFile ------------------------- */
 
 export const parseStateObjectToFile: thisModule['parseStateObjectToFile'] = (state) => {
-  let fileContent = `import type { ${state.kind} } from "@totuna/cli/@CRDs/@CRD_${state.kind}.js"
-  
-  export default ${JSON.stringify(state, null, 2).replace(/"([^"]+)":/g, '$1:')} satisfies ${state.kind};`
+  const stringObject = JSON.stringify(state, null, 2)
+    .replace(/"([^"]+)":/g, '$1:')
+    .replace(/(withCheck: |using: )\"(.+)"/gm, '$1`$2`')
+    .replace(/\\n/gm, '\n')
+
+  let fileContent = `import type { ${state.kind} } from "@totuna/cli/@CRDs/@CRD_${state.kind}.js";
+
+export default ${stringObject} satisfies ${state.kind};`
 
   return fileContent
 }
@@ -95,7 +100,7 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
 
   for (const filePath of filesPaths) {
     try {
-      const fileParsed = (await import(filePath)).default
+      const fileParsed = (await import(path.resolve(filePath))).default
       // Check if file is a valid file for the current CRD being parsed
       const isValid = crd._kind_ === fileParsed.kind
 
@@ -109,6 +114,7 @@ export const $fetchLocalStates: thisModule['$fetchLocalStates'] = async (crd) =>
         object: parsedfile,
       })
     } catch (err) {
+      console.error(err)
       throw new Error(`Error when parsing file ${filePath}` + err, {cause: err})
     }
   }
