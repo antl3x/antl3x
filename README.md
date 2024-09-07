@@ -57,8 +57,8 @@ Welcome to my GitHub!
 
 ### Personal Projects
 
-- [codeplot](https://github.com/codeplot-co/codeplot) is an innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.
-- [learnpolars.co](https://learnpolars.co) is a platform and knowledge base for learning and mastering the Polars data manipulation library.
+- [codeplot](https://github.com/antl3x/codeplot) is an innovative, interactive canvas for dynamic, code-driven data visualization and exploration, seamlessly integrating with IDEs and Jupyter notebooks.
+- [Scriba]([https://learnpolars.co](https://github.com/antl3x/scriba) is a highly adaptable, AI-powered code completion plugin for web-based code editors. 
 - [super-ts](https://github.com/antl3x/super-ts) is a Typescript functional programming library inspired by [Haskell](https://www.haskell.org/) and [PureScript](http://www.purescript.org/) providing both runtime type checking and functional algebraic data types.
 - [func](https://github.com/antl3x/antl3x/tree/master/minirepos/func) is a lightweight micro-library that simplifies function creation with run-time argument validation and parsing using the powerful `zod` library.
 
