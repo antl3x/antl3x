@@ -1,5 +1,3 @@
-![github-og](https://github.com/antl3x/antl3x/assets/26308297/5c68fb5d-6002-4579-8ee2-0775287f4379)
-
 <div align="center">
 <a href="https://antl3x.co">Website</a> 
 <span> · </span>
