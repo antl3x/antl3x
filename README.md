@@ -22,7 +22,7 @@
 
 - **Who:** I'm a **Software Engineer** who has founded companies and **led engineering teams**. I love **building products** that serve people.
 
-- **What:** I love to lead technical teams but also spendig half of my time coding, developing **full-stack applications**, designing **robust software architectures**, and **building tools** that enhance developer experiences (**DX**) of my team mates.
+- **What:** What: I love to lead technical teams but also to spend half of my time coding, developing full-stack applications, designing robust software architectures, and building tools that enhance DX.
 
 - **Education**: I have an Masters degree in Executive Finance and an Bachelor's on Software Engineering / IT Management.
 
