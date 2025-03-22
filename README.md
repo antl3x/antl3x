@@ -14,17 +14,17 @@
 
 #### Hi there, I'm Antonio 👋
 
-Welcome to my GitHub!
+**Full-Stack Engineering Leader** with 8+ years of experience building scalable SaaS platforms (B2B LegalTech, FinTech) and leading technical teams. Combines **strategic leadership** with **hands-on expertise** in Generative AI, LLM workflows, and cloud-native architecture. Passionate about solving complex problems through clean code and scalable solutions.
 
 ### About Me
 
 - **Born:** in Brazil 🇧🇷
 
-- **Living:** in **Salt Lake City, US 🇺🇸**
+- **Living:** in **San Francisco, CA 🇺🇸**
 
-- **Who:** I'm a **Software Engineer** who has founded companies and **led engineering teams**. I love **building products** that serve people. Open source is one of my passions.
+- **Who:** I'm a **Software Engineer** who has founded companies and **led engineering teams**. I love **building products** that serve people.
 
-- **What:** I spend most of my time coding, developing **full-stack applications**, designing **robust software architectures**, and **building tools** that enhance developer experiences (**DX**).
+- **What:** I love to lead technical teams but also spendig half of my time coding, developing **full-stack applications**, designing **robust software architectures**, and **building tools** that enhance developer experiences (**DX**) of my team mates.
 
 - **Education**: I have an Masters degree in Executive Finance and an Bachelor's on Software Engineering / IT Management.
 
